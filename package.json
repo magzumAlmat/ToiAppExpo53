@@ -36,6 +36,7 @@
     "react-native-animatable": "^1.4.0",
     "react-native-calendars": "^1.1310.0",
     "react-native-paper": "^5.14.0",
+    "react-native-swiper": "^1.6.0",
     "react-native-video": "^6.13.0",
     "react-redux": "^9.2.0"
   },

@@ -324,6 +324,7 @@ const AddItemModal = ({
     >
       <SafeAreaView style={styles.modalOverlay}>
         <View style={styles.addModalContainer}>
+         
           <View style={styles.addModalHeader}>
             <Text style={styles.addModalTitle}>Добавить элемент</Text>
             <TouchableOpacity
@@ -2100,6 +2101,8 @@ const [blockedDays, setBlockedDays] = useState({});
     // Иконка для категории внутри кнопки
     const categoryIcon = categoryIcons[item]?.on || require("../../assets/join.png"); // Иконка по умолчанию, если не найдена
   
+   
+
     return (
       <View style={styles.categoryRow}>
         <TouchableOpacity
@@ -2168,6 +2171,11 @@ const [blockedDays, setBlockedDays] = useState({});
 
 
 
+  const handleDetailsPress = () => {
+    setDetailsModalVisible(false); // Закрываем модальное окно
+    setSelectedItem(null); // Сбрасываем выбранный элемент
+    navigation.navigate('Details', { item: selectedItem }); // Переходим на DetailsScreen
+  };
 
 
 
@@ -2176,6 +2184,32 @@ const [blockedDays, setBlockedDays] = useState({});
       selectedCategories: categories,
     });
   };
+
+
+  // const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
+
+  // let item=selectedItem
+
+  // const fetchFiles = async () => {
+  //   console.log("Starting fetchFiles...");
+  //   try {
+  //     const response = await axios.get(
+  //       `${BASE_URL}/api/${item.type}/${item.id}/files`
+  //     );
+  //     console.log('RD',response.data)
+  //     setFiles(response.data);
+  //   } catch (err) {
+  //     setError("Ошибка загрузки файлов: " + err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchFiles();
+  // }, []);
+
+
 
   return (
     <>
@@ -2351,6 +2385,7 @@ const [blockedDays, setBlockedDays] = useState({});
             >
               <View style={styles.detailsModalHeader}>
                 <Text style={styles.detailsModalTitle}>Подробности</Text>
+
                 <TouchableOpacity
                   style={styles.detailsModalCloseIcon}
                   onPress={() => {
@@ -2361,8 +2396,10 @@ const [blockedDays, setBlockedDays] = useState({});
                   <Icon name="close" size={24} color={COLORS.textSecondary} />
                 </TouchableOpacity>
               </View>
+          
               {selectedItem ? (
                 <View style={styles.detailsModalContent}>
+                      {console.log('Selected ITEM= ',selectedItem)}
                   {(() => {
                     switch (selectedItem.type) {
                       case "restaurant":
@@ -2386,11 +2423,20 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address || "Не указан"}
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "clothing":
+                        
                         return (
                           <>
+
                             <Text style={styles.detailsModalText}>
                               Тип: Одежда
                             </Text>
@@ -2409,6 +2455,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "flowers":
@@ -2432,6 +2485,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "cake":
@@ -2452,6 +2512,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "alcohol":
@@ -2475,6 +2542,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "program":
@@ -2492,6 +2566,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "tamada":
@@ -2509,6 +2590,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "traditionalGift":
@@ -2532,6 +2620,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "transport":
@@ -2564,6 +2659,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "goods":
@@ -2581,6 +2683,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       case "jewelry":
@@ -2601,6 +2710,13 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
+                            <TouchableOpacity
+                                  style={styles.detailsButton}
+                                  onPress={()=>handleDetailsPress()}
+                                >
+
+                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        </TouchableOpacity>
                           </>
                         );
                       default:
@@ -2622,16 +2738,17 @@ const [blockedDays, setBlockedDays] = useState({});
         </Modal>
 
         <Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => {
-    setModalVisible(false);
-    setWeddingName("");
-    setWeddingDate(new Date());
-    setShowDatePicker(false);
-  }}
->
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                setModalVisible(false);
+                setWeddingName("");
+                setWeddingDate(new Date());
+                setShowDatePicker(false);
+              }}
+            >
+
   <SafeAreaView style={styles.modalOverlay}>
     <Animatable.View
       style={styles.modalContent}
@@ -2643,8 +2760,23 @@ const [blockedDays, setBlockedDays] = useState({});
           <Text style={styles.modalTitle}>
             Создание мероприятия "Свадьба"
           </Text>
-          <TouchableOpacity
 
+
+          <TouchableOpacity
+              style={styles.addModalCloseIcon}
+              onPress={() => {
+                setModalVisible(false);
+                setWeddingName("");
+                setWeddingDate(new Date());
+                setShowDatePicker(false);
+              }}
+            >
+              <Icon name="close" size={30} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+
+
+
+          <TouchableOpacity
             onPress={() => {
               setModalVisible(false);
               setWeddingName("");
@@ -2652,21 +2784,26 @@ const [blockedDays, setBlockedDays] = useState({});
               setShowDatePicker(false);
             }}
           >
-            {/* <Text> <Icon
+            
+
+{/* 
+            <Text> <Icon
               name="check"
               size={20}
               color={COLORS.white}
               style={styles.buttonIcon}
-            /></Text> */}
-            <Image
+            /></Text>  */}
+
+             {/* <Image
                 source={require("../../assets/close.png")}
                 style={styles.potIcon2}
                 resizeMode="contain"
-              />
+              />  */}
 
-              <Icon name="close" size={24} color={COLORS.textSecondary} style={styles.detailsModalCloseIcon} />
+            {/* <Icon name="close" size={24} color={COLORS.textSecondary} style={styles.detailsModalCloseIcon} /> 
                           
-            {/* <Icon name="close" size={24} color={COLORS.textSecondary}  /> */}
+            <Icon name="close" size={24} color={COLORS.textSecondary}  /> */}
+
           </TouchableOpacity>
         </View>
 
@@ -3507,16 +3644,17 @@ totalCost: {
     paddingBottom: 20,
   },
   modalHeader: {
-    // flexDirection: "row",
-    // justifyContent: "space-between",
-    // alignItems: "center",
-    // marginBottom: 20,
     flexDirection: "row",
+    alignItems: "space-between",
+    marginBottom:20,
+    marginTop:10,
     justifyContent: "center",
-    marginTop: 20,
+
+
   },
   modalTitle: {
-    fontSize: 20,
+  
+    fontSize: 16,
     fontWeight: "600",
     color: COLORS.textPrimary,
   },
