@@ -1317,13 +1317,50 @@ const [blockedDays, setBlockedDays] = useState({});
     return unsubscribe;
   }, [navigation, token, user]);
 
+
+
+  const formatBudget = (input) => {
+    // Удаляем все нечисловые символы
+    const cleaned = input.replace(/[^\d]/g, '');
+    // Форматируем с пробелами каждые 3 цифры с конца
+    const formatted = cleaned
+      .split('')
+      .reverse()
+      .join('')
+      .match(/.{1,3}/g)
+      ?.join(' ')
+      .split('')
+      .reverse()
+      .join('') || cleaned;
+    return formatted;
+  };
+
+
+  // const handleBudgetChange = (value) => {
+  //   const filteredValue = value.replace(/[^0-9]/g, "");
+  //   if (filteredValue === "" || parseFloat(filteredValue) >= 0) {
+  //     const formattedBudget = formatBudget(filteredValue);
+  //     console.log('FILTERED VALUE= ',filteredValue,'BUDGET= ',formattedBudget)
+  //     // setBudget(fil);
+
+  //     setBudget(filteredValue);
+  //     setShouldFilter(true);
+  //   }
+  // };
+
   const handleBudgetChange = (value) => {
-    const filteredValue = value.replace(/[^0-9]/g, "");
-    if (filteredValue === "" || parseFloat(filteredValue) >= 0) {
+    // Удаляем все нечисловые символы
+    const filteredValue = value.replace(/[^0-9]/g, '');
+    if (filteredValue === '' || parseFloat(filteredValue) >= 0) {
+      // Сохраняем чистое число без пробелов
       setBudget(filteredValue);
       setShouldFilter(true);
+      console.log('FILTERED VALUE=', filteredValue, 'BUDGET=', filteredValue);
     }
   };
+
+
+
 
   const handleGuestCountChange = (value) => {
     const filteredValue = value.replace(/[^0-9]/g, "");
@@ -2210,6 +2247,13 @@ const [blockedDays, setBlockedDays] = useState({});
   // }, []);
 
 
+  const handleSubmitEditing = () => {
+    // Действие при нажатии кнопки "Готово" на клавиатуре
+    // Например, можно вызвать handleSubmit или просто закрыть клавиатуру
+    // Keyboard.dismiss(); // Если нужно закрыть клавиатуру
+  };
+
+
 
   return (
     <>
@@ -2244,21 +2288,43 @@ const [blockedDays, setBlockedDays] = useState({});
 
   <View style={styles.budgetContainer}>
     <View style={styles.categoryItemAdd}>{renderCategory("Добавить")}</View>
-    <TextInput
+    {/* <TextInput
       style={styles.budgetInput}
       placeholder="Бюджет (т)"
       value={budget}
       onChangeText={handleBudgetChange}
-      keyboardType="numeric"
+      
       placeholderTextColor="#FFF"
-    />
+      keyboardType="phone-pad"
+      maxLength={18}
+      returnKeyType="done"
+      onSubmitEditing={handleSubmitEditing}
+    /> */}
+
+<TextInput
+        style={styles.budgetInput}
+        placeholder="Бюджет (т)"
+        value={formatBudget(budget)} // Отображаем число с пробелами
+        onChangeText={handleBudgetChange}
+        placeholderTextColor={COLORS.placeholder}
+        keyboardType="numeric" // Используем numeric вместо phone-pad
+        maxLength={18}
+        returnKeyType="done"
+        onSubmitEditing={handleSubmitEditing}
+      />
+
+      
     <TextInput
       style={styles.guestInput}
       placeholder="Гостей"
       value={guestCount}
       onChangeText={handleGuestCountChange}
-      keyboardType="numeric"
+
       placeholderTextColor="#FFF"
+      keyboardType="phone-pad"
+                maxLength={18}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
     />
   </View>
 
