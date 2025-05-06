@@ -317,107 +317,88 @@ const AddItemModal = ({
 
   return (
     <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={closeModal}
-    >
-      <SafeAreaView style={styles.modalOverlay}>
-        <View style={styles.addModalContainer}>
-         
-          <View style={styles.addModalHeader}>
-            <Text style={styles.addModalTitle}>Добавить элемент</Text>
-            <TouchableOpacity
-              style={styles.addModalCloseIcon}
-              onPress={closeModal}
-            >
-              <Icon name="close" size={24} color={COLORS.textSecondary} />
+    visible={visible}
+    transparent
+    animationType="slide"
+    onRequestClose={closeModal}
+  >
+    <SafeAreaView style={styles.modalOverlay}>
+      <View style={styles.addModalContainer}>
+        <View style={styles.addModalHeader}>
+          <Text style={styles.addModalTitle}>Добавить элемент</Text>
+          <TouchableOpacity style={styles.addModalCloseIcon} onPress={closeModal}>
+            <Icon name="close" size={24} color={COLORS.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.addModalSearchContainer}>
+          <Icon name="search" size={20} color={COLORS.textSecondary} style={styles.addModalSearchIcon} />
+          <TextInput
+            style={styles.addModalSearchInput}
+            placeholder="Поиск по названию..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity style={styles.addModalClearIcon} onPress={() => setSearchQuery("")}>
+              <Icon name="clear" size={20} color={COLORS.textSecondary} />
             </TouchableOpacity>
-          </View>
+          )}
+        </View>
 
-          <View style={styles.addModalSearchContainer}>
-            <Icon
-              name="search"
-              size={20}
-              color={COLORS.textSecondary}
-              style={styles.addModalSearchIcon}
-            />
-            <TextInput
-              style={styles.addModalSearchInput}
-              placeholder="Поиск по названию..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity
-                style={styles.addModalClearIcon}
-                onPress={() => setSearchQuery("")}
-              >
-                <Icon name="clear" size={20} color={COLORS.textSecondary} />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <ScrollView
-            style={styles.addModalFilterScroll}
-            contentContainerStyle={styles.addModalFilterContainer}
-            showsVerticalScrollIndicator={false}
-          >
+        <ScrollView style={styles.addModalFilterScroll} showsVerticalScrollIndicator={false}>
+          <View style={styles.addModalFilterContainer}>
             <View style={styles.addModalTypeFilterContainer}>
               <Text style={styles.addModalFilterLabel}>Тип</Text>
-              <View style={styles.addModalTypeButtons}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {uniqueTypes.map((typeObj) => (
                   <TouchableOpacity
                     key={typeObj.type}
                     style={[
                       styles.addModalTypeButton,
-                      selectedTypeFilter === typeObj.type &&
-                        styles.addModalTypeButtonActive,
+                      selectedTypeFilter === typeObj.type && styles.addModalTypeButtonActive,
                     ]}
                     onPress={() => setSelectedTypeFilter(typeObj.type)}
                   >
                     <Text
                       style={[
                         styles.addModalTypeButtonText,
-                        selectedTypeFilter === typeObj.type &&
-                          styles.addModalTypeButtonTextActive,
+                        selectedTypeFilter === typeObj.type && styles.addModalTypeButtonTextActive,
                       ]}
                     >
                       {typeObj.label}
                     </Text>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </View>
             <View style={styles.addModalDistrictFilterContainer}>
               <Text style={styles.addModalFilterLabel}>Район</Text>
-              <View style={styles.addModalDistrictButtons}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {districts.map((district) => (
                   <TouchableOpacity
                     key={district}
                     style={[
                       styles.addModalDistrictButton,
-                      selectedDistrict === district &&
-                        styles.addModalDistrictButtonActive,
+                      selectedDistrict === district && styles.addModalDistrictButtonActive,
                     ]}
                     onPress={() => setSelectedDistrict(district)}
                   >
                     <Text
                       style={[
                         styles.addModalDistrictButtonText,
-                        selectedDistrict === district &&
-                          styles.addModalDistrictButtonTextActive,
+                        selectedDistrict === district && styles.addModalDistrictButtonTextActive,
                       ]}
                     >
                       {district === "all" ? "Все" : district}
                     </Text>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </View>
             <View style={styles.addModalPriceFilterContainer}>
               <Text style={styles.addModalFilterLabel}>Цена</Text>
-              <View style={styles.addModalPriceButtons}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {[
                   { label: "Все", value: "all" },
                   { label: "0-10k", value: "0-10000" },
@@ -428,40 +409,46 @@ const AddItemModal = ({
                     key={option.value}
                     style={[
                       styles.addModalPriceButton,
-                      costRange === option.value &&
-                        styles.addModalPriceButtonActive,
+                      costRange === option.value && styles.addModalPriceButtonActive,
                     ]}
                     onPress={() => setCostRange(option.value)}
                   >
                     <Text
                       style={[
                         styles.addModalPriceButtonText,
-                        costRange === option.value &&
-                          styles.addModalPriceButtonTextActive,
+                        costRange === option.value && styles.addModalPriceButtonTextActive,
                       ]}
                     >
                       {option.label}
                     </Text>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </View>
-          </ScrollView>
+          </View>
+        </ScrollView>
 
-          <FlatList
-            data={filteredDataMemo}
-            renderItem={renderAddItem}
-            keyExtractor={(item) => `${item.type}-${item.id}`}
-            showsVerticalScrollIndicator={true}
-            style={styles.addModalScrollView}
-            contentContainerStyle={styles.addModalItemList}
-            ListEmptyComponent={
-              <Text style={styles.addModalEmptyText}>Ничего не найдено</Text>
-            }
-          />
-        </View>
-      </SafeAreaView>
-    </Modal>
+        <FlatList
+          data={filteredDataMemo}
+          renderItem={renderAddItem}
+          keyExtractor={(item) => `${item.type}-${item.id}`}
+          showsVerticalScrollIndicator={true}
+          contentContainerStyle={styles.addModalItemList}
+          ListEmptyComponent={<Text style={styles.addModalEmptyText}>Ничего не найдено</Text>}
+          style={styles.addModalScrollView}
+          nestedScrollEnabled
+        />
+      </View>
+    </SafeAreaView>
+  </Modal>
+
+
+
+
+
+
+
+
   );
 };
 
@@ -1075,9 +1062,9 @@ const CategoryItemsModal = ({
           </TouchableOpacity>
         </View>
 
-        {/* Контент с прокруткой */}
+
         <ScrollView contentContainerStyle={styles.addModalItemList}>
-          {/* Секция выбранных элементов */}
+
           {selectedItems.length > 0 && (
             <View style={styles.selectedItemContainer}>
               <Text style={styles.categoryHeader}>
@@ -3887,4 +3874,3 @@ totalCost: {
 });
 
 export default CreateEventScreen;
-
