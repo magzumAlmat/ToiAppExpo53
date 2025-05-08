@@ -1,3 +1,15 @@
+const COLORS = {
+  primary: '#4A90E2',
+  secondary: '#50C878',
+  accent: '#FF6F61',
+  background: '#F7F9FC',
+  text: '#2D3748',
+  muted: '#718096',
+  white: '#FFFFFF',
+  border: '#E2E8F0',
+  error: '#E53E3E',
+};
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -21,57 +33,70 @@ export default function WeddingWishlistScreen() {
 
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [weddingDetails, setWeddingDetails] = useState({ name: '', date: '' });
   const weddingId = route.params?.id;
 
-  console.log('USER=',userId)
-  
+  console.log('USER=', userId);
   console.log('WeddingWishlistScreen Started | wishlist=', weddingId);
 
-  // Настройка шапки с кнопками
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: true, // Включаем шапку
-      title: `Список подарков `, // Заголовок с weddingId
-      headerLeft: () => (
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => navigation.goBack()} // Кнопка "Назад"
-        >
-          <Text style={styles.headerButtonText}>Назад</Text>
-        </TouchableOpacity>
-      ),
-      // headerRight: () => (
-      //   <TouchableOpacity
-      //     style={styles.headerButton}
-      //     onPress={fetchWishlistItems} // Кнопка "Обновить"
-      //   >
-      //     <Text style={styles.headerButtonText}>Обновить</Text>
-      //   </TouchableOpacity>
-      // ),
-    });
-  }, [navigation, weddingId]);
-
-  // Загрузка списка подарков
-  useEffect(() => {
-    if (weddingId) {
-      fetchWishlistItems();
-    } else {
-      Alert.alert('Ошибка', 'Не удалось загрузить данные свадьбы');
+  // Fetch wedding details and wishlist items
+  const fetchWeddingAndWishlist = async () => {
+    if (!token || !userId) {
+      Alert.alert('Ошибка', 'Пожалуйста, авторизуйтесь для просмотра деталей свадьбы');
+      setLoading(false);
+      return;
     }
-  }, [weddingId]);
 
-  const fetchWishlistItems = async () => {
     try {
       setLoading(true);
-      const response = await api.getWishlistByWeddingIdWithoutToken(weddingId);
-      setWishlistItems(response.data.data || []);
+      const response = await api.getWeddingsById(weddingId, token);
+      const wedding = response.data.data;
+      console.log('api.getWeddingsById cработал ', wedding);
+      if (wedding) {
+        setWeddingDetails({ name: wedding.name, date: wedding.date });
+      } else {
+        Alert.alert('Ошибка', 'Не удалось найти данные о свадьбе');
+      }
+
+      const wishlistResponse = await api.getWishlistByWeddingIdWithoutToken(weddingId);
+      setWishlistItems(wishlistResponse.data.data || []);
     } catch (error) {
-      console.error('Ошибка при загрузке подарков:', error);
-      Alert.alert('Ошибка', 'Не удалось загрузить список подарков');
+      console.error('Ошибка при загрузке данных:', error);
+      if (error.response?.status === 403) {
+        Alert.alert('Ошибка', 'У вас нет доступа к данным этой свадьбы');
+      } else {
+        Alert.alert('Ошибка', 'Не удалось загрузить данные свадьбы');
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  // Fetch data on mount
+  useEffect(() => {
+    if (weddingId) {
+      fetchWeddingAndWishlist();
+    } else {
+      Alert.alert('Ошибка', 'Не удалось загрузить данные свадьбы');
+      setLoading(false);
+    }
+  }, [weddingId, token, userId]);
+
+  // Set up the header with navigation buttons
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      title: `Список подарков`,
+      headerLeft: () => (
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.headerButtonText}>Назад</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, weddingId]);
 
   const handleReserveWishlistItem = (wishlistId) => {
     Alert.prompt(
@@ -129,13 +154,38 @@ export default function WeddingWishlistScreen() {
     <SafeAreaView style={styles.container}>
       {loading ? (
         <Text style={styles.noItems}>Загрузка...</Text>
+      ) : !token || !userId ? (
+        <View style={styles.authMessageContainer}>
+          <Text style={styles.authMessage}>Пожалуйста, авторизуйтесь для просмотра деталей свадьбы</Text>
+        </View>
       ) : (
-        <FlatList
-          data={wishlistItems}
-          renderItem={renderWishlistItem}
-          keyExtractor={(item) => item.id.toString()}
-          ListEmptyComponent={<Text style={styles.noItems}>Подарков пока нет</Text>}
-        />
+        <>
+          {/* Invitation Section */}
+          <View style={styles.invitationContainer}>
+            <Text style={styles.invitationTitle}>Приглашение на свадьбу</Text>
+            <Text style={styles.invitationText}>
+              Присоединяйтесь к празднованию свадьбы
+            </Text>
+            <Text style={styles.weddingName}>
+              {weddingDetails.name || 'Название свадьбы'}
+            </Text>
+            <Text style={styles.weddingDate}>
+              Дата: {weddingDetails.date || 'Не указана'}
+            </Text>
+            <Text style={styles.invitationFooter}>
+              Выберите подарок из списка ниже, чтобы порадовать молодоженов!
+            </Text>
+          </View>
+
+          {/* Wishlist Section */}
+          <FlatList
+            data={wishlistItems}
+            renderItem={renderWishlistItem}
+            keyExtractor={(item) => item.id.toString()}
+            ListEmptyComponent={<Text style={styles.noItems}>Подарков пока нет</Text>}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        </>
       )}
     </SafeAreaView>
   );
@@ -144,44 +194,119 @@ export default function WeddingWishlistScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
+    padding: 16,
+  },
+  invitationContainer: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
     padding: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  invitationTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.primary,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  invitationText: {
+    fontSize: 16,
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  weddingName: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.accent,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  weddingDate: {
+    fontSize: 16,
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  invitationFooter: {
+    fontSize: 14,
+    color: COLORS.muted,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   wishlistItemContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   itemText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 6,
   },
   itemStatus: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 5,
+    color: COLORS.muted,
+    marginBottom: 8,
   },
   noItems: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.muted,
     textAlign: 'center',
     marginTop: 20,
   },
   actionButton: {
-    padding: 5,
-    backgroundColor: '#007BFF',
-    borderRadius: 5,
-    marginTop: 5,
+    backgroundColor: COLORS.secondary,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
     alignSelf: 'flex-start',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   actionButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 14,
+    fontWeight: '500',
   },
   headerButton: {
     padding: 10,
   },
   headerButtonText: {
     fontSize: 16,
-    color: '#007BFF',
+    color: COLORS.primary,
+    fontWeight: '500',
+  },
+  authMessageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  authMessage: {
+    fontSize: 18,
+    color: COLORS.error,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
 });

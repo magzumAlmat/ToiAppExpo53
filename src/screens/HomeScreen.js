@@ -2356,7 +2356,7 @@ const [blockedDays, setBlockedDays] = useState({});
         placeholder="Бюджет (т)"
         value={formatBudget(budget)} // Отображаем число с пробелами
         onChangeText={handleBudgetChange}
-        placeholderTextColor={COLORS.placeholder}
+
         keyboardType="numeric" // Используем numeric вместо phone-pad
         maxLength={18}
         returnKeyType="done"
@@ -2521,16 +2521,17 @@ const [blockedDays, setBlockedDays] = useState({});
                       case "restaurant":
                         return (
                           <>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: Ресторан
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Название: {selectedItem.name}
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Вместимость: {selectedItem.capacity}
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            <Text></Text>
+                            {/* <Text style={styles.detailsModalText}>
                               Кухня: {selectedItem.cuisine}
                             </Text>
                             <Text style={styles.detailsModalText}>
@@ -2538,14 +2539,32 @@ const [blockedDays, setBlockedDays] = useState({});
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address || "Не указан"}
-                            </Text>
-                            <TouchableOpacity
+                            </Text> */}
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+
+                          </TouchableOpacity> */}
+
+                          <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+                        
+
+                       
                           </>
                         );
                       case "clothing":
@@ -2553,12 +2572,12 @@ const [blockedDays, setBlockedDays] = useState({});
                         return (
                           <>
 
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: Одежда
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Магазин: {selectedItem.storeName}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Товар: {selectedItem.itemName}
                             </Text>
@@ -2568,27 +2587,44 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            <Text></Text>
+                            {/* <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
-                            </Text>
-                            <TouchableOpacity
+                            </Text> */}
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+
+                          
+                        <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+
                           </>
                         );
                       case "flowers":
                         return (
                           <>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: Цветы
-                            </Text>
-                            <Text style={styles.detailsModalText}>
+                            </Text> */}
+                            {/* <Text style={styles.detailsModalText}>
                               Салон: {selectedItem.salonName}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Цветы: {selectedItem.flowerName}
                             </Text>
@@ -2598,43 +2634,76 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            <Text></Text>
+                            {/* <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
-                            </Text>
-                            <TouchableOpacity
+                            </Text> */}
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+
+
+<TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
                           </>
                         );
                       case "cake":
                         return (
                           <>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: Торты
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Название: {selectedItem.name}
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип торта: {selectedItem.cakeType}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <Text style={styles.detailsModalText}>
+
+                            <Text></Text>
+                            {/* <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
-                            </Text>
-                            <TouchableOpacity
+                            </Text> */}
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+
+
+<TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
                           </>
                         );
                       case "alcohol":
@@ -2643,36 +2712,51 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Тип: Алкоголь
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Салон: {selectedItem.salonName}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Напиток: {selectedItem.alcoholName}
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Категория: {selectedItem.category}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
-                            </Text>
-                            <TouchableOpacity
+                            </Text> */}
+
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+                        <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+
                           </>
                         );
                       case "program":
                         return (
                           <>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: Программа
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Команда: {selectedItem.teamName}
                             </Text>
@@ -2682,13 +2766,31 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <TouchableOpacity
+
+                            <Text></Text>
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+
+<TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+
+
                           </>
                         );
                       case "tamada":
@@ -2706,54 +2808,84 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <TouchableOpacity
+                            <Text></Text>
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+                            <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+
                           </>
                         );
                       case "traditionalGift":
                         return (
                           <>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: Традиционные подарки
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Салон: {selectedItem.salonName}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Товар: {selectedItem.itemName}
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: {selectedItem.type}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
-                            </Text>
-                            <TouchableOpacity
+                            </Text> */}
+                            <Text></Text>
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+                            <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+
                           </>
                         );
                       case "transport":
                         return (
                           <>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: Транспорт
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Салон: {selectedItem.salonName}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Авто: {selectedItem.carName}
                             </Text>
@@ -2763,25 +2895,40 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Цвет: {selectedItem.color}
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Телефон: {selectedItem.phone}
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Район: {selectedItem.district}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Адрес: {selectedItem.address}
-                            </Text>
-                            <TouchableOpacity
+                            </Text> */}
+                            <Text></Text>
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+                            <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+
                           </>
                         );
                       case "goods":
@@ -2799,24 +2946,39 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <TouchableOpacity
+                            <Text></Text>
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+                            <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+
                           </>
                         );
                       case "jewelry":
                         return (
                           <>
-                            <Text style={styles.detailsModalText}>
+                            {/* <Text style={styles.detailsModalText}>
                               Тип: Ювелирные изделия
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Магазин: {selectedItem.storeName}
-                            </Text>
+                            </Text> */}
                             <Text style={styles.detailsModalText}>
                               Товар: {selectedItem.itemName}
                             </Text>
@@ -2826,13 +2988,28 @@ const [blockedDays, setBlockedDays] = useState({});
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
-                            <TouchableOpacity
+                            <Text></Text>
+                            {/* <TouchableOpacity
                                   style={styles.detailsButton}
                                   onPress={()=>handleDetailsPress()}
                                 >
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+                            <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity>
+
                           </>
                         );
                       default:
@@ -3861,6 +4038,14 @@ totalCost: {
     paddingHorizontal: 20,
     borderRadius: 10,
     marginHorizontal: 10,
+  },
+  modalButton2: {
+    flexDirection: "row",
+    alignItems: "left",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginHorizontal: 20,
   },
   confirmButton: {
     backgroundColor: COLORS.primary,
