@@ -441,6 +441,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import AddItemModal from '../components/AddItemModal';
+import * as Haptics from 'expo-haptics';
 const COLORS = {
   primary: '#FF6F61',
   white: '#FFFFFF',
@@ -542,7 +543,15 @@ const BeforeHomeScreen = ({ navigation, route }) => {
     setCurrentPage(page);
   };
 
-  const handleCategoryPress = (category) => {
+  const handleCategoryPress =async (category) => {
+    try {
+      // Запускаем легкую вибрацию (можно выбрать другой тип)
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      console.log('Vibration triggered');
+    } catch (error) {
+      console.error('Vibration error:', error);
+    }
+
     if (category === 'Добавить') {
       return;
     }

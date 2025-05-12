@@ -30,6 +30,7 @@ import * as Animatable from "react-native-animatable";
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
+import * as Haptics from 'expo-haptics';
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const COLORS = {
@@ -285,15 +286,38 @@ const AddItemModal = ({
             )}
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.addModalDetailsButton}
+             style={[styles.modalButton2, styles.confirmButton]}
             onPress={() => {
               setSelectedItem(item);
               setDetailsModalVisible(true);
               onClose();
             }}
           >
-            <Text style={styles.addModalDetailsButtonText}>Подробнее</Text>
+            {/* <Text style={styles.addModalDetailsButtonText}>Подробнее</Text> */}
+            <Icon
+                              name="search"
+                              size={15}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
           </TouchableOpacity>
+
+
+
+
+          {/* <TouchableOpacity
+                            style={[styles.modalButton2, styles.confirmButton]}
+                            onPress={()=>handleDetailsPress()}
+                          >
+                            <Icon
+                              name="search"
+                              size={20}
+                              color={COLORS.white}
+                              style={styles.buttonIcon}
+                            />
+                            <Text></Text>
+                            <Text style={styles.modalButtonText}>Подробнее</Text>
+                          </TouchableOpacity> */}
         </View>
       );
     },
@@ -1196,8 +1220,11 @@ const [blockedDays, setBlockedDays] = useState({});
   // );
 
   const handleRemoveCategory = useCallback(
+    
     (category) => {
       setDisabledCategories((prev) => {
+       
+
         if (prev.includes(category)) {
           // Разблокировка категории
           const updatedDisabledCategories = prev.filter((cat) => cat !== category);
@@ -2525,7 +2552,7 @@ const [blockedDays, setBlockedDays] = useState({});
                               Тип: Ресторан
                             </Text> */}
                             <Text style={styles.detailsModalText}>
-                              Название: {selectedItem.name}
+                              Наименование: {selectedItem.name}
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Вместимость: {selectedItem.capacity}
@@ -3733,6 +3760,7 @@ controlRow: {
   justifyContent: "space-between",
   marginBottom: 16,
   paddingHorizontal: 4,
+  fontSize:10
 },
 label: {
   fontSize: 15,
@@ -3753,7 +3781,7 @@ quantityContainer: {
 quantityButton: {
 
   padding: 10,
-  paddingHorizontal: 12,
+  paddingHorizontal: 1,
 },
 input: {
   width: 56,
@@ -3775,39 +3803,6 @@ totalCost: {
   marginLeft: 12,
 },
 
-
-
-controlRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: 16,
-},
-label: {
-  fontSize: 15,
-  fontWeight: "500",
-  color: "#4B5563",
-},
-
-quantityButton: {
-  padding: 12,
-},
-input: {
-  width: 50,
-  height: 44,
-  fontSize: 15,
-  fontWeight: "500",
-  color: "#1A1A1A",
-  textAlign: "center",
-  backgroundColor: "#FFFFFF",
-  borderRadius: 8,
-  marginHorizontal: 4,
-},
-totalCost: {
-  fontSize: 15,
-  fontWeight: "600",
-  color: "#26A69A",
-},
 
 
   selectedItemCard: { backgroundColor: "#E6F0FA" },
