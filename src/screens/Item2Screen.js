@@ -2372,6 +2372,8 @@ export default function Item2Screen({ navigation }) {
             >
               <Text style={styles.submitButtonText}>{isLoading ? 'Создание...' : 'Создать'}</Text>
             </TouchableOpacity>
+            <Text></Text>
+            <Text></Text>
           </>
         )}
       </ScrollView>

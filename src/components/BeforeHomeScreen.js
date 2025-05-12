@@ -472,8 +472,8 @@ const categoryImages = {
     active: require('../../assets/prokatAvtoOn.png'),     // Replace with actual path
   },
   'Традиционные подарки': {
-    inactive: require('../../assets/noFile.png'), // Replace with actual path
-    active: require('../../assets/noFile.png'),     // Replace with actual path
+    inactive: require('../../assets/tradGifts.png'), // Replace with actual path
+    active: require('../../assets/tradGiftsOn.png'),     // Replace with actual path
   },
   'Ювелирные изделия': {
     inactive: require('../../assets/uvIzdeliyaOff.png'), // Use the provided image

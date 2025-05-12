@@ -195,8 +195,9 @@ export default function LoginScreen({ navigation }) {
           console.log('No token found, staying on Login screen');
         }
       } catch (err) {
-        console.error('Token validation error:', err.response?.data || err.message);
-        dispatch(setError('Невалидный токен или ошибка сервера'));
+        // console.error('Token validation error:', err.response?.data || err.message);
+
+        dispatch(setError('Войдите в личный кабинет'));
         await SecureStore.deleteItemAsync('token');
         console.log('Token removed from SecureStore due to invalidity');
       } finally {

@@ -262,6 +262,7 @@ export default function Item3Screen() {
       const response = await api.postGoodsData(giftData);
       const newGood = response.data.data;
 
+      console.log('add custom gift= ',newGood)
       const wishlistData = {
         wedding_id: selectedWedding.id,
         good_id: newGood.id,

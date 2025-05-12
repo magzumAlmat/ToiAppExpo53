@@ -964,10 +964,21 @@ export default {
     }),
 
   // Товары
+
+
+
+   postGoodsData:(goodsData) => api.post(`/api/goods`, goodsData),
+
   createGood: (data) =>
     api.post('/api/goods', data).catch((error) => {
       throw new Error(`Ошибка создания товара: ${error.response?.data?.message || error.message}`);
     }),
+
+  getGoodDetailsInfo:(id) =>
+    api.get(`/api/goodbyid/${id}`).catch((error) => {
+      throw new Error(`Ошибка получения списка товаров: ${error.response?.data?.message || error.message}`);
+    }),
+
 
   getGoods: () =>
     api.get('/api/goods').catch((error) => {

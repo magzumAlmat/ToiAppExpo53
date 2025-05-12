@@ -20,17 +20,16 @@ import {
   SafeAreaView,
 } from "react-native";
 
-
 import { LinearGradient } from "expo-linear-gradient";
 // import Icon from "react-native-vector-icons/MaterialIcons";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { useDispatch, useSelector } from "react-redux";
 import api from "../api/api";
 import * as Animatable from "react-native-animatable";
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
-import * as Haptics from 'expo-haptics';
+import * as Haptics from "expo-haptics";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const COLORS = {
@@ -93,20 +92,19 @@ const typesMapping = [
     type: "jewelry",
     label: "Ювелирные изделия",
   },
-
 ];
 
 const categoryToTypeMap = {
-  'Ведущий': "tamada",
-  'Ресторан': "restaurant",
-  'Алкоголь': "alcohol",
-  'Шоу программа': "program",
-  'Ювелирные изделия': "jewelry",
-  'Традиционные подарки': "traditionalGift",
-  'Свадебный салон': "clothing",
-  'Прокат авто': "transport",
-  'Торты': "cake",
-  'Цветы':'flowers'
+  Ведущий: "tamada",
+  Ресторан: "restaurant",
+  Алкоголь: "alcohol",
+  "Шоу программа": "program",
+  "Ювелирные изделия": "jewelry",
+  "Традиционные подарки": "traditionalGift",
+  "Свадебный салон": "clothing",
+  "Прокат авто": "transport",
+  Торты: "cake",
+  Цветы: "flowers",
   // 'Фото видео съемка':''
   // 'Оформление'
   // 'Продукты'
@@ -286,7 +284,7 @@ const AddItemModal = ({
             )}
           </TouchableOpacity>
           <TouchableOpacity
-             style={[styles.modalButton2, styles.confirmButton]}
+            style={[styles.modalButton2, styles.confirmButton]}
             onPress={() => {
               setSelectedItem(item);
               setDetailsModalVisible(true);
@@ -295,15 +293,12 @@ const AddItemModal = ({
           >
             {/* <Text style={styles.addModalDetailsButtonText}>Подробнее</Text> */}
             <Icon
-                              name="search"
-                              size={15}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
+              name="search"
+              size={15}
+              color={COLORS.white}
+              style={styles.buttonIcon}
+            />
           </TouchableOpacity>
-
-
-
 
           {/* <TouchableOpacity
                             style={[styles.modalButton2, styles.confirmButton]}
@@ -341,138 +336,152 @@ const AddItemModal = ({
 
   return (
     <Modal
-    visible={visible}
-    transparent
-    animationType="slide"
-    onRequestClose={closeModal}
-  >
-    <SafeAreaView style={styles.modalOverlay}>
-      <View style={styles.addModalContainer}>
-        <View style={styles.addModalHeader}>
-          <Text style={styles.addModalTitle}>Добавить элемент</Text>
-          <TouchableOpacity style={styles.addModalCloseIcon} onPress={closeModal}>
-            <Icon name="close" size={24} color={COLORS.textSecondary} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.addModalSearchContainer}>
-          <Icon name="search" size={20} color={COLORS.textSecondary} style={styles.addModalSearchIcon} />
-          <TextInput
-            style={styles.addModalSearchInput}
-            placeholder="Поиск по названию..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity style={styles.addModalClearIcon} onPress={() => setSearchQuery("")}>
-              <Icon name="clear" size={20} color={COLORS.textSecondary} />
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={closeModal}
+    >
+      <SafeAreaView style={styles.modalOverlay}>
+        <View style={styles.addModalContainer}>
+          <View style={styles.addModalHeader}>
+            <Text style={styles.addModalTitle}>Добавить элемент</Text>
+            <TouchableOpacity
+              style={styles.addModalCloseIcon}
+              onPress={closeModal}
+            >
+              <Icon name="close" size={24} color={COLORS.textSecondary} />
             </TouchableOpacity>
-          )}
-        </View>
-
-        <ScrollView style={styles.addModalFilterScroll} showsVerticalScrollIndicator={false}>
-          <View style={styles.addModalFilterContainer}>
-            <View style={styles.addModalTypeFilterContainer}>
-              <Text style={styles.addModalFilterLabel}>Тип</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {uniqueTypes.map((typeObj) => (
-                  <TouchableOpacity
-                    key={typeObj.type}
-                    style={[
-                      styles.addModalTypeButton,
-                      selectedTypeFilter === typeObj.type && styles.addModalTypeButtonActive,
-                    ]}
-                    onPress={() => setSelectedTypeFilter(typeObj.type)}
-                  >
-                    <Text
-                      style={[
-                        styles.addModalTypeButtonText,
-                        selectedTypeFilter === typeObj.type && styles.addModalTypeButtonTextActive,
-                      ]}
-                    >
-                      {typeObj.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-            <View style={styles.addModalDistrictFilterContainer}>
-              <Text style={styles.addModalFilterLabel}>Район</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {districts.map((district) => (
-                  <TouchableOpacity
-                    key={district}
-                    style={[
-                      styles.addModalDistrictButton,
-                      selectedDistrict === district && styles.addModalDistrictButtonActive,
-                    ]}
-                    onPress={() => setSelectedDistrict(district)}
-                  >
-                    <Text
-                      style={[
-                        styles.addModalDistrictButtonText,
-                        selectedDistrict === district && styles.addModalDistrictButtonTextActive,
-                      ]}
-                    >
-                      {district === "all" ? "Все" : district}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-            <View style={styles.addModalPriceFilterContainer}>
-              <Text style={styles.addModalFilterLabel}>Цена</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {[
-                  { label: "Все", value: "all" },
-                  { label: "0-10k", value: "0-10000" },
-                  { label: "10k-50k", value: "10000-50000" },
-                  { label: "50k+", value: "50000+" },
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option.value}
-                    style={[
-                      styles.addModalPriceButton,
-                      costRange === option.value && styles.addModalPriceButtonActive,
-                    ]}
-                    onPress={() => setCostRange(option.value)}
-                  >
-                    <Text
-                      style={[
-                        styles.addModalPriceButtonText,
-                        costRange === option.value && styles.addModalPriceButtonTextActive,
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
           </View>
-        </ScrollView>
 
-        <FlatList
-          data={filteredDataMemo}
-          renderItem={renderAddItem}
-          keyExtractor={(item) => `${item.type}-${item.id}`}
-          showsVerticalScrollIndicator={true}
-          contentContainerStyle={styles.addModalItemList}
-          ListEmptyComponent={<Text style={styles.addModalEmptyText}>Ничего не найдено</Text>}
-          style={styles.addModalScrollView}
-          nestedScrollEnabled
-        />
-      </View>
-    </SafeAreaView>
-  </Modal>
+          <View style={styles.addModalSearchContainer}>
+            <Icon
+              name="search"
+              size={20}
+              color={COLORS.textSecondary}
+              style={styles.addModalSearchIcon}
+            />
+            <TextInput
+              style={styles.addModalSearchInput}
+              placeholder="Поиск по названию..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                style={styles.addModalClearIcon}
+                onPress={() => setSearchQuery("")}
+              >
+                <Icon name="clear" size={20} color={COLORS.textSecondary} />
+              </TouchableOpacity>
+            )}
+          </View>
 
+          <ScrollView
+            style={styles.addModalFilterScroll}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.addModalFilterContainer}>
+              <View style={styles.addModalTypeFilterContainer}>
+                <Text style={styles.addModalFilterLabel}>Тип</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {uniqueTypes.map((typeObj) => (
+                    <TouchableOpacity
+                      key={typeObj.type}
+                      style={[
+                        styles.addModalTypeButton,
+                        selectedTypeFilter === typeObj.type &&
+                          styles.addModalTypeButtonActive,
+                      ]}
+                      onPress={() => setSelectedTypeFilter(typeObj.type)}
+                    >
+                      <Text
+                        style={[
+                          styles.addModalTypeButtonText,
+                          selectedTypeFilter === typeObj.type &&
+                            styles.addModalTypeButtonTextActive,
+                        ]}
+                      >
+                        {typeObj.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              <View style={styles.addModalDistrictFilterContainer}>
+                <Text style={styles.addModalFilterLabel}>Район</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {districts.map((district) => (
+                    <TouchableOpacity
+                      key={district}
+                      style={[
+                        styles.addModalDistrictButton,
+                        selectedDistrict === district &&
+                          styles.addModalDistrictButtonActive,
+                      ]}
+                      onPress={() => setSelectedDistrict(district)}
+                    >
+                      <Text
+                        style={[
+                          styles.addModalDistrictButtonText,
+                          selectedDistrict === district &&
+                            styles.addModalDistrictButtonTextActive,
+                        ]}
+                      >
+                        {district === "all" ? "Все" : district}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              <View style={styles.addModalPriceFilterContainer}>
+                <Text style={styles.addModalFilterLabel}>Цена</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {[
+                    { label: "Все", value: "all" },
+                    { label: "0-10k", value: "0-10000" },
+                    { label: "10k-50k", value: "10000-50000" },
+                    { label: "50k+", value: "50000+" },
+                  ].map((option) => (
+                    <TouchableOpacity
+                      key={option.value}
+                      style={[
+                        styles.addModalPriceButton,
+                        costRange === option.value &&
+                          styles.addModalPriceButtonActive,
+                      ]}
+                      onPress={() => setCostRange(option.value)}
+                    >
+                      <Text
+                        style={[
+                          styles.addModalPriceButtonText,
+                          costRange === option.value &&
+                            styles.addModalPriceButtonTextActive,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+          </ScrollView>
 
-
-
-
-
-
-
+          <FlatList
+            data={filteredDataMemo}
+            renderItem={renderAddItem}
+            keyExtractor={(item) => `${item.type}-${item.id}`}
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={styles.addModalItemList}
+            ListEmptyComponent={
+              <Text style={styles.addModalEmptyText}>Ничего не найдено</Text>
+            }
+            style={styles.addModalScrollView}
+            nestedScrollEnabled
+          />
+        </View>
+      </SafeAreaView>
+    </Modal>
   );
 };
 
@@ -493,8 +502,12 @@ const SelectedItem = ({
   setGuestCount,
 }) => {
   const itemKey = `${item.type}-${item.id}`;
-  const [inputQuantity, setInputQuantity] = useState(quantities[itemKey] || "1");
-  const [inputGuestCount, setInputGuestCount] = useState(initialGuestCount?.toString() || "1");
+  const [inputQuantity, setInputQuantity] = useState(
+    quantities[itemKey] || "1"
+  );
+  const [inputGuestCount, setInputGuestCount] = useState(
+    initialGuestCount?.toString() || "1"
+  );
   const isSelected = !!quantities[itemKey];
 
   useEffect(() => {
@@ -510,7 +523,9 @@ const SelectedItem = ({
   const parsedQuantity = parseInt(inputQuantity, 10) || 1;
 
   const totalCost =
-    item.type === "restaurant" ? cost * parsedGuestCount : cost * parsedQuantity;
+    item.type === "restaurant"
+      ? cost * parsedGuestCount
+      : cost * parsedQuantity;
 
   const syncQuantity = (value, guestCountValue = inputGuestCount) => {
     let newQuantity = value === "" ? "1" : value;
@@ -576,7 +591,7 @@ const SelectedItem = ({
 
   const handleGuestCountChange = (value) => {
     const filteredValue = value.replace(/[^0-9]/g, "");
-    setInputGuestCount (filteredValue);
+    setInputGuestCount(filteredValue);
     if (setGuestCount) {
       setGuestCount(filteredValue === "" ? 1 : parseInt(filteredValue, 10));
     }
@@ -686,18 +701,19 @@ const SelectedItem = ({
         </Text>
         <View style={styles.actions}>
           {!isSelected && (
-            <TouchableOpacity style={styles.actionButton} onPress={handleAddItem}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleAddItem}
+            >
               <Icon name="plus-circle" size={24} color="#26A69A" />
             </TouchableOpacity>
           )}
-           <TouchableOpacity
-              style={styles.quantityButton}
+          <TouchableOpacity
+            style={styles.quantityButton}
             onPress={() => handleRemoveItem(item)}
-            >
-
-
-           <Icon2 name="trash-can" size={18} color="#0000000" />
-            </TouchableOpacity>
+          >
+            <Icon2 name="trash-can" size={18} color="#0000000" />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
@@ -705,9 +721,7 @@ const SelectedItem = ({
               setDetailsModalVisible(true);
               onClose();
             }}
-            
           >
-             
             <Icon2 name="magnify" size={24} color="#0288D1" />
           </TouchableOpacity>
         </View>
@@ -715,53 +729,20 @@ const SelectedItem = ({
       {isSelected && (
         <>
           {item.type === "restaurant" ? (
-         <View style={styles.controlRow}>
-         <Text style={styles.label}>Гостей</Text>
-         <View style={styles.quantityContainer}>
-           <TouchableOpacity
-             style={styles.quantityButton}
-             onPress={decrementGuestCount}
-           >
-             <Icon2 name="minus" size={18} color="#0288D1" />
-           </TouchableOpacity>
-           <TextInput
-             style={styles.input}
-             value={inputGuestCount}
-             onChangeText={handleGuestCountChange}
-             onBlur={handleGuestCountBlur}
-             keyboardType="numeric"
-             placeholder="1"
-             placeholderTextColor="#B0BEC5"
-             textAlign="center"
-           />
-           <TouchableOpacity
-             style={styles.quantityButton}
-             onPress={incrementGuestCount}
-           >
-             <Icon2 name="plus" size={18} color="#0288D1" />
-           </TouchableOpacity>
-         </View>
-         <Text style={styles.totalCost}>
-           {totalCost.toLocaleString()} ₸
-         </Text>
-       </View>
-
-          ) : (
-            <>
             <View style={styles.controlRow}>
-              <Text style={styles.label}>Количество  </Text>
+              <Text style={styles.label}>Гостей</Text>
               <View style={styles.quantityContainer}>
                 <TouchableOpacity
                   style={styles.quantityButton}
-                  onPress={decrementQuantity}
+                  onPress={decrementGuestCount}
                 >
                   <Icon2 name="minus" size={18} color="#0288D1" />
                 </TouchableOpacity>
                 <TextInput
                   style={styles.input}
-                  value={inputQuantity}
-                  onChangeText={handleQuantityChange}
-                  onBlur={handleBlur}
+                  value={inputGuestCount}
+                  onChangeText={handleGuestCountChange}
+                  onBlur={handleGuestCountBlur}
                   keyboardType="numeric"
                   placeholder="1"
                   placeholderTextColor="#B0BEC5"
@@ -769,32 +750,54 @@ const SelectedItem = ({
                 />
                 <TouchableOpacity
                   style={styles.quantityButton}
-                  onPress={incrementQuantity}
+                  onPress={incrementGuestCount}
                 >
                   <Icon2 name="plus" size={18} color="#0288D1" />
                 </TouchableOpacity>
               </View>
-             
-
-             
-
-
+              <Text style={styles.totalCost}>
+                {totalCost.toLocaleString()} ₸
+              </Text>
             </View>
-            <View style={styles.totalCost}>
-             <Text >
-               {totalCost.toLocaleString()} ₸
-             </Text>
-             </View>
-</>
-            
+          ) : (
+            <>
+              <View style={styles.controlRow}>
+                <Text style={styles.label}>Количество </Text>
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={decrementQuantity}
+                  >
+                    <Icon2 name="minus" size={18} color="#0288D1" />
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.input}
+                    value={inputQuantity}
+                    onChangeText={handleQuantityChange}
+                    onBlur={handleBlur}
+                    keyboardType="numeric"
+                    placeholder="1"
+                    placeholderTextColor="#B0BEC5"
+                    textAlign="center"
+                  />
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={incrementQuantity}
+                  >
+                    <Icon2 name="plus" size={18} color="#0288D1" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.totalCost}>
+                <Text>{totalCost.toLocaleString()} ₸</Text>
+              </View>
+            </>
           )}
-           
         </>
       )}
     </View>
   );
 };
-
 
 // Модальное окно для отображения элементов категории
 const CategoryItemsModal = ({
@@ -921,52 +924,59 @@ const CategoryItemsModal = ({
         // </View>
 
         <View style={styles.addModalItemCard}>
-        <View style={[styles.addModalItemContent, isSelected && styles.disabledItemContent]}>
-
-        <TouchableOpacity
+          <View
             style={[
               styles.addModalItemContent,
               isSelected && styles.disabledItemContent,
             ]}
-            onPress={() => {
-              if (!isSelected) {
-                // Проверка capacity перед добавлением
-                if (item.type === "restaurant" && guestCount) {
-                  const totalGuests = parseInt(guestCount, 10);
-                  if (totalGuests > item.capacity) {
-                    alert(
-                      `Этот ресторан не может вместить ${totalGuests} гостей. Максимальная вместимость: ${item.capacity}.`
-                    );
-                    return;
+          >
+            <TouchableOpacity
+              style={[
+                styles.addModalItemContent,
+                isSelected && styles.disabledItemContent,
+              ]}
+              onPress={() => {
+                if (!isSelected) {
+                  // Проверка capacity перед добавлением
+                  if (item.type === "restaurant" && guestCount) {
+                    const totalGuests = parseInt(guestCount, 10);
+                    if (totalGuests > item.capacity) {
+                      alert(
+                        `Этот ресторан не может вместить ${totalGuests} гостей. Максимальная вместимость: ${item.capacity}.`
+                      );
+                      return;
+                    }
+                  }
+                  handleAddItem(item);
+                  const category = typeToCategoryMap[item.type];
+                  if (category) {
+                    updateCategories(category);
                   }
                 }
-                handleAddItem(item);
-                const category = typeToCategoryMap[item.type];
-                if (category) {
-                  updateCategories(category);
-                }
-              }
-            }}
-            disabled={isSelected}
-          >
-            
-          <Text style={styles.addModalItemText} numberOfLines={1} ellipsizeMode="tail">
-          <Icon2 name="plus" size={24} color="#0288D1" style={{marginTop:'50%'}} />
-            {title}
-          </Text>
-          
-          {count > 0 && (
-            <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
-          )}
+              }}
+              disabled={isSelected}
+            >
+              <Text
+                style={styles.addModalItemText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                <Icon2
+                  name="plus"
+                  size={24}
+                  color="#0288D1"
+                  style={{ marginTop: "50%" }}
+                />
+                {title}
+              </Text>
 
-
-
-</TouchableOpacity>
-
-
-        </View>
-        <View style={styles.actions}>
-          {/* <TouchableOpacity
+              {count > 0 && (
+                <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+          <View style={styles.actions}>
+            {/* <TouchableOpacity
             style={[styles.actionButton, isSelected && styles.disabledActionButton]}
             onPress={handleSelectItem}
             disabled={isSelected}
@@ -974,23 +984,18 @@ const CategoryItemsModal = ({
             <Icon name="plus-circle" size={24} color={isSelected ? "#B0BEC5" : "#26A69A"} />
           </TouchableOpacity> */}
 
-
-
-       
-
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => {
-              setSelectedItem(item);
-              setDetailsModalVisible(true);
-              onClose();
-            }}
-          >
-            <Icon2 name="magnify" size={24} color="#0288D1" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => {
+                setSelectedItem(item);
+                setDetailsModalVisible(true);
+                onClose();
+              }}
+            >
+              <Icon2 name="magnify" size={24} color="#0288D1" />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
       );
     },
     [
@@ -1048,7 +1053,7 @@ const CategoryItemsModal = ({
     //                 onClose={onClose}
     //                 guestCount={guestCount} // Передаем guestCount
     //               />
-              
+
     //             ))}
     //           </View>
     //         )}
@@ -1066,75 +1071,75 @@ const CategoryItemsModal = ({
     //   </SafeAreaView>
     // </Modal>
     <Modal
-    visible={visible}
-    transparent
-    animationType="slide" // Плавное появление снизу
-    onRequestClose={handleClose}
-  >
-    <SafeAreaView style={styles.modalOverlay}>
-      <View style={styles.addModalContainer}>
-        {/* Заголовок и кнопка закрытия */}
-        <View style={styles.addModalHeader}>
-          <Text style={styles.addModalTitle}>{categoryLabel}</Text>
-          <TouchableOpacity
-            style={styles.addModalCloseIcon}
-            onPress={handleClose}
-            accessible
-            accessibilityLabel="Закрыть модальное окно"
-          >
-            <Icon name="close" size={28} color={COLORS.textSecondary} />
-          </TouchableOpacity>
-        </View>
+      visible={visible}
+      transparent
+      animationType="slide" // Плавное появление снизу
+      onRequestClose={handleClose}
+    >
+      <SafeAreaView style={styles.modalOverlay}>
+        <View style={styles.addModalContainer}>
+          {/* Заголовок и кнопка закрытия */}
+          <View style={styles.addModalHeader}>
+            <Text style={styles.addModalTitle}>{categoryLabel}</Text>
+            <TouchableOpacity
+              style={styles.addModalCloseIcon}
+              onPress={handleClose}
+              accessible
+              accessibilityLabel="Закрыть модальное окно"
+            >
+              <Icon name="close" size={28} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+          </View>
 
-
-        <ScrollView contentContainerStyle={styles.addModalItemList}>
-
-          {selectedItems.length > 0 && (
-            <View style={styles.selectedItemContainer}>
-              <Text style={styles.categoryHeader}>
-                Выбранные элементы ({selectedItems.length}):
-              </Text>
-              {selectedItems.map((item) => (
-                <SelectedItem
-                  key={`${item.type}-${item.id}`}
-                  item={item}
-                  quantities={quantities}
-                  setQuantities={setQuantities}
-                  filteredData={filteredData}
-                  setFilteredData={setFilteredData}
-                  budget={budget}
-                  setRemainingBudget={setRemainingBudget}
-                  handleRemoveItem={handleRemoveItem}
-                  setDetailsModalVisible={setDetailsModalVisible}
-                  setSelectedItem={setSelectedItem}
-                  onClose={onClose}
-                  guestCount={guestCount}
-                />
-              ))}
-            </View>
-          )}
-
-          {/* Секция доступных элементов */}
-          {sortedCategoryItems.length > 0 ? (
-            sortedCategoryItems.map((item) => (
-              <View key={`${item.type}-${item.id}`} style={styles.itemWrapper}>
-                {renderCategoryItem({ item })}
+          <ScrollView contentContainerStyle={styles.addModalItemList}>
+            {selectedItems.length > 0 && (
+              <View style={styles.selectedItemContainer}>
+                <Text style={styles.categoryHeader}>
+                  Выбранные элементы ({selectedItems.length}):
+                </Text>
+                {selectedItems.map((item) => (
+                  <SelectedItem
+                    key={`${item.type}-${item.id}`}
+                    item={item}
+                    quantities={quantities}
+                    setQuantities={setQuantities}
+                    filteredData={filteredData}
+                    setFilteredData={setFilteredData}
+                    budget={budget}
+                    setRemainingBudget={setRemainingBudget}
+                    handleRemoveItem={handleRemoveItem}
+                    setDetailsModalVisible={setDetailsModalVisible}
+                    setSelectedItem={setSelectedItem}
+                    onClose={onClose}
+                    guestCount={guestCount}
+                  />
+                ))}
               </View>
-            ))
-          ) : (
-            <Text style={styles.addModalEmptyText}>Элементы не найдены</Text>
-          )}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  </Modal>
+            )}
+
+            {/* Секция доступных элементов */}
+            {sortedCategoryItems.length > 0 ? (
+              sortedCategoryItems.map((item) => (
+                <View
+                  key={`${item.type}-${item.id}`}
+                  style={styles.itemWrapper}
+                >
+                  {renderCategoryItem({ item })}
+                </View>
+              ))
+            ) : (
+              <Text style={styles.addModalEmptyText}>Элементы не найдены</Text>
+            )}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    </Modal>
   );
 };
 
 // Главный экран
 
 const CreateEventScreen = ({ navigation, route }) => {
-  
   const selectedCategories = route?.params?.selectedCategories || [];
 
   const dispatch = useDispatch();
@@ -1173,7 +1178,7 @@ const CreateEventScreen = ({ navigation, route }) => {
   const [weddingDate, setWeddingDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [shouldFilter, setShouldFilter] = useState(false);
-const [blockedDays, setBlockedDays] = useState({});
+  const [blockedDays, setBlockedDays] = useState({});
   const scrollViewRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const updateCategories = useCallback((newCategory) => {
@@ -1220,19 +1225,20 @@ const [blockedDays, setBlockedDays] = useState({});
   // );
 
   const handleRemoveCategory = useCallback(
-    
     (category) => {
       setDisabledCategories((prev) => {
-       
-
         if (prev.includes(category)) {
           // Разблокировка категории
-          const updatedDisabledCategories = prev.filter((cat) => cat !== category);
+          const updatedDisabledCategories = prev.filter(
+            (cat) => cat !== category
+          );
           const type = categoryToTypeMap[category];
           if (type) {
             // Получаем элементы для разблокированной категории
-            const itemsToAdd = combinedData.filter((item) => item.type === type);
-  
+            const itemsToAdd = combinedData.filter(
+              (item) => item.type === type
+            );
+
             // Фильтруем элементы с учётом бюджета и количества гостей
             let remaining = parseFloat(budget) || 0;
             const currentTotalSpent = filteredData.reduce((sum, dataItem) => {
@@ -1242,16 +1248,21 @@ const [blockedDays, setBlockedDays] = useState({});
                   ? parseInt(guestCount, 10) || 1
                   : parseInt(quantities[key] || "1");
               const itemCost =
-                dataItem.type === "restaurant" ? dataItem.averageCost : dataItem.cost;
+                dataItem.type === "restaurant"
+                  ? dataItem.averageCost
+                  : dataItem.cost;
               return sum + itemCost * itemQuantity;
             }, 0);
             remaining -= currentTotalSpent;
-  
+
             const filteredItemsToAdd = itemsToAdd
               .filter((item) => {
-                const cost = item.type === "restaurant" ? item.averageCost : item.cost;
+                const cost =
+                  item.type === "restaurant" ? item.averageCost : item.cost;
                 const effectiveQuantity =
-                  item.type === "restaurant" ? parseInt(guestCount, 10) || 1 : 1;
+                  item.type === "restaurant"
+                    ? parseInt(guestCount, 10) || 1
+                    : 1;
                 const totalCost = cost * effectiveQuantity;
                 return totalCost <= remaining;
               })
@@ -1260,7 +1271,7 @@ const [blockedDays, setBlockedDays] = useState({});
                 const costB = b.type === "restaurant" ? b.averageCost : b.cost;
                 return costA - costB;
               });
-  
+
             // Добавляем не более 2 элементов из категории
             const maxItemsToSelect = Math.min(2, filteredItemsToAdd.length);
             const selectedItemsToAdd = [];
@@ -1268,21 +1279,25 @@ const [blockedDays, setBlockedDays] = useState({});
               const selectedItem = filteredItemsToAdd[i];
               if (selectedItem) {
                 const cost =
-                  selectedItem.type === "restaurant" ? selectedItem.averageCost : selectedItem.cost;
+                  selectedItem.type === "restaurant"
+                    ? selectedItem.averageCost
+                    : selectedItem.cost;
                 const effectiveQuantity =
-                  selectedItem.type === "restaurant" ? parseInt(guestCount, 10) || 1 : 1;
+                  selectedItem.type === "restaurant"
+                    ? parseInt(guestCount, 10) || 1
+                    : 1;
                 const totalCost = cost * effectiveQuantity;
                 selectedItemsToAdd.push({ ...selectedItem, totalCost });
                 remaining -= totalCost;
               }
             }
-  
+
             // Обновляем filteredData, добавляя новые элементы
             setFilteredData((prevData) => {
               const updatedData = [...prevData, ...selectedItemsToAdd].sort(
                 (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
               );
-  
+
               // Обновляем quantities для новых элементов
               setQuantities((prevQuantities) => ({
                 ...prevQuantities,
@@ -1291,7 +1306,7 @@ const [blockedDays, setBlockedDays] = useState({});
                   return { ...acc, [itemKey]: "1" };
                 }, {}),
               }));
-  
+
               // Пересчитываем оставшийся бюджет
               const totalSpent = updatedData.reduce((sum, dataItem) => {
                 const key = `${dataItem.type}-${dataItem.id}`;
@@ -1300,14 +1315,15 @@ const [blockedDays, setBlockedDays] = useState({});
                     ? parseInt(guestCount, 10) || 1
                     : parseInt(quantities[key] || "1");
                 const itemCost =
-                  dataItem.type === "restaurant" ? dataItem.averageCost : dataItem.cost;
+                  dataItem.type === "restaurant"
+                    ? dataItem.averageCost
+                    : dataItem.cost;
                 return sum + itemCost * itemQuantity;
               }, 0);
               setRemainingBudget(parseFloat(budget) - totalSpent);
-  
+
               return updatedData;
             });
-  
           }
           return updatedDisabledCategories;
         } else {
@@ -1326,7 +1342,9 @@ const [blockedDays, setBlockedDays] = useState({});
                   ? parseInt(guestCount, 10) || 1
                   : parseInt(quantities[key] || "1");
               const itemCost =
-                dataItem.type === "restaurant" ? dataItem.averageCost : dataItem.cost;
+                dataItem.type === "restaurant"
+                  ? dataItem.averageCost
+                  : dataItem.cost;
               return sum + itemCost * itemQuantity;
             }, 0);
             setRemainingBudget(parseFloat(budget) - totalSpent);
@@ -1338,7 +1356,6 @@ const [blockedDays, setBlockedDays] = useState({});
     },
     [quantities, budget, guestCount, combinedData]
   );
-
 
   const fetchData = async () => {
     if (!token || !user?.id) return;
@@ -1373,8 +1390,8 @@ const [blockedDays, setBlockedDays] = useState({});
         goods: userData[9] || [],
         jewelry: userData[10] || [],
       };
-      
-      console.log('JEWELRY=  ',newData[10])
+
+      console.log("JEWELRY=  ", newData[10]);
       setData(newData);
     } catch (error) {
       console.error("Ошибка загрузки данных:", error);
@@ -1394,24 +1411,22 @@ const [blockedDays, setBlockedDays] = useState({});
     return unsubscribe;
   }, [navigation, token, user]);
 
-
-
   const formatBudget = (input) => {
     // Удаляем все нечисловые символы
-    const cleaned = input.replace(/[^\d]/g, '');
+    const cleaned = input.replace(/[^\d]/g, "");
     // Форматируем с пробелами каждые 3 цифры с конца
-    const formatted = cleaned
-      .split('')
-      .reverse()
-      .join('')
-      .match(/.{1,3}/g)
-      ?.join(' ')
-      .split('')
-      .reverse()
-      .join('') || cleaned;
+    const formatted =
+      cleaned
+        .split("")
+        .reverse()
+        .join("")
+        .match(/.{1,3}/g)
+        ?.join(" ")
+        .split("")
+        .reverse()
+        .join("") || cleaned;
     return formatted;
   };
-
 
   // const handleBudgetChange = (value) => {
   //   const filteredValue = value.replace(/[^0-9]/g, "");
@@ -1427,17 +1442,14 @@ const [blockedDays, setBlockedDays] = useState({});
 
   const handleBudgetChange = (value) => {
     // Удаляем все нечисловые символы
-    const filteredValue = value.replace(/[^0-9]/g, '');
-    if (filteredValue === '' || parseFloat(filteredValue) >= 0) {
+    const filteredValue = value.replace(/[^0-9]/g, "");
+    if (filteredValue === "" || parseFloat(filteredValue) >= 0) {
       // Сохраняем чистое число без пробелов
       setBudget(filteredValue);
       setShouldFilter(true);
-      console.log('FILTERED VALUE=', filteredValue, 'BUDGET=', filteredValue);
+      console.log("FILTERED VALUE=", filteredValue, "BUDGET=", filteredValue);
     }
   };
-
-
-
 
   const handleGuestCountChange = (value) => {
     const filteredValue = value.replace(/[^0-9]/g, "");
@@ -1447,7 +1459,6 @@ const [blockedDays, setBlockedDays] = useState({});
     }
   };
 
-
   // const filterDataByBudget = useCallback(() => {
 
   //   console.log('filterDataByBudget  Стартанул')
@@ -1456,23 +1467,23 @@ const [blockedDays, setBlockedDays] = useState({});
   //     alert("Пожалуйста, введите корректную сумму бюджета");
   //     return;
   //   }
-  
+
   //   if (!guestCount || isNaN(guestCount) || parseFloat(guestCount) <= 0) {
   //     alert("Пожалуйста, введите корректное количество гостей");
   //     return;
   //   }
-  
+
   //   const budgetValue = parseFloat(budget);
   //   const guests = parseFloat(guestCount);
   //   let remaining = budgetValue;
   //   const selectedItems = [];
-  
+
   //   // Получаем все активные категории (не отключённые)
   //   const allowedTypes = categories
   //     .filter((category) => !disabledCategories.includes(category))
   //     .map((category) => categoryToTypeMap[category])
   //     .filter((type) => type);
-  
+
   //   // Определяем все типы, которые нужно обработать
   //   const typesToProcess = [
   //     { key: "restaurants", costField: "averageCost", type: "restaurant" },
@@ -1486,34 +1497,34 @@ const [blockedDays, setBlockedDays] = useState({});
   //     { key: "transport", costField: "cost", type: "transport" },
   //     { key: "jewelry", costField: "cost", type: "jewelry" },
   //   ].filter(({ type }) => allowedTypes.includes(type));
-  
+
   //   // Обрабатываем каждый тип
   //   for (const { key, costField, type } of typesToProcess) {
   //     let items = data[key];
-  
+
   //     // Специальная обработка для ресторанов
   //     if (type === "restaurant") {
   //       items = items.filter(
   //         (restaurant) => parseFloat(restaurant.capacity) >= guests
   //       );
-  
+
   //       if (items.length === 0) {
   //         alert(
   //           "Нет ресторанов с достаточной вместимостью для указанного количества гостей"
   //         );
   //         continue; // Пропускаем категорию, если нет подходящих ресторанов
   //       }
-  
+
   //       // Учитываем стоимость ресторана на основе количества гостей
   //       const sortedItems = items
   //         .filter((item) => parseFloat(item[costField]) * guests <= remaining)
   //         .sort((a, b) => parseFloat(a[costField]) - parseFloat(b[costField]));
-  
+
   //       if (sortedItems.length === 0) {
   //         alert(`Нет ресторанов, подходящих под ваш бюджет (${remaining} тг)`);
   //         continue;
   //       }
-  
+
   //       const selectedItem = sortedItems[Math.floor(sortedItems.length / 2)];
   //       const itemCost = parseFloat(selectedItem[costField]) * guests;
   //       selectedItems.push({
@@ -1527,7 +1538,7 @@ const [blockedDays, setBlockedDays] = useState({});
   //       const sortedItems = items
   //         .filter((item) => parseFloat(item[costField]) <= remaining)
   //         .sort((a, b) => parseFloat(a[costField]) - parseFloat(b[costField]));
-  
+
   //       if (sortedItems.length > 0) {
   //         const maxItemsToSelect = Math.min(2, sortedItems.length); // Максимум 2 элемента на категорию
   //         for (let i = 0; i < maxItemsToSelect; i++) {
@@ -1543,16 +1554,16 @@ const [blockedDays, setBlockedDays] = useState({});
   //       }
   //     }
   //   }
-  
+
   //   if (selectedItems.length === 0) {
   //     alert("Нет элементов, подходящих под ваш бюджет и количество гостей");
   //     return;
   //   }
-  
+
   //   const sortedSelectedItems = [...selectedItems].sort((a, b) => {
   //     return (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11);
   //   });
-  
+
   //   setFilteredData(sortedSelectedItems);
   //   setRemainingBudget(remaining);
   //   setQuantities(
@@ -1563,19 +1574,19 @@ const [blockedDays, setBlockedDays] = useState({});
   //   );
   // }, [budget, guestCount, data, categories, disabledCategories]);
   const filterDataByBudget = useCallback(() => {
-    console.log('filterDataByBudget Стартанул');
+    console.log("filterDataByBudget Стартанул");
     setIsLoading(true); // Показываем лоадер
 
     // Задержка на 1 секунду для демонстрации лоадера
     setTimeout(() => {
       if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
-        alert('Пожалуйста, введите корректную сумму бюджета');
+        alert("Пожалуйста, введите корректную сумму бюджета");
         setIsLoading(false);
         return;
       }
 
       if (!guestCount || isNaN(guestCount) || parseFloat(guestCount) <= 0) {
-        alert('Пожалуйста, введите корректное количество гостей');
+        alert("Пожалуйста, введите корректное количество гостей");
         setIsLoading(false);
         return;
       }
@@ -1593,16 +1604,16 @@ const [blockedDays, setBlockedDays] = useState({});
 
       // Определяем все типы, которые нужно обработать
       const typesToProcess = [
-        { key: 'restaurants', costField: 'averageCost', type: 'restaurant' },
-        { key: 'clothing', costField: 'cost', type: 'clothing' },
-        { key: 'tamada', costField: 'cost', type: 'tamada' },
-        { key: 'programs', costField: 'cost', type: 'program' },
-        { key: 'traditionalGifts', costField: 'cost', type: 'traditionalGift' },
-        { key: 'flowers', costField: 'cost', type: 'flowers' },
-        { key: 'cakes', costField: 'cost', type: 'cake' },
-        { key: 'alcohol', costField: 'cost', type: 'alcohol' },
-        { key: 'transport', costField: 'cost', type: 'transport' },
-        { key: 'jewelry', costField: 'cost', type: 'jewelry' },
+        { key: "restaurants", costField: "averageCost", type: "restaurant" },
+        { key: "clothing", costField: "cost", type: "clothing" },
+        { key: "tamada", costField: "cost", type: "tamada" },
+        { key: "programs", costField: "cost", type: "program" },
+        { key: "traditionalGifts", costField: "cost", type: "traditionalGift" },
+        { key: "flowers", costField: "cost", type: "flowers" },
+        { key: "cakes", costField: "cost", type: "cake" },
+        { key: "alcohol", costField: "cost", type: "alcohol" },
+        { key: "transport", costField: "cost", type: "transport" },
+        { key: "jewelry", costField: "cost", type: "jewelry" },
       ].filter(({ type }) => allowedTypes.includes(type));
 
       // Обрабатываем каждый тип
@@ -1610,14 +1621,14 @@ const [blockedDays, setBlockedDays] = useState({});
         let items = data[key] || [];
 
         // Специальная обработка для ресторанов
-        if (type === 'restaurant') {
+        if (type === "restaurant") {
           items = items.filter(
             (restaurant) => parseFloat(restaurant.capacity) >= guests
           );
 
           if (items.length === 0) {
             alert(
-              'Нет ресторанов с достаточной вместимостью для указанного количества гостей'
+              "Нет ресторанов с достаточной вместимостью для указанного количества гостей"
             );
             continue;
           }
@@ -1625,10 +1636,14 @@ const [blockedDays, setBlockedDays] = useState({});
           // Учитываем стоимость ресторана на основе количества гостей
           const sortedItems = items
             .filter((item) => parseFloat(item[costField]) * guests <= remaining)
-            .sort((a, b) => parseFloat(a[costField]) - parseFloat(b[costField]));
+            .sort(
+              (a, b) => parseFloat(a[costField]) - parseFloat(b[costField])
+            );
 
           if (sortedItems.length === 0) {
-            alert(`Нет ресторанов, подходящих под ваш бюджет (${remaining} тг)`);
+            alert(
+              `Нет ресторанов, подходящих под ваш бюджет (${remaining} тг)`
+            );
             continue;
           }
 
@@ -1644,7 +1659,9 @@ const [blockedDays, setBlockedDays] = useState({});
           // Обработка остальных категорий
           const sortedItems = items
             .filter((item) => parseFloat(item[costField]) <= remaining)
-            .sort((a, b) => parseFloat(a[costField]) - parseFloat(b[costField]));
+            .sort(
+              (a, b) => parseFloat(a[costField]) - parseFloat(b[costField])
+            );
 
           if (sortedItems.length > 0) {
             const maxItemsToSelect = Math.min(2, sortedItems.length);
@@ -1653,7 +1670,11 @@ const [blockedDays, setBlockedDays] = useState({});
               if (selectedItem) {
                 const cost = parseFloat(selectedItem[costField]);
                 if (cost <= remaining) {
-                  selectedItems.push({ ...selectedItem, type, totalCost: cost });
+                  selectedItems.push({
+                    ...selectedItem,
+                    type,
+                    totalCost: cost,
+                  });
                   remaining -= cost;
                 }
               }
@@ -1663,7 +1684,7 @@ const [blockedDays, setBlockedDays] = useState({});
       }
 
       if (selectedItems.length === 0) {
-        alert('Нет элементов, подходящих под ваш бюджет и количество гостей');
+        alert("Нет элементов, подходящих под ваш бюджет и количество гостей");
         setIsLoading(false);
         return;
       }
@@ -1677,18 +1698,13 @@ const [blockedDays, setBlockedDays] = useState({});
       setQuantities(
         sortedSelectedItems.reduce((acc, item) => {
           const itemKey = `${item.type}-${item.id}`;
-          return { ...acc, [itemKey]: '1' };
+          return { ...acc, [itemKey]: "1" };
         }, {})
       );
 
       setIsLoading(false); // Скрываем лоадер
     }, 200); // Задержка 1 секунда
   }, [budget, guestCount, data, categories, disabledCategories]);
-
-
-
-
-
 
   useEffect(() => {
     if (
@@ -1710,7 +1726,9 @@ const [blockedDays, setBlockedDays] = useState({});
 
       // Проверка количества гостей перед добавлением ресторана
       if (item.type === "restaurant" && !guestCount) {
-        alert("Пожалуйста, укажите количество гостей перед добавлением ресторана.");
+        alert(
+          "Пожалуйста, укажите количество гостей перед добавлением ресторана."
+        );
         return;
       }
 
@@ -1769,7 +1787,9 @@ const [blockedDays, setBlockedDays] = useState({});
               ? parseInt(guestCount, 10) || 1
               : parseInt(quantities[key] || "1");
           const itemCost =
-            dataItem.type === "restaurant" ? dataItem.averageCost : dataItem.cost;
+            dataItem.type === "restaurant"
+              ? dataItem.averageCost
+              : dataItem.cost;
           return sum + itemCost * itemQuantity;
         }, 0);
 
@@ -1804,7 +1824,9 @@ const [blockedDays, setBlockedDays] = useState({});
               ? parseInt(guestCount, 10) || 1
               : parseInt(quantities[key] || "1");
           const itemCost =
-            dataItem.type === "restaurant" ? dataItem.averageCost : dataItem.cost;
+            dataItem.type === "restaurant"
+              ? dataItem.averageCost
+              : dataItem.cost;
           return sum + itemCost * itemQuantity;
         }, 0);
 
@@ -1834,7 +1856,7 @@ const [blockedDays, setBlockedDays] = useState({});
   const fetchAllBlockedDays = async () => {
     try {
       const response = await api.fetchAllBlockDays();
-      console.log('Ответ API fetchAllBlockDays:', response.data);
+      console.log("Ответ API fetchAllBlockDays:", response.data);
       const blockedDays = {};
       response.data.forEach((entry) => {
         const { date, restaurantId, restaurantName } = entry;
@@ -1847,16 +1869,14 @@ const [blockedDays, setBlockedDays] = useState({});
         blockedDays[date].dots.push({
           restaurantId,
           restaurantName,
-
         });
       });
-      console.log('Сформированные blockedDays:', blockedDays);
+      console.log("Сформированные blockedDays:", blockedDays);
       setBlockedDays(blockedDays);
     } catch (error) {
-      console.error('Ошибка загрузки заблокированных дней:', error.message);
+      console.error("Ошибка загрузки заблокированных дней:", error.message);
     }
   };
-
 
   // const handleSubmit = async () => {
   //   if (!weddingName.trim()) {
@@ -1910,28 +1930,29 @@ const [blockedDays, setBlockedDays] = useState({});
   //   }
   // };
 
-
   const handleSubmit = async () => {
     // Валидация базовых полей
     if (!weddingName.trim()) {
-      alert('Пожалуйста, укажите название свадьбы');
+      alert("Пожалуйста, укажите название свадьбы");
       return;
     }
     if (!filteredData.length) {
-      alert('Пожалуйста, выберите хотя бы один элемент для свадьбы');
+      alert("Пожалуйста, выберите хотя бы один элемент для свадьбы");
       return;
     }
     if (!user?.id || !token) {
-      alert('Ошибка авторизации. Пожалуйста, войдите в систему.');
-      navigation.navigate('Login');
+      alert("Ошибка авторизации. Пожалуйста, войдите в систему.");
+      navigation.navigate("Login");
       return;
     }
-  
+
     // Формирование строки даты
-    const dateString = weddingDate.toISOString().split('T')[0];
-  
+    const dateString = weddingDate.toISOString().split("T")[0];
+
     // Проверка, есть ли ресторан в filteredData
-    const restaurantItem = filteredData.find((item) => item.type === 'restaurant');
+    const restaurantItem = filteredData.find(
+      (item) => item.type === "restaurant"
+    );
     if (restaurantItem) {
       // Проверка, заблокирована ли дата для этого ресторана
       if (blockedDays[dateString]) {
@@ -1946,17 +1967,17 @@ const [blockedDays, setBlockedDays] = useState({});
         }
       }
     }
-  
+
     // Формирование данных для отправки
     const weddingData = {
       name: weddingName.trim(),
       date: dateString,
       host_id: user.id,
       items: filteredData.map((item) => {
-        const quantity = parseInt(quantities[`${item.type}-${item.id}`] || '1');
+        const quantity = parseInt(quantities[`${item.type}-${item.id}`] || "1");
         const effectiveQuantity =
-          item.type === 'restaurant' ? parseInt(guestCount, 10) || 1 : quantity;
-        const cost = item.type === 'restaurant' ? item.averageCost : item.cost;
+          item.type === "restaurant" ? parseInt(guestCount, 10) || 1 : quantity;
+        const cost = item.type === "restaurant" ? item.averageCost : item.cost;
         return {
           id: item.id,
           type: item.type,
@@ -1965,27 +1986,25 @@ const [blockedDays, setBlockedDays] = useState({});
         };
       }),
     };
-  
+
     // Отправка данных на сервер
     try {
       await api.createWedding(weddingData, token);
-      alert('Свадьба успешно создана!');
+      alert("Свадьба успешно создана!");
       setModalVisible(false);
-      setWeddingName('');
+      setWeddingName("");
       setWeddingDate(new Date());
       setShowDatePicker(false);
       setFilteredData([]);
       setQuantities({});
-      setBudget('');
-      setGuestCount('');
+      setBudget("");
+      setGuestCount("");
       setRemainingBudget(0);
     } catch (error) {
-      console.error('Ошибка при создании свадьбы:', error);
-      alert('Ошибка: ' + (error.response?.data?.error || error.message));
+      console.error("Ошибка при создании свадьбы:", error);
+      alert("Ошибка: " + (error.response?.data?.error || error.message));
     }
   };
-
-
 
   const onDateChange = (day) => {
     setWeddingDate(new Date(day.timestamp));
@@ -2041,7 +2060,7 @@ const [blockedDays, setBlockedDays] = useState({});
   //   if (item === "Добавить") {
   //     return (
   //       <View style={styles.categoryRow}>
-         
+
   //         <TouchableOpacity
   //               style={styles.categoryButton}
   //               onPress={() => setAddItemModalVisible(true)}
@@ -2127,12 +2146,6 @@ const [blockedDays, setBlockedDays] = useState({});
   //   );
   // };
 
-
-
-
-
-
-
   const renderCategory = (item) => {
     if (item === "Добавить") {
       return (
@@ -2153,22 +2166,16 @@ const [blockedDays, setBlockedDays] = useState({});
         </View>
       );
     }
-  
+
     const isDisabled = disabledCategories.includes(item);
-  
 
- 
-  // 'Шоу программа': "program",
- 
-  // 'Традиционные подарки': "traditionalGift",
- 
+    // 'Шоу программа': "program",
 
- 
-
+    // 'Традиционные подарки': "traditionalGift",
 
     // Маппинг категорий на изображения для активного и неактивного состояния
     const categoryIcons = {
-     "Цветы": {
+      Цветы: {
         on: require("../../assets/cvetyOn.png"),
         off: require("../../assets/cvetyOff.png"),
       },
@@ -2180,24 +2187,26 @@ const [blockedDays, setBlockedDays] = useState({});
         on: require("../../assets/show.png"),
         off: require("../../assets/showTurnOff.png"),
       },
-      "Ресторан": {
+      Ресторан: {
         on: require("../../assets/restaurantOn.png"),
         off: require("../../assets/restaurantTurnOff.png"),
       },
-     
-      "Ведущий": {
+
+      Ведущий: {
         on: require("../../assets/vedushieOn.png"),
         off: require("../../assets/vedushieOff.png"),
       },
-      // "Традиционные подарки": {
-      //   on: require("../assets/icons/giftOn.png"),
-      //   off: require("../assets/icons/giftOff.png"),
-      // },
+      "Традиционные подарки": {
+        on: require("../../assets/tradGiftsOn.png"),
+        off: require("../../assets/tradGifts.png"),
+      },
+
+
       "Свадебный салон": {
         on: require("../../assets/svadebnyisalon.png"),
         off: require("../../assets/svadeblyisalonOff.png"),
       },
-      "Алкоголь": {
+      Алкоголь: {
         on: require("../../assets/alcoholOn.png"),
         off: require("../../assets/alcoholOff.png"),
       },
@@ -2205,17 +2214,16 @@ const [blockedDays, setBlockedDays] = useState({});
         on: require("../../assets/uvizdeliyaOn.png"),
         off: require("../../assets/uvIzdeliyaOff.png"),
       },
-      "Торты": {
+      Торты: {
         on: require("../../assets/torty.png"),
         off: require("../../assets/tortyTurnOff.png"),
       },
       // Добавьте другие категории, если нужно
     };
-  
+
     // Иконка для категории внутри кнопки
-    const categoryIcon = categoryIcons[item]?.on || require("../../assets/join.png"); // Иконка по умолчанию, если не найдена
-  
-   
+    const categoryIcon =
+      categoryIcons[item]?.on || require("../../assets/join.png"); // Иконка по умолчанию, если не найдена
 
     return (
       <View style={styles.categoryRow}>
@@ -2224,12 +2232,17 @@ const [blockedDays, setBlockedDays] = useState({});
           onPress={() => handleRemoveCategory(item)}
         >
           <Image
-            source={isDisabled ? categoryIcons[item]?.on : categoryIcons[item]?.off}
+            source={
+              isDisabled ? categoryIcons[item]?.on : categoryIcons[item]?.off
+            }
             style={{ width: 60, height: 70 }} // Настройте размер под ваши нужды
           />
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.categoryButton, isDisabled && styles.disabledCategoryButton]}
+          style={[
+            styles.categoryButton,
+            isDisabled && styles.disabledCategoryButton,
+          ]}
           onPress={() => {
             if (!isDisabled) {
               handleCategoryPress(item);
@@ -2246,7 +2259,7 @@ const [blockedDays, setBlockedDays] = useState({});
                 source={categoryIcon}
                 style={{ width: 20, height: 20, marginRight: 10 }} // Настройте размер и отступ
               /> */}
-               <Icon
+              <Icon
                 name={
                   item === "Ресторан"
                     ? "restaurant"
@@ -2280,25 +2293,17 @@ const [blockedDays, setBlockedDays] = useState({});
     );
   };
 
-
-
-
-
-
   const handleDetailsPress = () => {
     setDetailsModalVisible(false); // Закрываем модальное окно
     setSelectedItem(null); // Сбрасываем выбранный элемент
-    navigation.navigate('Details', { item: selectedItem }); // Переходим на DetailsScreen
+    navigation.navigate("Details", { item: selectedItem }); // Переходим на DetailsScreen
   };
-
-
 
   const handleGoBack = () => {
     navigation.navigate("BeforeHomeScreen", {
       selectedCategories: categories,
     });
   };
-
 
   // const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
 
@@ -2323,14 +2328,11 @@ const [blockedDays, setBlockedDays] = useState({});
   //   fetchFiles();
   // }, []);
 
-
   const handleSubmitEditing = () => {
     // Действие при нажатии кнопки "Готово" на клавиатуре
     // Например, можно вызвать handleSubmit или просто закрыть клавиатуру
     // Keyboard.dismiss(); // Если нужно закрыть клавиатуру
   };
-
-
 
   return (
     <>
@@ -2340,7 +2342,6 @@ const [blockedDays, setBlockedDays] = useState({});
         end={{ x: 0, y: 0 }}
         style={styles.splashContainer}
       >
-
         <TouchableOpacity
           style={{ marginTop: "15%", marginLeft: "2%" }}
           onPress={() => navigation.goBack()}
@@ -2356,16 +2357,17 @@ const [blockedDays, setBlockedDays] = useState({});
           />
         </View>
 
- <Image
-        source={require('../../assets/footer.png')}
-        style={styles.topPatternContainer}
-      />
+        <Image
+          source={require("../../assets/footer.png")}
+          style={styles.topPatternContainer}
+        />
 
         <View style={styles.headerContainer}>
-
-  <View style={styles.budgetContainer}>
-    <View style={styles.categoryItemAdd}>{renderCategory("Добавить")}</View>
-    {/* <TextInput
+          <View style={styles.budgetContainer}>
+            <View style={styles.categoryItemAdd}>
+              {renderCategory("Добавить")}
+            </View>
+            {/* <TextInput
       style={styles.budgetInput}
       placeholder="Бюджет (т)"
       value={budget}
@@ -2378,34 +2380,29 @@ const [blockedDays, setBlockedDays] = useState({});
       onSubmitEditing={handleSubmitEditing}
     /> */}
 
-<TextInput
-        style={styles.budgetInput}
-        placeholder="Бюджет (т)"
-        value={formatBudget(budget)} // Отображаем число с пробелами
-        onChangeText={handleBudgetChange}
+            <TextInput
+              style={styles.budgetInput}
+              placeholder="Бюджет (т)"
+              value={formatBudget(budget)} // Отображаем число с пробелами
+              onChangeText={handleBudgetChange}
+              keyboardType="numeric" // Используем numeric вместо phone-pad
+              maxLength={18}
+              returnKeyType="done"
+              onSubmitEditing={handleSubmitEditing}
+            />
 
-        keyboardType="numeric" // Используем numeric вместо phone-pad
-        maxLength={18}
-        returnKeyType="done"
-        onSubmitEditing={handleSubmitEditing}
-      />
-
-
-    <TextInput
-      style={styles.guestInput}
-      placeholder="Гостей"
-      value={guestCount}
-      onChangeText={handleGuestCountChange}
-
-     placeholderTextColor={COLORS.placeholder}
-      keyboardType="phone-pad"
-                maxLength={18}
-                returnKeyType="done"
-                onSubmitEditing={handleSubmitEditing}
-    />
-  </View>
-
-
+            <TextInput
+              style={styles.guestInput}
+              placeholder="Гостей"
+              value={guestCount}
+              onChangeText={handleGuestCountChange}
+              placeholderTextColor={COLORS.placeholder}
+              keyboardType="phone-pad"
+              maxLength={18}
+              returnKeyType="done"
+              onSubmitEditing={handleSubmitEditing}
+            />
+          </View>
 
           {/* <View style={styles.categoryItem2}>{renderCategory("Добавить")}</View>
           <View style={styles.budgetContainer}>
@@ -2429,20 +2426,18 @@ const [blockedDays, setBlockedDays] = useState({});
           </View> */}
 
           <Modal
-          animationType="fade"
-          transparent={true}
-          visible={isLoading}
-          onRequestClose={() => {}} // Блокируем закрытие
-        >
-          <View style={styles.loaderOverlay}>
-            <View style={styles.loaderContainer}>
-              <ActivityIndicator size="large" color={COLORS.primary} />
-              <Text style={styles.loaderText}>Загрузка...</Text>
+            animationType="fade"
+            transparent={true}
+            visible={isLoading}
+            onRequestClose={() => {}} // Блокируем закрытие
+          >
+            <View style={styles.loaderOverlay}>
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={styles.loaderText}>Загрузка...</Text>
+              </View>
             </View>
-          </View>
-        </Modal>
-
-
+          </Modal>
         </View>
 
         <View style={styles.listContainer}>
@@ -2539,10 +2534,10 @@ const [blockedDays, setBlockedDays] = useState({});
                   <Icon name="close" size={24} color={COLORS.textSecondary} />
                 </TouchableOpacity>
               </View>
-          
+
               {selectedItem ? (
                 <View style={styles.detailsModalContent}>
-                      {console.log('Selected ITEM= ',selectedItem)}
+                  {console.log("Selected ITEM= ", selectedItem)}
                   {(() => {
                     switch (selectedItem.type) {
                       case "restaurant":
@@ -2576,29 +2571,29 @@ const [blockedDays, setBlockedDays] = useState({});
 
                           </TouchableOpacity> */}
 
-                          <TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-                        
-
-                       
+                            <TouchableOpacity
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "clothing":
-                        
                         return (
                           <>
-
                             {/* <Text style={styles.detailsModalText}>
                               Тип: Одежда
                             </Text>
@@ -2626,21 +2621,24 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
 
-                          
-                        <TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-
+                            <TouchableOpacity
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "flowers":
@@ -2673,20 +2671,24 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
 
-
-<TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "cake":
@@ -2695,12 +2697,12 @@ const [blockedDays, setBlockedDays] = useState({});
                             {/* <Text style={styles.detailsModalText}>
                               Тип: Торты
                             </Text> */}
-                            <Text style={styles.detailsModalText}>
-                              Название: {selectedItem.name}
-                            </Text>
                             {/* <Text style={styles.detailsModalText}>
-                              Тип торта: {selectedItem.cakeType}
+                              Название: {selectedItem.name}
                             </Text> */}
+                            <Text style={styles.detailsModalText}>
+                              Тип торта: {selectedItem.cakeType}
+                            </Text>
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>
@@ -2717,20 +2719,24 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
 
-
-<TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "alcohol":
@@ -2762,20 +2768,24 @@ const [blockedDays, setBlockedDays] = useState({});
 
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
-                        <TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-
+                            <TouchableOpacity
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "program":
@@ -2803,21 +2813,24 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
 
-<TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-
-
+                            <TouchableOpacity
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "tamada":
@@ -2844,19 +2857,23 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
                             <TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "traditionalGift":
@@ -2889,19 +2906,23 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
                             <TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "transport":
@@ -2943,19 +2964,23 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
                             <TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "goods":
@@ -2968,7 +2993,8 @@ const [blockedDays, setBlockedDays] = useState({});
                               Название: {selectedItem.item_name}
                             </Text>
                             <Text style={styles.detailsModalText}>
-                              Описание: {selectedItem.description || "Не указано"}
+                              Описание:{" "}
+                              {selectedItem.description || "Не указано"}
                             </Text>
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
@@ -2982,19 +3008,23 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
                             <TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       case "jewelry":
@@ -3024,19 +3054,23 @@ const [blockedDays, setBlockedDays] = useState({});
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity> */}
                             <TouchableOpacity
-                            style={[styles.modalButton2, styles.confirmButton]}
-                            onPress={()=>handleDetailsPress()}
-                          >
-                            <Icon
-                              name="search"
-                              size={20}
-                              color={COLORS.white}
-                              style={styles.buttonIcon}
-                            />
-                            <Text></Text>
-                            <Text style={styles.modalButtonText}>Подробнее</Text>
-                          </TouchableOpacity>
-
+                              style={[
+                                styles.modalButton2,
+                                styles.confirmButton,
+                              ]}
+                              onPress={() => handleDetailsPress()}
+                            >
+                              <Icon
+                                name="search"
+                                size={20}
+                                color={COLORS.white}
+                                style={styles.buttonIcon}
+                              />
+                              <Text></Text>
+                              <Text style={styles.modalButtonText}>
+                                Подробнее
+                              </Text>
+                            </TouchableOpacity>
                           </>
                         );
                       default:
@@ -3058,55 +3092,49 @@ const [blockedDays, setBlockedDays] = useState({});
         </Modal>
 
         <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                setModalVisible(false);
-                setWeddingName("");
-                setWeddingDate(new Date());
-                setShowDatePicker(false);
-              }}
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+            setWeddingName("");
+            setWeddingDate(new Date());
+            setShowDatePicker(false);
+          }}
+        >
+          <SafeAreaView style={styles.modalOverlay}>
+            <Animatable.View
+              style={styles.modalContent}
+              animation="zoomIn"
+              duration={300}
             >
+              <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>
+                    Создание мероприятия "Свадьба"
+                  </Text>
 
-  <SafeAreaView style={styles.modalOverlay}>
-    <Animatable.View
-      style={styles.modalContent}
-      animation="zoomIn"
-      duration={300}
-    >
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>
-            Создание мероприятия "Свадьба"
-          </Text>
+                  <TouchableOpacity
+                    style={styles.addModalCloseIcon}
+                    onPress={() => {
+                      setModalVisible(false);
+                      setWeddingName("");
+                      setWeddingDate(new Date());
+                      setShowDatePicker(false);
+                    }}
+                  >
+                    <Icon name="close" size={30} color={COLORS.textSecondary} />
+                  </TouchableOpacity>
 
-
-          <TouchableOpacity
-              style={styles.addModalCloseIcon}
-              onPress={() => {
-                setModalVisible(false);
-                setWeddingName("");
-                setWeddingDate(new Date());
-                setShowDatePicker(false);
-              }}
-            >
-              <Icon name="close" size={30} color={COLORS.textSecondary} />
-            </TouchableOpacity>
-
-
-
-          <TouchableOpacity
-            onPress={() => {
-              setModalVisible(false);
-              setWeddingName("");
-              setWeddingDate(new Date());
-              setShowDatePicker(false);
-            }}
-          >
-            
-
-{/* 
+                  <TouchableOpacity
+                    onPress={() => {
+                      setModalVisible(false);
+                      setWeddingName("");
+                      setWeddingDate(new Date());
+                      setShowDatePicker(false);
+                    }}
+                  >
+                    {/* 
             <Text> <Icon
               name="check"
               size={20}
@@ -3114,206 +3142,217 @@ const [blockedDays, setBlockedDays] = useState({});
               style={styles.buttonIcon}
             /></Text>  */}
 
-             {/* <Image
+                    {/* <Image
                 source={require("../../assets/close.png")}
                 style={styles.potIcon2}
                 resizeMode="contain"
               />  */}
 
-            {/* <Icon name="close" size={24} color={COLORS.textSecondary} style={styles.detailsModalCloseIcon} /> 
+                    {/* <Icon name="close" size={24} color={COLORS.textSecondary} style={styles.detailsModalCloseIcon} /> 
                           
             <Icon name="close" size={24} color={COLORS.textSecondary}  /> */}
-
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Icon
-            name="event-note"
-            size={20}
-            color={COLORS.textSecondary}
-            style={styles.inputIcon}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Имя свадьбы (например, Свадьба Ивана и Марии)"
-            value={weddingName}
-            onChangeText={setWeddingName}
-            placeholderTextColor={COLORS.textSecondary}
-          />
-        </View>
-        <TouchableOpacity
-          style={styles.dateButton}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <Icon
-            name="calendar-today"
-            size={20}
-            color={COLORS.secondary}
-            style={styles.buttonIcon}
-          />
-          <Text style={styles.dateButtonText}>
-            {weddingDate.toLocaleDateString("ru-RU") || "Выберите дату свадьбы"}
-          </Text>
-        </TouchableOpacity>
-        {showDatePicker && (
-          <Calendar
-            style={styles.calendar}
-            current={weddingDate.toISOString().split("T")[0]}
-            onDayPress={onDateChange}
-            minDate={new Date().toISOString().split("T")[0]}
-            theme={{
-              selectedDayBackgroundColor: COLORS.primary,
-              todayTextColor: COLORS.accent,
-              arrowColor: COLORS.secondary,
-              textDayFontSize: 16,
-              textMonthFontSize: 18,
-              textDayHeaderFontSize: 14,
-            }}
-          />
-        )}
-        <Text style={styles.subtitle}>Выбранные элементы:</Text>
-        <View style={styles.itemsContainer}>
-          {filteredData.length > 0 ? (
-            Object.entries(
-              filteredData.reduce((acc, item) => {
-                const type = item.type;
-                if (!acc[type]) acc[type] = [];
-                acc[type].push(item);
-                return acc;
-              }, {})
-            )
-              .sort(
-                ([typeA], [typeB]) =>
-                  (typeOrder[typeA] || 11) - (typeOrder[typeB] || 11)
-              )
-              .map(([type, items]) => (
-                <View key={type}>
-                  <Text style={styles.categoryHeader}>
-                    {typesMapping.find((t) => t.type === type)?.label || type} (
-                    {items.length})
-                  </Text>
-                  {items.map((item) => {
-                    const quantity = parseInt(
-                      quantities[`${item.type}-${item.id}`] || "1"
-                    );
-                    const cost =
-                      item.type === "restaurant" ? item.averageCost : item.cost;
-                    const effectiveQuantity =
-                      item.type === "restaurant"
-                        ? parseInt(guestCount, 10) || 1
-                        : quantity;
-                    const totalItemCost = cost * effectiveQuantity;
-                    return (
-                      <View
-                        key={`${item.type}-${item.id}`}
-                        style={styles.itemContainer}
-                      >
-                        <Icon
-                          name={
-                            item.type === "restaurant"
-                              ? "restaurant"
-                              : item.type === "clothing"
-                              ? "store"
-                              : item.type === "tamada"
-                              ? "mic"
-                              : item.type === "program"
-                              ? "event"
-                              : item.type === "traditionalGift"
-                              ? "card-giftcard"
-                              : item.type === "flowers"
-                              ? "local-florist"
-                              : item.type === "cake"
-                              ? "cake"
-                              : item.type === "alcohol"
-                              ? "local-drink"
-                              : item.type === "transport"
-                              ? "directions-car"
-                              : item.type === "jewelry"
-                              ? "diamond"
-                              : "shopping-bag"
-                          }
-                          size={18}
-                          color={COLORS.primary}
-                          style={styles.itemIcon}
-                        />
-                        <Text style={styles.itemText}>
-                          {(() => {
-                            switch (item.type) {
-                              case "restaurant":
-                                return `${item.name} (${item.cuisine}) - ${cost} тг x ${effectiveQuantity} гостей = ${totalItemCost} тг`;
-                              case "clothing":
-                                return `${item.itemName} (${item.storeName}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              case "tamada":
-                                return `${item.name} - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              case "program":
-                                return `${item.teamName} - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              case "traditionalGift":
-                                return `${item.itemName} (${
-                                  item.salonName || "Не указано"
-                                }) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`; // Fixed typo here
-                              case "flowers":
-                                return `${item.flowerName} (${item.flowerType}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              case "cake":
-                                return `${item.name} (${item.cakeType}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              case "alcohol":
-                                return `${item.alcoholName} (${item.category}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              case "transport":
-                                return `${item.carName} (${item.brand}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              case "goods":
-                                return `${item.item_name} - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              case "jewelry":
-                                return `${item.itemName} (${item.storeName}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
-                              default:
-                                return "Неизвестный элемент";
-                            }
-                          })()}
-                        </Text>
-                      </View>
-                    );
-                  })}
+                  </TouchableOpacity>
                 </View>
-              ))
-          ) : (
-            <Text style={styles.noItems}>Выберите элементы для свадьбы</Text>
-          )}
-        </View>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalText}>
-            Общая стоимость: {calculateTotalCost().toLocaleString("ru-RU")} тг
-          </Text>
-        </View>
 
-        <Text style={styles.totalText}>
-          {filteredData.length > 0
-            ? `Ваш бюджет (${parseFloat(budget).toLocaleString("ru-RU")} ₸)`
-            : " "}
-        </Text>
+                <View style={styles.inputContainer}>
+                  <Icon
+                    name="event-note"
+                    size={20}
+                    color={COLORS.textSecondary}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Имя свадьбы (например, Свадьба Ивана и Марии)"
+                    value={weddingName}
+                    onChangeText={setWeddingName}
+                    placeholderTextColor={COLORS.textSecondary}
+                  />
+                </View>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Icon
+                    name="calendar-today"
+                    size={20}
+                    color={COLORS.secondary}
+                    style={styles.buttonIcon}
+                  />
+                  <Text style={styles.dateButtonText}>
+                    {weddingDate.toLocaleDateString("ru-RU") ||
+                      "Выберите дату свадьбы"}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <Calendar
+                    style={styles.calendar}
+                    current={weddingDate.toISOString().split("T")[0]}
+                    onDayPress={onDateChange}
+                    minDate={new Date().toISOString().split("T")[0]}
+                    theme={{
+                      selectedDayBackgroundColor: COLORS.primary,
+                      todayTextColor: COLORS.accent,
+                      arrowColor: COLORS.secondary,
+                      textDayFontSize: 16,
+                      textMonthFontSize: 18,
+                      textDayHeaderFontSize: 14,
+                    }}
+                  />
+                )}
+                <Text style={styles.subtitle}>Выбранные элементы:</Text>
+                <View style={styles.itemsContainer}>
+                  {filteredData.length > 0 ? (
+                    Object.entries(
+                      filteredData.reduce((acc, item) => {
+                        const type = item.type;
+                        if (!acc[type]) acc[type] = [];
+                        acc[type].push(item);
+                        return acc;
+                      }, {})
+                    )
+                      .sort(
+                        ([typeA], [typeB]) =>
+                          (typeOrder[typeA] || 11) - (typeOrder[typeB] || 11)
+                      )
+                      .map(([type, items]) => (
+                        <View key={type}>
+                          <Text style={styles.categoryHeader}>
+                            {typesMapping.find((t) => t.type === type)?.label ||
+                              type}{" "}
+                            ({items.length})
+                          </Text>
+                          {items.map((item) => {
+                            const quantity = parseInt(
+                              quantities[`${item.type}-${item.id}`] || "1"
+                            );
+                            const cost =
+                              item.type === "restaurant"
+                                ? item.averageCost
+                                : item.cost;
+                            const effectiveQuantity =
+                              item.type === "restaurant"
+                                ? parseInt(guestCount, 10) || 1
+                                : quantity;
+                            const totalItemCost = cost * effectiveQuantity;
+                            return (
+                              <View
+                                key={`${item.type}-${item.id}`}
+                                style={styles.itemContainer}
+                              >
+                                <Icon
+                                  name={
+                                    item.type === "restaurant"
+                                      ? "restaurant"
+                                      : item.type === "clothing"
+                                      ? "store"
+                                      : item.type === "tamada"
+                                      ? "mic"
+                                      : item.type === "program"
+                                      ? "event"
+                                      : item.type === "traditionalGift"
+                                      ? "card-giftcard"
+                                      : item.type === "flowers"
+                                      ? "local-florist"
+                                      : item.type === "cake"
+                                      ? "cake"
+                                      : item.type === "alcohol"
+                                      ? "local-drink"
+                                      : item.type === "transport"
+                                      ? "directions-car"
+                                      : item.type === "jewelry"
+                                      ? "diamond"
+                                      : "shopping-bag"
+                                  }
+                                  size={18}
+                                  color={COLORS.primary}
+                                  style={styles.itemIcon}
+                                />
+                                <Text style={styles.itemText}>
+                                  {(() => {
+                                    switch (item.type) {
+                                      case "restaurant":
+                                        return `${item.name} (${item.cuisine}) - ${cost} тг x ${effectiveQuantity} гостей = ${totalItemCost} тг`;
+                                      case "clothing":
+                                        return `${item.itemName} (${item.storeName}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      case "tamada":
+                                        return `${item.name} - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      case "program":
+                                        return `${item.teamName} - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      case "traditionalGift":
+                                        return `${item.itemName} (${
+                                          item.salonName || "Не указано"
+                                        }) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`; // Fixed typo here
+                                      case "flowers":
+                                        return `${item.flowerName} (${item.flowerType}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      case "cake":
+                                        return `${item.name} (${item.cakeType}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      case "alcohol":
+                                        return `${item.alcoholName} (${item.category}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      case "transport":
+                                        return `${item.carName} (${item.brand}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      case "goods":
+                                        return `${item.item_name} - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      case "jewelry":
+                                        return `${item.itemName} (${item.storeName}) - ${cost} тг x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                      default:
+                                        return "Неизвестный элемент";
+                                    }
+                                  })()}
+                                </Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      ))
+                  ) : (
+                    <Text style={styles.noItems}>
+                      Выберите элементы для свадьбы
+                    </Text>
+                  )}
+                </View>
+                <View style={styles.totalContainer}>
+                  <Text style={styles.totalText}>
+                    Общая стоимость:{" "}
+                    {calculateTotalCost().toLocaleString("ru-RU")} тг
+                  </Text>
+                </View>
 
-        {filteredData.length > 0 && (
-          <Text
-            style={[styles.budgetInfo, remainingBudget < 0 && styles.budgetError]}
-          >
-            Остаток: {remainingBudget.toLocaleString("ru-RU")} ₸{" "}
-            {remainingBudget < 0 && "(превышение)"}
-          </Text>
-        )}
-        <Text></Text>
+                <Text style={styles.totalText}>
+                  {filteredData.length > 0
+                    ? `Ваш бюджет (${parseFloat(budget).toLocaleString(
+                        "ru-RU"
+                      )} ₸)`
+                    : " "}
+                </Text>
 
-        <View style={styles.modalButtonContainer}>
-          <TouchableOpacity
-            style={[styles.modalButton, styles.confirmButton]}
-            onPress={handleSubmit}
-          >
-            <Icon
-              name="check"
-              size={20}
-              color={COLORS.white}
-              style={styles.buttonIcon}
-            />
-            <Text style={styles.modalButtonText}>Создать свадьбу</Text>
-          </TouchableOpacity>
-          {/* <TouchableOpacity
+                {filteredData.length > 0 && (
+                  <Text
+                    style={[
+                      styles.budgetInfo,
+                      remainingBudget < 0 && styles.budgetError,
+                    ]}
+                  >
+                    Остаток: {remainingBudget.toLocaleString("ru-RU")} ₸{" "}
+                    {remainingBudget < 0 && "(превышение)"}
+                  </Text>
+                )}
+                <Text></Text>
+
+                <View style={styles.modalButtonContainer}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.confirmButton]}
+                    onPress={handleSubmit}
+                  >
+                    <Icon
+                      name="check"
+                      size={20}
+                      color={COLORS.white}
+                      style={styles.buttonIcon}
+                    />
+                    <Text style={styles.modalButtonText}>Создать свадьбу</Text>
+                  </TouchableOpacity>
+                  {/* <TouchableOpacity
 
 onPress={() => {
   setModalVisible(false);
@@ -3336,33 +3375,28 @@ onPress={() => {
 
 <Icon name="close" size={24} color={COLORS.textSecondary} style={styles.detailsModalCloseIcon} />
 </TouchableOpacity> */}
-
-
-        </View>
-      </ScrollView>
-    </Animatable.View>
-  </SafeAreaView>
-</Modal>
+                </View>
+              </ScrollView>
+            </Animatable.View>
+          </SafeAreaView>
+        </Modal>
       </LinearGradient>
     </>
   );
 };
 
-
-
 const styles = StyleSheet.create({
-
   loaderOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)', // Полупрозрачный фон
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)", // Полупрозрачный фон
   },
   loaderContainer: {
     backgroundColor: COLORS.card,
     borderRadius: 15,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -3373,19 +3407,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: COLORS.textPrimary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 
-
   topPatternContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
-    width: '100%',
-    height: '20%',
+    width: "100%",
+    height: "20%",
     zIndex: 1,
-    resizeMode: 'cover',
+    resizeMode: "cover",
     opacity: 0.8,
-    marginBottom:'10$'
+    marginBottom: "10$",
   },
   categoryButton: {
     flex: 1,
@@ -3399,7 +3432,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginVertical: 2,
     width: 20, // Уменьшаем ширину кнопки, так как теперь только "+"
-    
   },
   categoryButtonGradient: {
     flex: 1,
@@ -3454,43 +3486,42 @@ const styles = StyleSheet.create({
   //   fontSize: 16,
   // },
 
-
   headerContainer: {
-  paddingHorizontal: 20,
-  marginTop: 20,
-},
-budgetContainer: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  marginBottom: 20,
-},
-categoryItemAdd: {
-  width: '20%', // Adjusted width for the Add button
-  marginRight: 10,
-},
-budgetInput: {
-  flex: 1,
-  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  borderRadius: 10,
-  padding: 10,
-  marginRight: 10,
-  color: COLORS.white,
-  fontSize: 16,
-},
-guestInput: {
-  flex: 1,
-  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  borderRadius: 10,
-  padding: 10,
-  color: COLORS.white,
-  fontSize: 16,
-},
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  budgetContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  categoryItemAdd: {
+    width: "20%", // Adjusted width for the Add button
+    marginRight: 10,
+  },
+  budgetInput: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
+    color: COLORS.white,
+    fontSize: 16,
+  },
+  guestInput: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 10,
+    padding: 10,
+    color: COLORS.white,
+    fontSize: 16,
+  },
 
   logoContainer: { alignItems: "center", marginVertical: 20, marginTop: "0%" },
   potIcon: { width: 150, height: 150 },
   potIcon2: { width: 50, height: 50 },
-  potIcon3: { width: 70, height: 70,zIndex:3 },
+  potIcon3: { width: 70, height: 70, zIndex: 3 },
   listContainer: { flex: 1, paddingHorizontal: 20 },
   scrollView: { flex: 1 },
   categoryGrid: {
@@ -3531,7 +3562,7 @@ guestInput: {
   removeCategoryButton: {
     marginRight: 10,
   },
-  
+
   categoryButtonGradient: {
     flex: 1,
     justifyContent: "center",
@@ -3552,15 +3583,15 @@ guestInput: {
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: "transparent",
-    zIndex:5,
-    marginBottom:'20%'
+    zIndex: 5,
+    marginBottom: "20%",
   },
   nextButton: {
     borderRadius: 25,
     overflow: "hidden",
     marginVertical: 5,
     alignItems: "center",
-    zIndex:6,
+    zIndex: 6,
   },
   nextButtonText: {
     fontSize: 18,
@@ -3574,8 +3605,6 @@ guestInput: {
     alignItems: "center",
   },
 
-
-  
   addModalContainer: {
     backgroundColor: COLORS.card,
     borderRadius: 20,
@@ -3596,7 +3625,16 @@ guestInput: {
     marginBottom: 15,
   },
   addModalTitle: { fontSize: 20, fontWeight: "600", color: COLORS.textPrimary },
-  addModalCloseIcon: { padding: 5 },
+  
+  addModalCloseIcon: {  
+     color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '600',},
+
+  // closeButtonText: {
+  
+  // },
+
   addModalSearchContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -3663,9 +3701,6 @@ guestInput: {
   addModalScrollView: { flex: 1, minHeight: 100 },
   addModalItemList: { paddingBottom: 20, flexGrow: 1 },
 
-
-
-
   addModalItemCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -3717,98 +3752,91 @@ guestInput: {
     opacity: 0.6,
   },
 
-
-
-card: {
-  backgroundColor: "#FFFFFF",
-  borderRadius: 16,
-  padding: 20,
-  marginVertical: 12,
-  marginHorizontal: 16,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08,
-  shadowRadius: 12,
-  elevation: 5,
-},
-header: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  marginBottom: 16,
-},
-titleText: {
-  fontSize: 17,
-  fontWeight: "600",
-  color: "#1A1A1A",
-  flex: 1,
-  lineHeight: 24,
-},
-actions: {
-  flexDirection: "row",
-  alignItems: "center",
-},
-actionButton: {
-  padding: 10,
-  borderRadius: 10,
-  backgroundColor: "#F1F5F9",
-  marginLeft: 8,
-},
-controlRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: 16,
-  paddingHorizontal: 4,
-  fontSize:10
-},
-label: {
-  fontSize: 15,
-  fontWeight: "500",
-  color: "#4B5563",
-  marginRight: 12,
-},
-quantityContainer: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#F8FAFC",
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: "#E5E7EB",
-  paddingHorizontal: 4,
-  flex: 1,
-},
-quantityButton: {
-
-  padding: 10,
-  paddingHorizontal: 1,
-},
-input: {
-  width: 56,
-  height: 40,
-  fontSize: 15,
-  fontWeight: "500",
-  color: "#1A1A1A",
-  textAlign: "center",
-  backgroundColor: "#FFFFFF",
-  borderRadius: 8,
-  marginHorizontal: 4,
-},
-totalCost: {
-  flexDirection: "start",
-  alignItems: "center",
-  fontSize: 15,
-  fontWeight: "600",
-  color: "#26A69A",
-  marginLeft: 12,
-},
-
-
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    marginVertical: 12,
+    marginHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  titleText: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    flex: 1,
+    lineHeight: 24,
+  },
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  actionButton: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#F1F5F9",
+    marginLeft: 8,
+  },
+  controlRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    paddingHorizontal: 4,
+    fontSize: 10,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#4B5563",
+    marginRight: 12,
+  },
+  quantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    paddingHorizontal: 4,
+    flex: 1,
+  },
+  quantityButton: {
+    padding: 10,
+    paddingHorizontal: 1,
+  },
+  input: {
+    width: 56,
+    height: 40,
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#1A1A1A",
+    textAlign: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  totalCost: {
+    flexDirection: "start",
+    alignItems: "center",
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#26A69A",
+    marginLeft: 12,
+  },
 
   selectedItemCard: { backgroundColor: "#E6F0FA" },
-  addModalItemContent: { flex:1,
-    paddingRight: 10,
-  },
+  addModalItemContent: { flex: 1, paddingRight: 10 },
   disabledItemContent: { opacity: 0.5 },
   addModalItemText: {
     fontSize: 16,
@@ -3934,14 +3962,11 @@ totalCost: {
   modalHeader: {
     flexDirection: "row",
     alignItems: "space-between",
-    marginBottom:20,
-    marginTop:10,
+    marginBottom: 20,
+    marginTop: 10,
     justifyContent: "center",
-
-
   },
   modalTitle: {
-  
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.textPrimary,
