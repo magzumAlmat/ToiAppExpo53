@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.amagzum.myjsproject"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,6 +29,11 @@
     "plugins": [
       "expo-secure-store",
       "expo-video"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "52267aee-02b2-479b-8d86-0f562a3715ff"
+      }
+    }
   }
 }

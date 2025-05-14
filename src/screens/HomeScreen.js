@@ -1273,7 +1273,7 @@ const CreateEventScreen = ({ navigation, route }) => {
               });
 
             // Добавляем не более 2 элементов из категории
-            const maxItemsToSelect = Math.min(2, filteredItemsToAdd.length);
+            const maxItemsToSelect = Math.min(1, filteredItemsToAdd.length);
             const selectedItemsToAdd = [];
             for (let i = 0; i < maxItemsToSelect; i++) {
               const selectedItem = filteredItemsToAdd[i];
@@ -1573,35 +1573,169 @@ const CreateEventScreen = ({ navigation, route }) => {
   //     }, {})
   //   );
   // }, [budget, guestCount, data, categories, disabledCategories]);
+  // const filterDataByBudget = useCallback(() => {
+  //   console.log("filterDataByBudget Стартанул");
+  //   setIsLoading(true); // Показываем лоадер
+
+  //   // Задержка на 1 секунду для демонстрации лоадера
+  //   setTimeout(() => {
+  //     if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
+  //       alert("Пожалуйста, введите корректную сумму бюджета");
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     if (!guestCount || isNaN(guestCount) || parseFloat(guestCount) <= 0) {
+  //       alert("Пожалуйста, введите корректное количество гостей");
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     const budgetValue = parseFloat(budget);
+  //     const guests = parseFloat(guestCount);
+  //     let remaining = budgetValue;
+  //     const selectedItems = [];
+
+  //     // Получаем все активные категории (не отключённые)
+  //     const allowedTypes = categories
+  //       .filter((category) => !disabledCategories.includes(category))
+  //       .map((category) => categoryToTypeMap[category])
+  //       .filter((type) => type);
+
+  //     // Определяем все типы, которые нужно обработать
+  //     const typesToProcess = [
+  //       { key: "restaurants", costField: "averageCost", type: "restaurant" },
+  //       { key: "clothing", costField: "cost", type: "clothing" },
+  //       { key: "tamada", costField: "cost", type: "tamada" },
+  //       { key: "programs", costField: "cost", type: "program" },
+  //       { key: "traditionalGifts", costField: "cost", type: "traditionalGift" },
+  //       { key: "flowers", costField: "cost", type: "flowers" },
+  //       { key: "cakes", costField: "cost", type: "cake" },
+  //       { key: "alcohol", costField: "cost", type: "alcohol" },
+  //       { key: "transport", costField: "cost", type: "transport" },
+  //       { key: "jewelry", costField: "cost", type: "jewelry" },
+  //     ].filter(({ type }) => allowedTypes.includes(type));
+
+  //     // Обрабатываем каждый тип
+  //     for (const { key, costField, type } of typesToProcess) {
+  //       let items = data[key] || [];
+
+  //       // Специальная обработка для ресторанов
+  //       if (type === "restaurant") {
+  //         items = items.filter(
+  //           (restaurant) => parseFloat(restaurant.capacity) >= guests
+  //         );
+
+  //         if (items.length === 0) {
+  //           alert(
+  //             "Нет ресторанов с достаточной вместимостью для указанного количества гостей"
+  //           );
+  //           continue;
+  //         }
+
+  //         // Учитываем стоимость ресторана на основе количества гостей
+  //         const sortedItems = items
+  //           .filter((item) => parseFloat(item[costField]) * guests <= remaining)
+  //           .sort(
+  //             (a, b) => parseFloat(a[costField]) - parseFloat(b[costField])
+  //           );
+
+  //         if (sortedItems.length === 0) {
+  //           alert(
+  //             `Нет ресторанов, подходящих под ваш бюджет (${remaining} тг)`
+  //           );
+  //           continue;
+  //         }
+
+  //         const selectedItem = sortedItems[Math.floor(sortedItems.length / 2)];
+  //         const itemCost = parseFloat(selectedItem[costField]) * guests;
+  //         selectedItems.push({
+  //           ...selectedItem,
+  //           type,
+  //           totalCost: itemCost,
+  //         });
+  //         remaining -= itemCost;
+  //       } else {
+  //         // Обработка остальных категорий
+  //         const sortedItems = items
+  //           .filter((item) => parseFloat(item[costField]) <= remaining)
+  //           .sort(
+  //             (a, b) => parseFloat(a[costField]) - parseFloat(b[costField])
+  //           );
+
+  //         if (sortedItems.length > 0) {
+  //           const maxItemsToSelect = Math.min(2, sortedItems.length);
+  //           for (let i = 0; i < maxItemsToSelect; i++) {
+  //             const selectedItem = sortedItems[i];
+  //             if (selectedItem) {
+  //               const cost = parseFloat(selectedItem[costField]);
+  //               if (cost <= remaining) {
+  //                 selectedItems.push({
+  //                   ...selectedItem,
+  //                   type,
+  //                   totalCost: cost,
+  //                 });
+  //                 remaining -= cost;
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     if (selectedItems.length === 0) {
+  //       alert("Нет элементов, подходящих под ваш бюджет и количество гостей");
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     const sortedSelectedItems = [...selectedItems].sort((a, b) => {
+  //       return (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11);
+  //     });
+
+  //     setFilteredData(sortedSelectedItems);
+  //     setRemainingBudget(remaining);
+  //     setQuantities(
+  //       sortedSelectedItems.reduce((acc, item) => {
+  //         const itemKey = `${item.type}-${item.id}`;
+  //         return { ...acc, [itemKey]: "1" };
+  //       }, {})
+  //     );
+
+  //     setIsLoading(false); // Скрываем лоадер
+  //   }, 200); // Задержка 1 секунда
+  // }, [budget, guestCount, data, categories, disabledCategories]);
+
+
+
   const filterDataByBudget = useCallback(() => {
     console.log("filterDataByBudget Стартанул");
-    setIsLoading(true); // Показываем лоадер
-
-    // Задержка на 1 секунду для демонстрации лоадера
+    setIsLoading(true);
+  
     setTimeout(() => {
       if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
         alert("Пожалуйста, введите корректную сумму бюджета");
         setIsLoading(false);
         return;
       }
-
+  
       if (!guestCount || isNaN(guestCount) || parseFloat(guestCount) <= 0) {
         alert("Пожалуйста, введите корректное количество гостей");
         setIsLoading(false);
         return;
       }
-
+  
       const budgetValue = parseFloat(budget);
       const guests = parseFloat(guestCount);
       let remaining = budgetValue;
       const selectedItems = [];
-
+  
       // Получаем все активные категории (не отключённые)
       const allowedTypes = categories
         .filter((category) => !disabledCategories.includes(category))
         .map((category) => categoryToTypeMap[category])
         .filter((type) => type);
-
+  
       // Определяем все типы, которые нужно обработать
       const typesToProcess = [
         { key: "restaurants", costField: "averageCost", type: "restaurant" },
@@ -1615,38 +1749,37 @@ const CreateEventScreen = ({ navigation, route }) => {
         { key: "transport", costField: "cost", type: "transport" },
         { key: "jewelry", costField: "cost", type: "jewelry" },
       ].filter(({ type }) => allowedTypes.includes(type));
-
+  
       // Обрабатываем каждый тип
       for (const { key, costField, type } of typesToProcess) {
         let items = data[key] || [];
-
+  
         // Специальная обработка для ресторанов
         if (type === "restaurant") {
           items = items.filter(
             (restaurant) => parseFloat(restaurant.capacity) >= guests
           );
-
+  
           if (items.length === 0) {
             alert(
               "Нет ресторанов с достаточной вместимостью для указанного количества гостей"
             );
             continue;
           }
-
+  
           // Учитываем стоимость ресторана на основе количества гостей
           const sortedItems = items
             .filter((item) => parseFloat(item[costField]) * guests <= remaining)
             .sort(
               (a, b) => parseFloat(a[costField]) - parseFloat(b[costField])
             );
-
+  
           if (sortedItems.length === 0) {
-            alert(
-              `Нет ресторанов, подходящих под ваш бюджет (${remaining} тг)`
-            );
+            alert(`Нет ресторанов, подходящих под ваш бюджет (${remaining} тг)`);
             continue;
           }
-
+  
+          // Выбираем только один ресторан (например, медианный по стоимости)
           const selectedItem = sortedItems[Math.floor(sortedItems.length / 2)];
           const itemCost = parseFloat(selectedItem[costField]) * guests;
           selectedItems.push({
@@ -1662,37 +1795,35 @@ const CreateEventScreen = ({ navigation, route }) => {
             .sort(
               (a, b) => parseFloat(a[costField]) - parseFloat(b[costField])
             );
-
+  
           if (sortedItems.length > 0) {
-            const maxItemsToSelect = Math.min(2, sortedItems.length);
-            for (let i = 0; i < maxItemsToSelect; i++) {
-              const selectedItem = sortedItems[i];
-              if (selectedItem) {
-                const cost = parseFloat(selectedItem[costField]);
-                if (cost <= remaining) {
-                  selectedItems.push({
-                    ...selectedItem,
-                    type,
-                    totalCost: cost,
-                  });
-                  remaining -= cost;
-                }
+            // Выбираем только один элемент из категории
+            const selectedItem = sortedItems[0]; // Берем первый (самый дешевый) или можно выбрать по другому критерию
+            if (selectedItem) {
+              const cost = parseFloat(selectedItem[costField]);
+              if (cost <= remaining) {
+                selectedItems.push({
+                  ...selectedItem,
+                  type,
+                  totalCost: cost,
+                });
+                remaining -= cost;
               }
             }
           }
         }
       }
-
+  
       if (selectedItems.length === 0) {
         alert("Нет элементов, подходящих под ваш бюджет и количество гостей");
         setIsLoading(false);
         return;
       }
-
+  
       const sortedSelectedItems = [...selectedItems].sort((a, b) => {
         return (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11);
       });
-
+  
       setFilteredData(sortedSelectedItems);
       setRemainingBudget(remaining);
       setQuantities(
@@ -1701,10 +1832,11 @@ const CreateEventScreen = ({ navigation, route }) => {
           return { ...acc, [itemKey]: "1" };
         }, {})
       );
-
-      setIsLoading(false); // Скрываем лоадер
-    }, 200); // Задержка 1 секунда
+  
+      setIsLoading(false);
+    }, 150);
   }, [budget, guestCount, data, categories, disabledCategories]);
+
 
   useEffect(() => {
     if (

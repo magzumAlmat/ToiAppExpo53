@@ -1037,11 +1037,21 @@ export default {
       throw new Error(`Ошибка удаления свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
-  getWeddingItems: (id, config = {}) =>
-    api.get(`/api/wedding-items/${id}`, config).catch((error) => {
+  getWeddingItems: (id, token,config = {}) =>
+    api.get(`/api/wedding-items/${id}`,{
+      headers: { Authorization: `Bearer ${token}` },
+    }, config).catch((error) => {
       throw new Error(`Ошибка получения элементов свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
+
+  deleteWeddingItem: (id, token,config = {}) =>
+      api.delete(`/api/wedding-items/${id}`,{
+        headers: { Authorization: `Bearer ${token}` },
+      }, config).catch((error) => {
+        throw new Error(`Ошибка получения элементов свадьбы: ${error.response?.data?.message || error.message}`);
+      }),
+  
   // Список желаний
   createWish: (wishlistData) =>
     api.post('/api/wishlist', wishlistData).catch((error) => {
