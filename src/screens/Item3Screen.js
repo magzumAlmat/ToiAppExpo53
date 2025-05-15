@@ -274,7 +274,9 @@ export default function Item3Screen() {
         name: weddingName,
         date: weddingDate,
       };
+      
       const response = await api.updateWedding(selectedWedding.id, token, data);
+      
       Alert.alert('Success', 'Wedding updated successfully');
       setWeddings((prev) =>
         prev.map((w) => (w.id === selectedWedding.id ? response.data.data : w))

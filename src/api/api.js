@@ -1027,8 +1027,10 @@ export default {
       throw new Error(`Ошибка получения свадеб: ${error.response?.data?.message || error.message}`);
     }),
 
-  updateWedding: (id, data) =>
-    api.put(`/api/updateweddingbyid/${id}`, data).catch((error) => {
+  updateWedding: (id, token,data) =>
+    api.put(`/api/updateweddingbyid/${id}`,data, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch((error) => {
       throw new Error(`Ошибка обновления свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
