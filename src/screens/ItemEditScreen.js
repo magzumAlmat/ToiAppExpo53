@@ -621,13 +621,13 @@ export default function ItemEditScreen() {
               />
             </View>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Портфолио:</Text>
+              <Text style={styles.inputLabel}>О себе:</Text>
               <TextInput
                 style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
                 value={form.portfolio}
                 onChangeText={(text) => handleChange('portfolio', text)}
                 multiline
-                placeholder="Портфолио"
+                placeholder="О себе"
               />
             </View>
             <View style={styles.inputContainer}>
@@ -1186,6 +1186,19 @@ export default function ItemEditScreen() {
                 placeholder="Название магазина"
               />
             </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Ссылка на товар:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.specs?.goodLink || ''}
+                onChangeText={(text) => handleChange('specs', { goodLink: text })}
+                placeholder="Ссылка на товар"
+              />
+            </View>
+
+           
+
           </>
         );
       default:

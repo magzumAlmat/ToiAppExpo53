@@ -1772,10 +1772,10 @@ export default function Item2Screen({ navigation }) {
               />
             </View>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Портфолио:</Text>
+              <Text style={styles.inputLabel}>О себе:</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Портфолио"
+                placeholder="Вставьте ссылку"
                 value={formData.portfolio || ''}
                 onChangeText={(value) => handleInputChange('portfolio', value)}
                 multiline
@@ -2313,6 +2313,20 @@ export default function Item2Screen({ navigation }) {
                 onSubmitEditing={handleSubmitEditing}
               />
             </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Ссылка на товар:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ссылка на товар"
+                value={formData.specs?.goodLink || ''}
+                onChangeText={(value) => handleInputChange('specs', { ...formData.specs, goodLink: value })}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+
+            
           </>
         );
       default:

@@ -30,6 +30,7 @@ import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
 import * as Haptics from "expo-haptics";
+import * as Linking from 'expo-linking';
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const COLORS = {
@@ -2975,8 +2976,17 @@ const CreateEventScreen = ({ navigation, route }) => {
                               Имя: {selectedItem.name}
                             </Text>
                             <Text style={styles.detailsModalText}>
-                              Портфолио: {selectedItem.portfolio}
+                              О себе: {selectedItem.portfolio}
                             </Text>
+                             <TouchableOpacity onPress={()=>{
+                                          const url = selectedItem.portfolio;
+                                          Linking.openURL(url);
+                                        }}>
+                                          <Text>Открыть в ссылку</Text>
+                              </TouchableOpacity>
+
+                              <Text></Text>
+
                             <Text style={styles.detailsModalText}>
                               Стоимость: {selectedItem.cost} ₸
                             </Text>

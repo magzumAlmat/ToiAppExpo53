@@ -433,7 +433,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as Animatable from 'react-native-animatable';
 import { ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
+import * as Linking from 'expo-linking';
 const COLORS = {
   primary: '#FF6F61',
   secondary: '#4A90E2',
@@ -725,6 +725,9 @@ export default function SupplierScreen({ navigation }) {
     }
   };
 
+
+  
+
   const renderItem = ({ item }) => {
     let content;
     switch (item.type) {
@@ -802,7 +805,13 @@ export default function SupplierScreen({ navigation }) {
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>Тамада</Text>
             <Text style={styles.cardTitle}>{item.name}</Text>
-            <Text style={styles.cardDetail}>Портфолио: {item.portfolio}</Text>
+            <Text style={styles.cardDetail}>О себе: {item.portfolio}</Text>
+           <TouchableOpacity onPress={()=>{
+                                                     const url = item.portfolio;
+                                                     Linking.openURL(url);
+                                                   }}>
+                                                     <Text>Открыть ссылку</Text>
+                                         </TouchableOpacity>
             <Text style={styles.cardDetail}>Стоимость: {item.cost} ₸</Text>
           </View>
         );

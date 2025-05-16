@@ -276,7 +276,7 @@ export default function Item3Screen() {
       };
       
       const response = await api.updateWedding(selectedWedding.id, token, data);
-      
+
       Alert.alert('Success', 'Wedding updated successfully');
       setWeddings((prev) =>
         prev.map((w) => (w.id === selectedWedding.id ? response.data.data : w))
@@ -356,22 +356,54 @@ export default function Item3Screen() {
   };
 
   // Добавление подарка в вишлист
+  // const handleAddWishlistItem = async () => {
+  //   if (!selectedGoodId) {
+  //     Alert.alert('Error', 'Please select a gift from the list');
+  //     return;
+  //   }
+
+  //   const wishlistData = {
+  //     wedding_id: selectedWedding.id,
+  //     good_id: selectedGoodId,
+  //   };
+
+  //   try {
+  //     const response = await api.createWish(wishlistData, token);
+  //     Alert.alert('Success', 'Gift added successfully');
+  //     setWishlistModalVisible(false);
+  //     setSelectedGoodId('');
+  //     const weddingData = await fetchWeddings();
+  //     if (weddingData.length > 0) {
+  //       const weddingId = activeWeddingId || weddingData[0].id;
+  //       setActiveWeddingId(weddingId);
+  //       await fetchWeddingItems(weddingId);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error adding gift:', error);
+  //     Alert.alert('Error', error.response?.data?.error || 'Failed to add gift');
+  //   }
+  // };
+
   const handleAddWishlistItem = async () => {
-    if (!selectedGoodId) {
-      Alert.alert('Error', 'Please select a gift from the list');
+    if (selectedGoodIds.length === 0) {
+      Alert.alert('Error', 'Пожалуйста, выберите хотя бы один подарок');
       return;
     }
-
-    const wishlistData = {
-      wedding_id: selectedWedding.id,
-      good_id: selectedGoodId,
-    };
-
+  
     try {
-      const response = await api.createWish(wishlistData, token);
-      Alert.alert('Success', 'Gift added successfully');
+      // Отправляем запрос для каждого выбранного товара
+      const promises = selectedGoodIds.map((goodId) => {
+        const wishlistData = {
+          wedding_id: selectedWedding.id,
+          good_id: goodId,
+        };
+        return api.createWish(wishlistData, token);
+      });
+  
+      await Promise.all(promises); // Ждём завершения всех запросов
+      Alert.alert('Success', 'Подарки успешно добавлены');
       setWishlistModalVisible(false);
-      setSelectedGoodId('');
+      setSelectedGoodIds([]); // Очищаем выбранные элементы
       const weddingData = await fetchWeddings();
       if (weddingData.length > 0) {
         const weddingId = activeWeddingId || weddingData[0].id;
@@ -379,8 +411,8 @@ export default function Item3Screen() {
         await fetchWeddingItems(weddingId);
       }
     } catch (error) {
-      console.error('Error adding gift:', error);
-      Alert.alert('Error', error.response?.data?.error || 'Failed to add gift');
+      console.error('Error adding gifts:', error);
+      Alert.alert('Error', error.response?.data?.error || 'Не удалось добавить подарки');
     }
   };
 
@@ -829,6 +861,7 @@ export default function Item3Screen() {
               ? `Кто подарит: ${item.Reserver?.username || item.reserved_by_unknown}`
               : 'Свободно'}
           </Text>
+          
           <View style={styles.mediaSection}>
             {loadingFiles ? (
               <ActivityIndicator size="small" color={COLORS.primary} style={styles.loader} />
@@ -853,24 +886,60 @@ export default function Item3Screen() {
   };
 
   // Рендеринг карточки товара
+  const [selectedGoodIds, setSelectedGoodIds] = useState([]); // Заменяем selectedGoodId
+
+  // const renderGoodCard = ({ item }) => (
+  //   <TouchableOpacity
+  //     style={[
+  //       styles.goodCard,
+  //       selectedGoodId === item.id && styles.selectedGoodCard,
+  //     ]}
+  //     onPress={() => setSelectedGoodId(item.id)}
+  //   >
+  //     <Text style={styles.goodCardTitle}>{item.item_name}</Text>
+  //     <Text style={styles.goodCardCategory}>Категория: {item.category}</Text>
+  //     <Text style={styles.goodCardCost}>
+  //       {item.cost ? `Цена: ${item.cost}` : 'Цена не указана'}
+  //     </Text>
+  //     {item.description && (
+  //       <Text style={styles.goodCardDescription}>{item.description}</Text>
+  //     )}
+  //   </TouchableOpacity>
+  // );
+
   const renderGoodCard = ({ item }) => (
     <TouchableOpacity
       style={[
         styles.goodCard,
-        selectedGoodId === item.id && styles.selectedGoodCard,
+        selectedGoodIds.includes(item.id) && styles.selectedGoodCard,
       ]}
-      onPress={() => setSelectedGoodId(item.id)}
+      onPress={() => {
+        setSelectedGoodIds((prev) =>
+          prev.includes(item.id)
+            ? prev.filter((id) => id !== item.id) // Удаляем ID, если уже выбран
+            : [...prev, item.id] // Добавляем ID, если не выбран
+        );
+      }}
     >
       <Text style={styles.goodCardTitle}>{item.item_name}</Text>
       <Text style={styles.goodCardCategory}>Категория: {item.category}</Text>
       <Text style={styles.goodCardCost}>
         {item.cost ? `Цена: ${item.cost}` : 'Цена не указана'}
       </Text>
+      <Text style={styles.goodCardCost}>{item.goodLink}</Text>
+      {/* <Text style={styles.goodCardCost}>{item}</Text> */}
+      
       {item.description && (
         <Text style={styles.goodCardDescription}>{item.description}</Text>
       )}
+
+
+      {selectedGoodIds.includes(item.id) && (
+        <Text style={styles.selectedIndicator}>✓</Text> // Индикатор выбора
+      )}
     </TouchableOpacity>
   );
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -1001,7 +1070,7 @@ export default function Item3Screen() {
         </SafeAreaView>
       </Modal>
 
-      <Modal visible={wishlistModalVisible} animationType="slide">
+      {/* <Modal visible={wishlistModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.subtitle}>
             {isCustomGift ? 'Добавить свой подарок' : 'Добавить подарок'}
@@ -1066,7 +1135,76 @@ export default function Item3Screen() {
             />
           </View>
         </SafeAreaView>
-      </Modal>
+      </Modal> */}
+
+
+<Modal visible={wishlistModalVisible} animationType="slide">
+  <SafeAreaView style={styles.modalContainer}>
+    <Text style={styles.subtitle}>
+      {isCustomGift ? 'Добавить свой подарок' : 'Добавить подарок'}
+    </Text>
+    {isCustomGift ? (
+      <>
+        <TextInput
+          style={styles.input}
+          placeholder="Название подарка"
+          placeholderTextColor={COLORS.muted}
+          value={formData.item_name}
+          onChangeText={(text) => setFormData({ ...formData, item_name: text })}
+        />
+        <Text style={styles.infoText}>Категория: Прочее</Text>
+      </>
+    ) : (
+      <FlatList
+        data={goods}
+        renderItem={renderGoodCard}
+        keyExtractor={(item) => item.id.toString()}
+        ListEmptyComponent={<Text style={styles.noItems}>Товаров пока нет</Text>}
+        contentContainerStyle={styles.goodList}
+      />
+    )}
+    <View style={styles.buttonRowModal}>
+      {isCustomGift ? (
+        <>
+          <Button
+            title="Сохранить"
+            onPress={handleAddCustomGift}
+            color={COLORS.primary}
+          />
+          <Button
+            title="Назад"
+            onPress={() => setIsCustomGift(false)}
+            color={COLORS.muted}
+          />
+        </>
+      ) : (
+        <>
+          <Button
+            title="Добавить"
+            onPress={handleAddWishlistItem}
+            color={COLORS.primary}
+            disabled={selectedGoodIds.length === 0} // Активна, если выбран хотя бы один товар
+          />
+          <Button
+            title="Добавить свой подарок"
+            onPress={() => setIsCustomGift(true)}
+            color={COLORS.secondary}
+          />
+        </>
+      )}
+      <Button
+        title="Отмена"
+        onPress={() => {
+          setWishlistModalVisible(false);
+          setIsCustomGift(false);
+          setSelectedGoodIds([]); // Очищаем выбранные элементы
+        }}
+        color={COLORS.muted}
+      />
+    </View>
+  </SafeAreaView>
+</Modal>
+
 
       <Modal visible={wishlistViewModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
@@ -1469,6 +1607,17 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     padding: 20,
   },
+
+  selectedIndicator: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    fontSize: 20,
+    color: COLORS.primary,
+    fontWeight: 'bold',
+  },
+
+
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
