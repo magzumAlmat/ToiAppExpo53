@@ -849,6 +849,13 @@ export default function SupplierScreen({ navigation }) {
             <Text style={styles.cardTitle}>Товар</Text>
             <Text style={styles.cardTitle}>{item.item_name}</Text>
             <Text style={styles.cardDetail}>Описание: {item.description || 'Не указано'}</Text>
+            <TouchableOpacity onPress={()=>{
+                                                     const url = item.specs.goodLink;
+                                                     Linking.openURL(url);
+                                                   }}>
+                                                     <Text>Открыть ссылку</Text>
+                                         </TouchableOpacity>
+
             <Text style={styles.cardDetail}>Стоимость: {item.cost} ₸</Text>
           </View>
         );

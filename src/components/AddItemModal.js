@@ -486,8 +486,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
-
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+import {  typesMapping, typeOrder, SCREEN_HEIGHT } from "../components/ConstantsComponent"; // Added SCREEN_HEIGHT 
+// const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const AddItemModal = ({
   visible,
@@ -679,7 +679,7 @@ const AddItemModal = ({
 
 const styles = {
   container: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' },
-  modalContainer: { width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.95, backgroundColor: COLORS.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden' },
+  modalContainer: {  backgroundColor: COLORS.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden' },
   handleContainer: { alignItems: 'center', paddingVertical: 8 },
   handle: { width: 40, height: 5, backgroundColor: COLORS.textSecondary, borderRadius: 2.5 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border },

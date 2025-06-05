@@ -493,6 +493,7 @@ export default function Item3Screen() {
           onPress: async () => {
             try {
               const response = await api.reserveWishlistItem(wishlistId, token);
+              
               Alert.alert('Success', 'Gift reserved successfully');
               setWishlistItems((prev) =>
                 prev.map((item) =>
@@ -842,7 +843,7 @@ export default function Item3Screen() {
 
   // Рендеринг элемента вишлиста
   const renderWishlistItem = ({ item }) => {
-    console.log('ITEMS=====', item);
+    console.log('ITEMS in renderWishListItem=====', item);
     const files = wishlistFiles[item.good_id] || [];
 
     return (
@@ -856,12 +857,21 @@ export default function Item3Screen() {
           >
             {item.item_name}
           </Text>
+
           <Text style={styles.wishlistStatus}>
             {item.is_reserved
               ? `Кто подарит: ${item.Reserver?.username || item.reserved_by_unknown}`
               : 'Свободно'}
           </Text>
           
+             <TouchableOpacity onPress={()=>{
+                                                               const url = item.goodLink;
+                                                               Linking.openURL(url);
+                                                             }}>
+                                                               <Text>Открыть ссылку</Text>
+                                                   </TouchableOpacity>
+
+
           <View style={styles.mediaSection}>
             {loadingFiles ? (
               <ActivityIndicator size="small" color={COLORS.primary} style={styles.loader} />
@@ -908,6 +918,7 @@ export default function Item3Screen() {
   // );
 
   const renderGoodCard = ({ item }) => (
+    console.log('item= ',item),
     <TouchableOpacity
       style={[
         styles.goodCard,
@@ -927,10 +938,18 @@ export default function Item3Screen() {
         {item.cost ? `Цена: ${item.cost}` : 'Цена не указана'}
       </Text>
       <Text style={styles.goodCardCost}>{item.goodLink}</Text>
+    
+       <TouchableOpacity onPress={()=>{
+                                                           const url = item.specs?.goodLink;
+                                                           Linking.openURL(url);
+                                                         }}>
+                                                           <Text>Открыть ссылку</Text>
+                                               </TouchableOpacity>
+
       {/* <Text style={styles.goodCardCost}>{item}</Text> */}
       
       {item.description && (
-        <Text style={styles.goodCardDescription}>{item.description}</Text>
+        <Text style={styles.goodCardDescription}>Описание: {item.description}</Text>
       )}
 
 

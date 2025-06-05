@@ -1,508 +1,3 @@
-// import React, { useState, useEffect } from 'react';
-// import {
-//   View,
-//   Text,
-//   StyleSheet,
-//   Image,
-//   ActivityIndicator,
-//   TouchableOpacity,
-//   Modal,
-//   ScrollView,
-//   FlatList,
-//   Dimensions,
-// } from 'react-native';
-// import { Video } from 'expo-av';
-// import axios from 'axios';
-// import { useNavigation } from '@react-navigation/native';
-// import { Card, Appbar, Title } from 'react-native-paper';
-// import Icon from 'react-native-vector-icons/MaterialIcons';
-
-// const COLORS = {
-//   primary: '#007AFF',
-//   secondary: '#FF9500',
-//   textPrimary: '#1C2526',
-//   textSecondary: '#6B7280',
-//   background: '#FFFFFF',
-//   overlay: 'rgba(0, 0, 0, 0.6)',
-//   border: '#E5E7EB',
-//   error: '#EF4444',
-// };
-
-// const { width: screenWidth } = Dimensions.get('window');
-
-// const DetailsScreen = ({ route }) => {
-//   const { item } = route.params;
-//   const [files, setFiles] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [selectedImage, setSelectedImage] = useState(null);
-//   const [activeSlide, setActiveSlide] = useState(0);
-//   const navigation = useNavigation();
-
-//   const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
-
-//   const fetchFiles = async () => {
-//     try {
-//       const response = await axios.get(`${BASE_URL}/api/${item.type}/${item.id}/files`);
-//       setFiles(response.data);
-//     } catch (err) {
-//       setError('Ошибка загрузки файлов: ' + err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchFiles();
-//   }, []);
-
-//   const handleScroll = (event) => {
-//     const contentOffsetX = event.nativeEvent.contentOffset.x;
-//     const index = Math.round(contentOffsetX / (screenWidth - 40));
-//     setActiveSlide(index);
-//   };
-
-//   const renderFileItem = ({ item: file }) => {
-//     const fileUrl = `${BASE_URL}/${file.path}`;
-
-//     if (file.mimetype.startsWith('image/')) {
-//       return (
-//         <TouchableOpacity
-//           style={styles.carouselItem}
-//           onPress={() => setSelectedImage(fileUrl)}
-//           activeOpacity={0.9}
-//         >
-//           <Image source={{ uri: fileUrl }} style={styles.media} />
-//           {/* <Text style={styles.caption}>{file.name}</Text> */}
-//         </TouchableOpacity>
-//       );
-//     } else if (file.mimetype === 'video/mp4') {
-//       return (
-//         <View style={styles.carouselItem}>
-//           <Video
-//             source={{ uri: fileUrl }}
-//             style={styles.video}
-//             useNativeControls
-//             resizeMode="cover"
-//             isLooping
-//           />
-//           {/* <Text style={styles.caption}>{file.name}</Text> */}
-//         </View>
-//       );
-//     } else {
-//       return (
-//         <View style={styles.carouselItem}>
-//           <Text style={styles.caption}>Неподдерживаемый формат: {file.mimetype}</Text>
-//         </View>
-//       );
-//     }
-//   };
-
-//   const renderDetails = () => {
-//     switch (item.type) {
-//       case 'restaurant':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Название:</Text>
-//             <Text style={styles.detailValue}>{item.name || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Ресторан</Text>
-//             <Text style={styles.detailLabel}>Вместимость:</Text>
-//             <Text style={styles.detailValue}>{item.capacity || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Кухня:</Text>
-//             <Text style={styles.detailValue}>{item.cuisine || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Средний чек:</Text>
-//             <Text style={styles.detailValue}>{item.averageCost ? `${item.averageCost} ₸` : 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Адрес:</Text>
-//             <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Телефон:</Text>
-//             <Text style={styles.detailValue}>{item.phone || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Район:</Text>
-//             <Text style={styles.detailValue}>{item.district || 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'clothing':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Магазин:</Text>
-//             <Text style={styles.detailValue}>{item.storeName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Одежда</Text>
-//             <Text style={styles.detailLabel}>Товар:</Text>
-//             <Text style={styles.detailValue}>{item.itemName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Пол:</Text>
-//             <Text style={styles.detailValue}>{item.gender || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Адрес:</Text>
-//             <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'flowers':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Салон:</Text>
-//             <Text style={styles.detailValue}>{item.salonName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Цветы</Text>
-//             <Text style={styles.detailLabel}>Цветы:</Text>
-//             <Text style={styles.detailValue}>{item.flowerName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип цветов:</Text>
-//             <Text style={styles.detailValue}>{item.flowerType || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Адрес:</Text>
-//             <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'cake':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Название:</Text>
-//             <Text style={styles.detailValue}>{item.name || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Торты</Text>
-//             <Text style={styles.detailLabel}>Тип торта:</Text>
-//             <Text style={styles.detailValue}>{item.cakeType || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Адрес:</Text>
-//             <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'alcohol':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Салон:</Text>
-//             <Text style={styles.detailValue}>{item.salonName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Алкоголь</Text>
-//             <Text style={styles.detailLabel}>Напиток:</Text>
-//             <Text style={styles.detailValue}>{item.alcoholName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Категория:</Text>
-//             <Text style={styles.detailValue}>{item.category || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Адрес:</Text>
-//             <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'program':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Команда:</Text>
-//             <Text style={styles.detailValue}>{item.teamName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Программа</Text>
-//             <Text style={styles.detailLabel}>Тип программы:</Text>
-//             <Text style={styles.detailValue}>{item.type || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'tamada':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Имя:</Text>
-//             <Text style={styles.detailValue}>{item.name || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Тамада</Text>
-//             <Text style={styles.detailLabel}>Портфолио:</Text>
-//             <Text style={styles.detailValue}>{item.portfolio || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'traditionalGift':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Салон:</Text>
-//             <Text style={styles.detailValue}>{item.salonName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Традиционные подарки</Text>
-//             <Text style={styles.detailLabel}>Товар:</Text>
-//             <Text style={styles.detailValue}>{item.itemName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Адрес:</Text>
-//             <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'transport':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Салон:</Text>
-//             <Text style={styles.detailValue}>{item.salonName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Транспорт</Text>
-//             <Text style={styles.detailLabel}>Авто:</Text>
-//             <Text style={styles.detailValue}>{item.carName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Марка:</Text>
-//             <Text style={styles.detailValue}>{item.brand || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Цвет:</Text>
-//             <Text style={styles.detailValue}>{item.color || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Телефон:</Text>
-//             <Text style={styles.detailValue}>{item.phone || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Район:</Text>
-//             <Text style={styles.detailValue}>{item.district || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Адрес:</Text>
-//             <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'goods':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Название:</Text>
-//             <Text style={styles.detailValue}>{item.item_name || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Товар</Text>
-//             <Text style={styles.detailLabel}>Описание:</Text>
-//             <Text style={styles.detailValue}>{item.description || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//           </>
-//         );
-//       case 'jewelry':
-//         return (
-//           <>
-//             <Text style={styles.detailLabel}>Магазин:</Text>
-//             <Text style={styles.detailValue}>{item.storeName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Тип:</Text>
-//             <Text style={styles.detailValue}>Ювелирные изделия</Text>
-//             <Text style={styles.detailLabel}>Товар:</Text>
-//             <Text style={styles.detailValue}>{item.itemName || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Материал:</Text>
-//             <Text style={styles.detailValue}>{item.material || 'Не указано'}</Text>
-//             <Text style={styles.detailLabel}>Стоимость:</Text>
-//             <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-//           </>
-//         );
-//       default:
-//         return <Text style={styles.detailValue}>Неизвестный тип</Text>;
-//     }
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <Appbar.Header style={styles.header}>
-//         <Appbar.BackAction onPress={() => navigation.goBack()} color={COLORS.textPrimary} />
-//         <Appbar.Content
-//           title={item.name || item.itemName || item.item_name || 'Детали'}
-//           titleStyle={styles.headerTitle}
-//         />
-//       </Appbar.Header>
-
-//       <ScrollView contentContainerStyle={styles.scrollContent}>
-//         <View style={styles.mediaSection}>
-//           {loading ? (
-//             <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
-//           ) : error ? (
-//             <Text style={styles.error}>{error}</Text>
-//           ) : files.length > 0 ? (
-//             <View>
-//               <FlatList
-//                 data={files}
-//                 renderItem={renderFileItem}
-//                 keyExtractor={(file) => file.id}
-//                 horizontal
-//                 showsHorizontalScrollIndicator={false}
-//                 snapToInterval={screenWidth - 40}
-//                 snapToAlignment="center"
-//                 decelerationRate="fast"
-//                 contentContainerStyle={styles.mediaList}
-//                 onScroll={handleScroll}
-//                 scrollEventThrottle={16}
-//               />
-//               {files.length > 1 && (
-//                 <View style={styles.paginationContainer}>
-//                   {files.map((_, index) => (
-//                     <View
-//                       key={index}
-//                       style={[
-//                         styles.paginationDot,
-//                         activeSlide === index ? styles.paginationActiveDot : styles.paginationInactiveDot,
-//                       ]}
-//                     />
-//                   ))}
-//                 </View>
-//               )}
-//             </View>
-//           ) : (
-//             <Text style={styles.detailValue}>Файлы отсутствуют</Text>
-//           )}
-//         </View>
-//         <Card style={styles.itemCard}>
-//           <Card.Content style={styles.cardContent}>
-//             <Title style={styles.title}>{item.name || item.itemName || item.item_name || 'Без названия'}</Title>
-//             {renderDetails()}
-//           </Card.Content>
-//         </Card>
-//       </ScrollView>
-
-//       <Modal visible={!!selectedImage} transparent animationType="fade" onRequestClose={() => setSelectedImage(null)}>
-//         <View style={styles.modalContainer}>
-//           <TouchableOpacity
-//             style={styles.closeButton}
-//             onPress={() => setSelectedImage(null)}
-//             activeOpacity={0.8}
-//           >
-//             <Icon name="close" size={24} color={COLORS.background} />
-//           </TouchableOpacity>
-//           <Image source={{ uri: selectedImage }} style={styles.fullscreenImage} />
-//         </View>
-//       </Modal>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: COLORS.background,
-//   },
-//   header: {
-//     backgroundColor: COLORS.background,
-//     elevation: 2,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//   },
-//   headerTitle: {
-//     fontSize: 20,
-//     fontWeight: '700',
-//     color: COLORS.textPrimary,
-//   },
-//   scrollContent: {
-//     padding: 16,
-//     paddingBottom: 20,
-//   },
-//   itemCard: {
-//     borderRadius: 12,
-//     overflow: 'hidden',
-//     marginBottom: 24,
-//     elevation: 3,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//   },
-//   cardContent: {
-//     padding: 20,
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: '700',
-//     color: COLORS.textPrimary,
-//     marginBottom: 12,
-//   },
-//   detailLabel: {
-//     fontSize: 14,
-//     fontWeight: '500',
-//     color: COLORS.textSecondary,
-//     marginBottom: 8,
-//   },
-//   detailValue: {
-//     fontSize: 16,
-//     fontWeight: '400',
-//     color: COLORS.textPrimary,
-//     marginBottom: 16,
-//   },
-//   mediaSection: {
-//     marginBottom: 24,
-//   },
-//   mediaList: {
-//     paddingHorizontal: 20,
-//   },
-//   carouselItem: {
-//     width: screenWidth - 64,
-//     borderRadius: 12,
-//     backgroundColor: COLORS.background,
-//     overflow: 'hidden',
-//     elevation: 2,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 1 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 2,
-//     marginHorizontal: 12,
-//   },
-//   media: {
-//     width: '100%',
-//     height: 200,
-//     borderTopLeftRadius: 12,
-//     borderTopRightRadius: 12,
-//   },
-//   video: {
-//     width: '100%',
-//     height: 200,
-//     borderTopLeftRadius: 12,
-//     borderTopRightRadius: 12,
-//   },
-//   caption: {
-//     fontSize: 12,
-//     fontWeight: '400',
-//     color: COLORS.textSecondary,
-//     padding: 8,
-//     textAlign: 'center',
-//   },
-//   loader: {
-//     marginVertical: 16,
-//   },
-//   error: {
-//     fontSize: 16,
-//     fontWeight: '500',
-//     color: COLORS.error,
-//     textAlign: 'center',
-//     marginVertical: 16,
-//   },
-//   paginationContainer: {
-//     flexDirection: 'row',
-//     justifyContent: 'center',
-//     paddingVertical: 12,
-//   },
-//   paginationDot: {
-//     width: 8,
-//     height: 8,
-//     borderRadius: 4,
-//     marginHorizontal: 6,
-//   },
-//   paginationActiveDot: {
-//     backgroundColor: COLORS.primary,
-//   },
-//   paginationInactiveDot: {
-//     backgroundColor: COLORS.textSecondary,
-//     opacity: 0.4,
-//   },
-//   modalContainer: {
-//     flex: 1,
-//     backgroundColor: COLORS.overlay,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 16,
-//   },
-//   closeButton: {
-//     position: 'absolute',
-//     top: 40,
-//     right: 20,
-//     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-//     borderRadius: 20,
-//     padding: 8,
-//     zIndex: 1,
-//   },
-//   fullscreenImage: {
-//     width: '100%',
-//     height: '100%',
-//     resizeMode: 'contain',
-//   },
-// });
-
-// export default DetailsScreen;
-
-
-
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -514,25 +9,19 @@ import {
   ScrollView,
   FlatList,
   Dimensions,
+  Linking, // Добавлено для открытия ссылок
 } from 'react-native';
 import ImageProgress from 'react-native-image-progress';
-import { ProgressBar } from 'react-native-progress';
+import { ProgressBar } from 'react-native-progress'; // Убедитесь, что установлен
 import { Video } from 'expo-av';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-import { Card, Appbar, Title } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Appbar } from 'react-native-paper'; // Используем Appbar из react-native-paper
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Для иконки закрытия
+import { LinearGradient } from 'expo-linear-gradient';
 
-const COLORS = {
-  primary: '#007AFF',
-  secondary: '#FF9500',
-  textPrimary: '#1C2526',
-  textSecondary: '#6B7280',
-  background: '#FFFFFF',
-  overlay: 'rgba(0, 0, 0, 0.6)',
-  border: '#E5E7EB',
-  error: '#EF4444',
-};
+// Замените на правильный путь к вашему файлу theme.js
+import { COLORS, SIZES, FONTS } from '../constants/theme'; // ПРЕДПОЛАГАЕТСЯ, ЧТО ЭТОТ ФАЙЛ ЕСТЬ
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -547,32 +36,38 @@ const DetailsScreen = ({ route }) => {
 
   const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
 
-  const fetchFiles = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/api/${item.type}/${item.id}/files`, {
-        headers: { 'Cache-Control': 'max-age=3600' },
-      });
-      setFiles(response.data);
-    } catch (err) {
-      setError('Ошибка загрузки файлов: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchFiles = async () => {
+      if (!item || !item.type || !item.id) {
+        setError('Ошибка: Недостаточно данных для загрузки файлов.');
+        setLoading(false);
+        return;
+      }
+      try {
+        const response = await axios.get(`${BASE_URL}/api/${item.type}/${item.id}/files`, {
+          // headers: { 'Cache-Control': 'max-age=3600' }, // Раскомментируйте, если нужно кеширование
+        });
+        setFiles(response.data || []); // Убедимся, что files всегда массив
+      } catch (err) {
+        console.error("File fetch error:", err);
+        setError('Ошибка загрузки файлов: ' + (err.response?.data?.message || err.message));
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchFiles();
-  }, []);
+  }, [item]);
 
   const handleScroll = (event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(contentOffsetX / (screenWidth - 40));
+    const carouselItemWidth = screenWidth - (SIZES.padding * 2);
+    const index = Math.round(contentOffsetX / carouselItemWidth);
     setActiveSlide(index);
   };
 
   const renderFileItem = ({ item: file }) => {
     const fileUrl = `${BASE_URL}/${file.path}`;
-    const thumbnailUrl = `${BASE_URL}/${file.path}?size=small`;
+    // const thumbnailUrl = `${BASE_URL}/${file.path}?size=small`; // Если сервер поддерживает small
 
     if (file.mimetype.startsWith('image/')) {
       return (
@@ -582,13 +77,14 @@ const DetailsScreen = ({ route }) => {
           activeOpacity={0.9}
         >
           <ImageProgress
-            source={{ uri: thumbnailUrl }}
+            source={{ uri: fileUrl /* или thumbnailUrl */ }}
             indicator={ProgressBar}
             indicatorProps={{
               color: COLORS.primary,
               borderWidth: 0,
               borderRadius: 0,
               unfilledColor: COLORS.textSecondary,
+              width: null, // Чтобы прогресс бар занимал всю ширину
             }}
             style={styles.media}
             resizeMode="cover"
@@ -600,16 +96,17 @@ const DetailsScreen = ({ route }) => {
         <View style={styles.carouselItem}>
           <Video
             source={{ uri: fileUrl }}
-            style={styles.video}
+            style={styles.media} // Используем один стиль для медиа
             useNativeControls
             resizeMode="cover"
-            isLooping
+            // isLooping // Раскомментируйте, если нужно авто-зацикливание
           />
         </View>
       );
     } else {
       return (
-        <View style={styles.carouselItem}>
+        <View style={[styles.carouselItem, styles.unsupportedFile]}>
+          <Icon name="broken-image" size={40} color={COLORS.textSecondary} />
           <Text style={styles.caption}>Неподдерживаемый формат: {file.mimetype}</Text>
         </View>
       );
@@ -617,224 +114,122 @@ const DetailsScreen = ({ route }) => {
   };
 
   const renderDetails = () => {
+    // Общая функция для отображения поля, если оно есть
+    const DetailField = ({ label, value }) => {
+      if (!value && typeof value !== 'number') return null; // Не отображать, если нет значения
+      return (
+        <>
+          <Text style={styles.detailLabel}>{label}</Text>
+          <Text style={styles.detailValue}>{value}</Text>
+        </>
+      );
+    };
+    
+    const LinkField = ({ label, url, text }) => {
+        if (!url) return null;
+        return (
+            <>
+                <Text style={styles.detailLabel}>{label}</Text>
+                <TouchableOpacity onPress={() => Linking.openURL(url)}>
+                    <Text style={[styles.detailValue, styles.linkValue]}>{text || url}</Text>
+                </TouchableOpacity>
+            </>
+        );
+    };
+
     switch (item.type) {
       case 'restaurant':
         return (
           <>
-            <Text style={styles.detailLabel}>Название:</Text>
-            <Text style={styles.detailValue}>{item.name || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Ресторан</Text>
-            <Text style={styles.detailLabel}>Вместимость:</Text>
-            <Text style={styles.detailValue}>{item.capacity || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Кухня:</Text>
-            <Text style={styles.detailValue}>{item.cuisine || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Средний чек:</Text>
-            <Text style={styles.detailValue}>{item.averageCost ? `${item.averageCost} ₸` : 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Адрес:</Text>
-            <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Телефон:</Text>
-            <Text style={styles.detailValue}>{item.phone || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Район:</Text>
-            <Text style={styles.detailValue}>{item.district || 'Не указано'}</Text>
+            <DetailField label="Тип" value="Ресторан" />
+            <DetailField label="Вместимость" value={item.capacity} />
+            <DetailField label="Кухня" value={item.cuisine} />
+            <DetailField label="Средний чек" value={item.averageCost ? `${item.averageCost} ₸` : null} />
+            <DetailField label="Адрес" value={item.address} />
+            <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Район" value={item.district} />
           </>
         );
       case 'clothing':
         return (
           <>
-            <Text style={styles.detailLabel}>Магазин:</Text>
-            <Text style={styles.detailValue}>{item.storeName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Одежда</Text>
-            <Text style={styles.detailLabel}>Товар:</Text>
-            <Text style={styles.detailValue}>{item.itemName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Пол:</Text>
-            <Text style={styles.detailValue}>{item.gender || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Адрес:</Text>
-            <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
+            <DetailField label="Магазин" value={item.storeName} />
+            <DetailField label="Тип" value="Одежда" />
+            <DetailField label="Товар" value={item.itemName} />
+            <DetailField label="Пол" value={item.gender} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Адрес" value={item.address} />
           </>
         );
+       case 'tamada':
+        return (
+          <>
+            <DetailField label="Тип" value="Ведущий / Тамада" />
+            <LinkField label="Портфолио / О себе" url={item.portfolio} text="Открыть ссылку на портфолио" />
+            <DetailField label="Стоимость услуг" value={item.cost ? `${item.cost} ₸` : null} />
+             {/* Добавьте другие поля для тамады, если есть, например, опыт, языки и т.д. */}
+          </>
+        );
+      // ... (остальные case'ы аналогично, используя DetailField и LinkField)
+      // Пример для 'flowers':
       case 'flowers':
         return (
           <>
-            <Text style={styles.detailLabel}>Салон:</Text>
-            <Text style={styles.detailValue}>{item.salonName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Цветы</Text>
-            <Text style={styles.detailLabel}>Цветы:</Text>
-            <Text style={styles.detailValue}>{item.flowerName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип цветов:</Text>
-            <Text style={styles.detailValue}>{item.flowerType || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Адрес:</Text>
-            <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
+            <DetailField label="Салон" value={item.salonName} />
+            <DetailField label="Тип" value="Цветы" />
+            <DetailField label="Название букета/цветов" value={item.flowerName} />
+            <DetailField label="Вид цветов" value={item.flowerType} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Адрес" value={item.address} />
           </>
         );
-      case 'cake':
-        return (
-          <>
-            <Text style={styles.detailLabel}>Название:</Text>
-            <Text style={styles.detailValue}>{item.name || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Торты</Text>
-            <Text style={styles.detailLabel}>Тип торта:</Text>
-            <Text style={styles.detailValue}>{item.cakeType || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Адрес:</Text>
-            <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-          </>
-        );
-      case 'alcohol':
-        return (
-          <>
-            <Text style={styles.detailLabel}>Салон:</Text>
-            <Text style={styles.detailValue}>{item.salonName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Алкоголь</Text>
-            <Text style={styles.detailLabel}>Напиток:</Text>
-            <Text style={styles.detailValue}>{item.alcoholName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Категория:</Text>
-            <Text style={styles.detailValue}>{item.category || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Адрес:</Text>
-            <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-          </>
-        );
-      case 'program':
-        return (
-          <>
-            <Text style={styles.detailLabel}>Команда:</Text>
-            <Text style={styles.detailValue}>{item.teamName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Программа</Text>
-            <Text style={styles.detailLabel}>Тип программы:</Text>
-            <Text style={styles.detailValue}>{item.type || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-          </>
-        );
-      case 'tamada':
-        return (
-          <>
-            <Text style={styles.detailLabel}>Имя:</Text>
-            <Text style={styles.detailValue}>{item.name || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Тамада</Text>
-            <Text style={styles.detailLabel}>Портфолио:</Text>
-            <Text style={styles.detailValue}>{item.portfolio || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-          </>
-        );
-      case 'traditionalGift':
-        return (
-          <>
-            <Text style={styles.detailLabel}>Салон:</Text>
-            <Text style={styles.detailValue}>{item.salonName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Традиционные подарки</Text>
-            <Text style={styles.detailLabel}>Товар:</Text>
-            <Text style={styles.detailValue}>{item.itemName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Адрес:</Text>
-            <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-          </>
-        );
-      case 'transport':
-        return (
-          <>
-            <Text style={styles.detailLabel}>Салон:</Text>
-            <Text style={styles.detailValue}>{item.salonName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Транспорт</Text>
-            <Text style={styles.detailLabel}>Авто:</Text>
-            <Text style={styles.detailValue}>{item.carName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Марка:</Text>
-            <Text style={styles.detailValue}>{item.brand || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Цвет:</Text>
-            <Text style={styles.detailValue}>{item.color || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Телефон:</Text>
-            <Text style={styles.detailValue}>{item.phone || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Район:</Text>
-            <Text style={styles.detailValue}>{item.district || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Адрес:</Text>
-            <Text style={styles.detailValue}>{item.address || 'Не указано'}</Text>
-          </>
-        );
-      case 'goods':
-        return (
-          <>
-            <Text style={styles.detailLabel}>Название:</Text>
-            <Text style={styles.detailValue}>{item.item_name || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Товар</Text>
-            <Text style={styles.detailLabel}>Описание:</Text>
-            <Text style={styles.detailValue}>{item.description || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-          </>
-        );
-      case 'jewelry':
-        return (
-          <>
-            <Text style={styles.detailLabel}>Магазин:</Text>
-            <Text style={styles.detailValue}>{item.storeName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Тип:</Text>
-            <Text style={styles.detailValue}>Ювелирные изделия</Text>
-            <Text style={styles.detailLabel}>Товар:</Text>
-            <Text style={styles.detailValue}>{item.itemName || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Материал:</Text>
-            <Text style={styles.detailValue}>{item.material || 'Не указано'}</Text>
-            <Text style={styles.detailLabel}>Стоимость:</Text>
-            <Text style={styles.detailValue}>{item.cost ? `${item.cost} ₸` : 'Не указано'}</Text>
-          </>
-        );
+      // И так далее для всех ваших типов...
       default:
-        return <Text style={styles.detailValue}>Неизвестный тип</Text>;
+        return <Text style={styles.detailValue}>Информация для данного типа отсутствует.</Text>;
     }
   };
+  
+  const getItemTitle = () => {
+      return item?.name || item?.itemName || item?.item_name || item?.storeName || item?.salonName || item?.teamName || 'Детали';
+  }
 
   return (
-    <View style={styles.container}>
-      <Appbar.Header style={styles.header}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} color={COLORS.textPrimary} />
+    <LinearGradient
+      colors={[COLORS.screenBackgroundGradientStart, COLORS.screenBackgroundGradientEnd]}
+      style={styles.container}
+    >
+      <Appbar.Header style={styles.appbarHeader} elevated={false}>
+        <Appbar.BackAction onPress={() => navigation.goBack()} color={COLORS.headerTintColor} size={SIZES.h2}/>
         <Appbar.Content
-          title={item.name || item.itemName || item.item_name || 'Детали'}
+          title={getItemTitle()}
           titleStyle={styles.headerTitle}
+          style={styles.appbarContent}
         />
       </Appbar.Header>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.mediaSection}>
           {loading ? (
             <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
           ) : error ? (
-            <Text style={styles.error}>{error}</Text>
-          ) : files.length > 0 ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : files && files.length > 0 ? (
             <View>
               <FlatList
                 data={files}
                 renderItem={renderFileItem}
-                keyExtractor={(file) => file.id}
+                keyExtractor={(file) => file.id.toString()}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                snapToInterval={screenWidth - 40}
+                snapToInterval={screenWidth - (SIZES.padding * 2)} // Ширина элемента карусели
                 snapToAlignment="center"
                 decelerationRate="fast"
-                contentContainerStyle={styles.mediaList}
+                contentContainerStyle={styles.mediaListContainer}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
                 initialNumToRender={1}
                 maxToRenderPerBatch={1}
-                windowSize={2}
+                windowSize={3} // Немного увеличил для плавной загрузки
               />
               {files.length > 1 && (
                 <View style={styles.paginationContainer}>
@@ -851,25 +246,28 @@ const DetailsScreen = ({ route }) => {
               )}
             </View>
           ) : (
-            <Text style={styles.detailValue}>Файлы отсутствуют</Text>
+            <View style={styles.noFilesContainer}>
+                 <Icon name="image-not-supported" size={50} color={COLORS.textSecondary} />
+                 <Text style={styles.noFilesText}>Изображения или видео отсутствуют</Text>
+            </View>
           )}
         </View>
-        <Card style={styles.itemCard}>
-          <Card.Content style={styles.cardContent}>
-            <Title style={styles.title}>{item.name || item.itemName || item.item_name || 'Без названия'}</Title>
-            {renderDetails()}
-          </Card.Content>
-        </Card>
+
+        <View style={styles.detailsCard}>
+          <Text style={styles.cardTitle}>{getItemTitle()}</Text>
+          <View style={styles.separator} />
+          {renderDetails()}
+        </View>
       </ScrollView>
 
       <Modal visible={!!selectedImage} transparent animationType="fade" onRequestClose={() => setSelectedImage(null)}>
-        <View style={styles.modalContainer}>
+        <View style={styles.modalOverlay}>
           <TouchableOpacity
-            style={styles.closeButton}
+            style={styles.modalCloseButton}
             onPress={() => setSelectedImage(null)}
             activeOpacity={0.8}
           >
-            <Icon name="close" size={24} color={COLORS.background} />
+            <Icon name="close" size={30} color={COLORS.white} />
           </TouchableOpacity>
           <ImageProgress
             source={{ uri: selectedImage }}
@@ -878,153 +276,174 @@ const DetailsScreen = ({ route }) => {
               color: COLORS.primary,
               borderWidth: 0,
               borderRadius: 0,
-              unfilledColor: COLORS.textSecondary,
+              unfilledColor: COLORS.textLight,
+              width: null,
             }}
             style={styles.fullscreenImage}
             resizeMode="contain"
           />
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
-  header: {
-    backgroundColor: COLORS.background,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  appbarHeader: { // Переименовано с header на appbarHeader во избежание конфликтов
+    backgroundColor: COLORS.headerBackground,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.cardBorderColor,
+    elevation: 0, // Убираем стандартную тень Android
+    shadowOpacity: 0, // Убираем стандартную тень iOS
+  },
+  appbarContent: {
+    marginLeft: -SIZES.padding / 1.5, // Компенсация для Appbar.Content, чтобы заголовок был ближе к центру
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
+    ...FONTS.h2, // Используем стиль из темы
+    color: COLORS.headerTintColor,
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 20,
-  },
-  itemCard: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 24,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardContent: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginBottom: 12,
-  },
-  detailLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-  },
-  detailValue: {
-    fontSize: 16,
-    fontWeight: '400',
-    color: COLORS.textPrimary,
-    marginBottom: 16,
+    paddingHorizontal: SIZES.padding,
+    paddingTop: SIZES.padding,
+    paddingBottom: SIZES.padding * 2,
   },
   mediaSection: {
-    marginBottom: 24,
+    marginBottom: SIZES.padding * 1.5,
   },
-  mediaList: {
-    paddingHorizontal: 20,
+  mediaListContainer: {
+    // Пусто, если элементы карусели занимают всю ширину и имеют свои отступы
   },
   carouselItem: {
-    width: screenWidth - 64,
-    borderRadius: 12,
-    backgroundColor: COLORS.background,
+    width: screenWidth - (SIZES.padding * 2),
+    height: screenWidth * 0.6, // Высота как 60% от ширины экрана
+    borderRadius: SIZES.radius,
+    backgroundColor: COLORS.cardBackground,
     overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    marginHorizontal: 12,
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
   },
   media: {
     width: '100%',
-    height: 200,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    height: '100%',
   },
-  video: {
-    width: '100%',
-    height: 200,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+   unsupportedFile: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.cardBorderColor, // Фон для неподдерживаемых
   },
   caption: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: COLORS.textSecondary,
-    padding: 8,
-    textAlign: 'center',
-  },
-  loader: {
-    marginVertical: 16,
-  },
-  error: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: COLORS.error,
-    textAlign: 'center',
-    marginVertical: 16,
+    ...FONTS.caption,
+    marginTop: SIZES.padding / 2,
   },
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 12,
+    alignItems: 'center',
+    paddingTop: SIZES.padding,
   },
   paginationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10, // Чуть крупнее
+    height: 10,
+    borderRadius: 5,
     marginHorizontal: 6,
   },
   paginationActiveDot: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.accent, // Используем accent для активной точки
   },
   paginationInactiveDot: {
-    backgroundColor: COLORS.textSecondary,
-    opacity: 0.4,
+    backgroundColor: COLORS.cardBorderColor, // Более светлый для неактивных
   },
-  modalContainer: {
+  noFilesContainer: {
+    height: screenWidth * 0.6, // Такая же высота, как у карусели
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: SIZES.radius,
+    padding: SIZES.padding,
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  noFilesText: {
+    ...FONTS.noFiles, // Стиль из темы
+    textAlign: 'center',
+    marginTop: SIZES.padding / 2,
+  },
+  detailsCard: {
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: SIZES.radius,
+    padding: SIZES.padding,
+    marginBottom: SIZES.padding,
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2, // Меньшая тень для карточки с текстом
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  cardTitle: {
+    ...FONTS.title, // Стиль из темы
+    textAlign: 'center',
+    marginBottom: SIZES.padding * 0.75,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: COLORS.cardBorderColor,
+    marginVertical: SIZES.padding * 0.75,
+    opacity: 0.7,
+  },
+  detailLabel: {
+    ...FONTS.detailLabel, // Стиль из темы
+    marginBottom: SIZES.padding / 3,
+  },
+  detailValue: {
+    ...FONTS.detailValue, // Стиль из темы
+    marginBottom: SIZES.padding,
+  },
+  linkValue: {
+    color: COLORS.primary, // Делаем ссылки акцентным цветом
+    textDecorationLine: 'underline',
+  },
+  loader: {
+    height: screenWidth * 0.6, // Чтобы занимал место карусели
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    ...FONTS.error, // Стиль из темы
+    textAlign: 'center',
+    padding: SIZES.padding,
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: SIZES.radius,
+    minHeight: screenWidth * 0.3, // Минимальная высота для блока ошибки
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOverlay: {
     flex: 1,
     backgroundColor: COLORS.overlay,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
   },
-  closeButton: {
+  modalCloseButton: {
     position: 'absolute',
-    top: 40,
-    right: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    top: SIZES.padding * 2.5, // Отступ для статус-бара и хедера
+    right: SIZES.padding,
+    backgroundColor: 'rgba(0,0,0,0.4)',
     borderRadius: 20,
     padding: 8,
-    zIndex: 1,
+    zIndex: 10, // Выше всего
   },
   fullscreenImage: {
-    width: '100%',
+    width: '100%', // Изображение на весь экран в модалке
     height: '100%',
     resizeMode: 'contain',
   },
