@@ -228,6 +228,7 @@ const AddItemModal = ({
         return true;
       });
     }
+    console.log("filteredDataMemo:", result);
     return result.sort(
       (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
     );
@@ -241,6 +242,11 @@ const AddItemModal = ({
 
   const renderAddItem = useCallback(
     ({ item }) => {
+      if (!item || !item.type || !item.id) {
+        console.warn("Некорректный элемент в renderAddItem:", item);
+        return null;
+      }
+  
       const count = filteredData.filter(
         (selectedItem) =>
           `${selectedItem.type}-${selectedItem.id}` ===
@@ -306,9 +312,9 @@ const AddItemModal = ({
           <TouchableOpacity
             style={styles.detailsIconButton}
             onPress={() => {
-                setSelectedItem(item);
-                setDetailsModalVisible(true);
-                onClose(); // Close AddItemModal when opening DetailsModal
+              setSelectedItem(item);
+              setDetailsModalVisible(true);
+              // Убрали onClose(), чтобы AddItemModal оставался открытым
             }}
           >
             <Icon name="search" size={20} color={MODAL_COLORS.icon} />
@@ -321,7 +327,6 @@ const AddItemModal = ({
       handleAddItem,
       setDetailsModalVisible,
       setSelectedItem,
-      onClose,
       updateCategories,
     ]
   );
@@ -840,74 +845,107 @@ const CategoryItemsModal = ({
     .sort((a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11));
 
 
-  const renderAvailableItem = useCallback(
-    ({ item }) => {
-      // This item is from `availableItemsForThisCategory`, so it's not yet selected.
-      const cost = item.type === "restaurant" ? item.averageCost : item.cost;
-      let title;
-      switch (item.type) {
-        case "restaurant": title = `${item.name} (${cost} ₸)`; break;
-        case "clothing": title = `${item.storeName} - ${item.itemName} (${cost} ₸)`; break;
-        case "flowers": title = `${item.salonName} - ${item.flowerName} (${cost} ₸)`; break;
-        case "cake": title = `${item.name} (${cost} ₸)`; break;
-        case "alcohol": title = `${item.salonName} - ${item.alcoholName} (${cost} ₸)`; break;
-        case "program": title = `${item.teamName} (${cost} ₸)`; break;
-        case "tamada": title = `${item.name} (${cost} ₸)`; break;
-        case "traditionalGift": title = `${item.salonName} - ${item.itemName} (${cost} ₸)`; break;
-        case "transport": title = `${item.salonName} - ${item.carName} (${cost} ₸)`; break;
-        case "goods": title = `${item.item_name} (${cost} ₸)`; break;
-        case "jewelry": title = `${item.storeName} - ${item.itemName} (${cost} ₸)`; break;
-        default: title = "Неизвестный элемент";
-      }
-      return (
-        <View style={styles.addModalItemCard}>
+    const renderAvailableItem = useCallback(
+      ({ item }) => {
+        if (!item || !item.type || !item.id) {
+          console.warn("Некорректный элемент в renderAvailableItem:", item);
+          return null;
+        }
+        const cost = item.type === "restaurant" ? item.averageCost : item.cost;
+        let title;
+        switch (item.type) {
+          case "restaurant":
+            title = `${item.name} (${cost} ₸)`;
+            break;
+          case "clothing":
+            title = `${item.storeName} - ${item.itemName} (${cost} ₸)`;
+            break;
+          case "flowers":
+            title = `${item.salonName} - ${item.flowerName} (${cost} ₸)`;
+            break;
+          case "cake":
+            title = `${item.name} (${cost} ₸)`;
+            break;
+          case "alcohol":
+            title = `${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
+            break;
+          case "program":
+            title = `${item.teamName} (${cost} ₸)`;
+            break;
+          case "tamada":
+            title = `${item.name} (${cost} ₸)`;
+            break;
+          case "traditionalGift":
+            title = `${item.salonName} - ${item.itemName} (${cost} ₸)`;
+            break;
+          case "transport":
+            title = `${item.salonName} - ${item.carName} (${cost} ₸)`;
+            break;
+          case "goods":
+            title = `${item.item_name} (${cost} ₸)`;
+            break;
+          case "jewelry":
+            title = `${item.storeName} - ${item.itemName} (${cost} ₸)`;
+            break;
+          default:
+            title = "Неизвестный элемент";
+        }
+        return (
+          <View style={styles.addModalItemCard}>
             <TouchableOpacity
-              style={styles.addModalItemContent} // Occupies most space
+              style={styles.addModalItemContent}
               onPress={() => {
-                  // Проверка capacity перед добавлением
-                  if (item.type === "restaurant" && guestCount) {
-                    const totalGuests = parseInt(guestCount, 10);
-                    if (totalGuests > item.capacity) {
-                      alert(
-                        `Этот ресторан не может вместить ${totalGuests} гостей. Максимальная вместимость: ${item.capacity}.`
-                      );
-                      return;
-                    }
+                if (item.type === "restaurant" && guestCount) {
+                  const totalGuests = parseInt(guestCount, 10);
+                  if (totalGuests > item.capacity) {
+                    alert(
+                      `Этот ресторан не может вместить ${totalGuests} гостей. Максимальная вместимость: ${item.capacity}.`
+                    );
+                    return;
                   }
-                  handleAddItem(item); // Use global addItem
-                  const category = typeToCategoryMap[item.type];
-                  if (category) {
-                    updateCategories(category); // Ensure category is enabled on main screen
-                  }
-                }}
+                }
+                handleAddItem(item);
+                const category = typeToCategoryMap[item.type];
+                if (category) {
+                  updateCategories(category);
+                }
+              }}
             >
-              <Icon2 name="plus-circle-outline" size={22} color={MODAL_COLORS.icon} style={{ marginRight: 10}} />
-              <Text style={styles.addModalItemText} numberOfLines={1} ellipsizeMode="tail">
+              <Icon2
+                name="plus-circle-outline"
+                size={22}
+                color={MODAL_COLORS.icon}
+                style={{ marginRight: 10 }}
+              />
+              <Text
+                style={styles.addModalItemText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
                 {title}
               </Text>
             </TouchableOpacity>
-             <TouchableOpacity
-                style={styles.detailsIconButton} // Magnify icon
-                onPress={() => {
-                  setSelectedItem(item);
-                  setDetailsModalVisible(true);
-                  // onClose(); // Keep CategoryItemsModal open or close based on UX preference
-                }}
-              >
-                <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
-              </TouchableOpacity>
-        </View>
-      );
-    },
-    [
-      handleAddItem,
-      setDetailsModalVisible,
-      setSelectedItem,
-      // onClose, // Decide if needed here
-      updateCategories,
-      guestCount,
-    ]
-  );
+            <TouchableOpacity
+              style={styles.detailsIconButton}
+              onPress={() => {
+                setSelectedItem(item);
+                setDetailsModalVisible(true);
+                // Убрали onClose(), чтобы CategoryItemsModal оставался открытым
+              }}
+            >
+              <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
+            </TouchableOpacity>
+          </View>
+        );
+      },
+      [
+        handleAddItem,
+        setDetailsModalVisible,
+        setSelectedItem,
+        updateCategories,
+        guestCount,
+      ]
+    );
 
   return (
     <Modal
@@ -1749,108 +1787,182 @@ const CreateEventScreen = ({ navigation, route }) => {
 
         {/* Details Modal (shows brief info, navigates to full details screen) */}
         <Modal
-          visible={detailsModalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => { setDetailsModalVisible(false); setSelectedItem(null); }}
+  visible={detailsModalVisible}
+  transparent
+  animationType="fade"
+  onRequestClose={() => {
+    setDetailsModalVisible(false);
+    // Не сбрасываем selectedItem, чтобы сохранить его для навигации
+  }}
+>
+  <SafeAreaView
+    style={[styles.modalOverlay, { justifyContent: "center", alignItems: "center" }]}
+  >
+    <Animatable.View
+      style={styles.detailsModalContainer}
+      animation="zoomIn"
+      duration={300}
+    >
+      <View style={styles.modalHeader}>
+        <Text style={styles.modalTitle}>Подробности</Text>
+        <TouchableOpacity
+          style={styles.modalCloseButton}
+          onPress={() => {
+            setDetailsModalVisible(false);
+            // Не сбрасываем selectedItem
+          }}
         >
-          <SafeAreaView style={[styles.modalOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
-            <Animatable.View style={styles.detailsModalContainer} animation="zoomIn" duration={300}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Подробности</Text>
-                <TouchableOpacity style={styles.modalCloseButton} onPress={() => { setDetailsModalVisible(false); setSelectedItem(null); }}>
-                  <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-                </TouchableOpacity>
-              </View>
-              {selectedItem ? (
-                <View style={styles.detailsModalContent}>
-                  {(() => {
-                    let mainTitle = "Детали элемента";
-                    let details = [];
-                    switch (selectedItem.type) {
-                        case "restaurant":
-                            mainTitle = selectedItem.name;
-                            details = [`Кухня: ${selectedItem.cuisine}`, `Вместимость: ${selectedItem.capacity}`, `Средний чек: ${selectedItem.averageCost} ₸`];
-                            break;
-                        case "clothing":
-                            mainTitle = `${selectedItem.storeName} - ${selectedItem.itemName}`;
-                            details = [`Пол: ${selectedItem.gender}`, `Стоимость: ${selectedItem.cost} ₸`];
-                            break;
-                        case "flowers":
-                            mainTitle = `${selectedItem.salonName} - ${selectedItem.flowerName}`;
-                            details = [`Тип: ${selectedItem.flowerType}`, `Стоимость: ${selectedItem.cost} ₸`];
-                            break;
-                        case "cake":
-                            mainTitle = selectedItem.name;
-                            details = [`Тип торта: ${selectedItem.cakeType}`, `Стоимость: ${selectedItem.cost} ₸`];
-                            break;
-                        case "alcohol":
-                             mainTitle = `${selectedItem.salonName} - ${selectedItem.alcoholName}`;
-                             details = [`Категория: ${selectedItem.category}`, `Стоимость: ${selectedItem.cost} ₸`];
-                             break;
-                        case "program":
-                            mainTitle = selectedItem.teamName;
-                            details = [`Тип программы: ${selectedItem.type}`, `Стоимость: ${selectedItem.cost} ₸`];
-                            break;
-                        case "tamada":
-                            mainTitle = selectedItem.name;
-                            details = [
-                                selectedItem.portfolio ? `Портфолио: ${selectedItem.portfolio.substring(0,50)}...` : 'Портфолио не указано',
-                                `Стоимость: ${selectedItem.cost} ₸`
-                            ];
-                            if (selectedItem.portfolio && (selectedItem.portfolio.startsWith('http://') || selectedItem.portfolio.startsWith('https://'))) {
-                                details.push(
-                                    <TouchableOpacity key="link" onPress={() => Linking.openURL(selectedItem.portfolio)}>
-                                        <Text style={{ color: COLORS.secondary, textDecorationLine: 'underline', marginTop:5 }}>Открыть ссылку</Text>
-                                    </TouchableOpacity>
-                                );
-                            }
-                            break;
-                        case "traditionalGift":
-                            mainTitle = `${selectedItem.salonName} - ${selectedItem.itemName}`;
-                            details = [`Тип: ${selectedItem.type}`, `Стоимость: ${selectedItem.cost} ₸`];
-                            break;
-                        case "transport":
-                            mainTitle = `${selectedItem.salonName} - ${selectedItem.carName}`;
-                            details = [`Марка: ${selectedItem.brand}`, `Цвет: ${selectedItem.color}`, `Стоимость: ${selectedItem.cost} ₸`];
-                            break;
-                        case "jewelry":
-                            mainTitle = `${selectedItem.storeName} - ${selectedItem.itemName}`;
-                            details = [`Материал: ${selectedItem.material}`,`Стоимость: ${selectedItem.cost} ₸`];
-                            break;
-                         case "goods":
-                            mainTitle = selectedItem.item_name;
-                            details = [selectedItem.description || "Описание не указано", `Стоимость: ${selectedItem.cost} ₸`];
-                            break;
-                        default:
-                            return <Text style={styles.detailsModalText}>Информация не доступна.</Text>;
-                    }
-                    return (
-                        <>
-                            <Text style={[styles.detailsModalText, { fontWeight: 'bold', fontSize: 18, marginBottom:15 }]}>{mainTitle}</Text>
-                            {details.map((detail, index) => 
-                                typeof detail === 'string' ? (
-                                    <Text key={index} style={styles.detailsModalText}>{detail}</Text>
-                                ) : (
-                                    detail // For TouchableOpacity link
-                                )
-                            )}
-                        </>
-                    );
-                  })()}
-                   <TouchableOpacity
-                        style={[styles.modalButton2, styles.confirmButton, { marginTop: 20 }]}
-                        onPress={handleDetailsPress} // Navigates to full details screen
+          <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
+        </TouchableOpacity>
+      </View>
+      {selectedItem ? (
+        <View style={styles.detailsModalContent}>
+          {(() => {
+            let mainTitle = "Детали элемента";
+            let details = [];
+            switch (selectedItem.type) {
+              case "restaurant":
+                mainTitle = selectedItem.name;
+                details = [
+                  `Кухня: ${selectedItem.cuisine || "Не указано"}`,
+                  `Вместимость: ${selectedItem.capacity || "Не указано"}`,
+                  `Средний чек: ${selectedItem.averageCost} ₸`,
+                ];
+                break;
+              case "clothing":
+                mainTitle = `${selectedItem.storeName} - ${selectedItem.itemName}`;
+                details = [
+                  `Пол: ${selectedItem.gender || "Не указано"}`,
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                break;
+              case "flowers":
+                mainTitle = `${selectedItem.salonName} - ${selectedItem.flowerName}`;
+                details = [
+                  `Тип: ${selectedItem.flowerType || "Не указано"}`,
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                break;
+              case "cake":
+                mainTitle = selectedItem.name;
+                details = [
+                  `Тип торта: ${selectedItem.cakeType || "Не указано"}`,
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                break;
+              case "alcohol":
+                mainTitle = `${selectedItem.salonName} - ${selectedItem.alcoholName}`;
+                details = [
+                  `Категория: ${selectedItem.category || "Не указано"}`,
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                break;
+              case "program":
+                mainTitle = selectedItem.teamName;
+                details = [
+                  `Тип программы: ${selectedItem.type || "Не указано"}`,
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                break;
+              case "tamada":
+                mainTitle = selectedItem.name;
+                details = [
+                  selectedItem.portfolio
+                    ? `Портфолио: ${selectedItem.portfolio.substring(0, 50)}...`
+                    : "Портфолио не указано",
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                if (
+                  selectedItem.portfolio &&
+                  (selectedItem.portfolio.startsWith("http://") ||
+                    selectedItem.portfolio.startsWith("https://"))
+                ) {
+                  details.push(
+                    <TouchableOpacity
+                      key="link"
+                      onPress={() => Linking.openURL(selectedItem.portfolio)}
                     >
-                        <Icon name="search" size={20} color={COLORS.white} style={styles.buttonIcon} />
-                        <Text style={styles.modalButtonText}>Подробнее</Text>
+                      <Text
+                        style={{
+                          color: COLORS.secondary,
+                          textDecorationLine: "underline",
+                          marginTop: 5,
+                        }}
+                      >
+                        Открыть ссылку
+                      </Text>
                     </TouchableOpacity>
-                </View>
-              ) : ( <Text style={styles.detailsModalText}>Нет данных для отображения</Text> )}
-            </Animatable.View>
-          </SafeAreaView>
-        </Modal>
-
+                  );
+                }
+                break;
+              case "traditionalGift":
+                mainTitle = `${selectedItem.salonName} - ${selectedItem.itemName}`;
+                details = [
+                  `Тип: ${selectedItem.type || "Не указано"}`,
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                break;
+              case "transport":
+                mainTitle = `${selectedItem.salonName} - ${selectedItem.carName}`;
+                details = [
+                  `Марка: ${selectedItem.brand || "Не указано"}`,
+                  `Цвет: ${selectedItem.color || "Не указано"}`,
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                break;
+              case "jewelry":
+                mainTitle = `${selectedItem.storeName} - ${selectedItem.itemName}`;
+                details = [
+                  `Материал: ${selectedItem.material || "Не указано"}`,
+                  `Стоимость: ${selectedItem.cost}`,
+                ];
+                break;
+              case "goods":
+                mainTitle = selectedItem.item_name;
+                details = [
+                  selectedItem.description || "Описание не указано",
+                  `Стоимость: ${selectedItem.cost} ₸`,
+                ];
+                break;
+              default:
+                return <Text style={styles.detailsModalText}>Информация недоступна.</Text>;
+            }
+            return (
+              <>
+                <Text
+                  style={[
+                    styles.detailsModalText,
+                    { fontWeight: "bold", fontSize: 18, marginBottom: 15 },
+                  ]}
+                >
+                  {mainTitle}
+                </Text>
+                {details.map((detail, index) =>
+                  typeof detail === "string" ? (
+                    <Text key={index} style={styles.detailsModalText}>
+                      {detail}
+                    </Text>
+                  ) : (
+                    detail
+                  )
+                )}
+              </>
+            );
+          })()}
+          <TouchableOpacity
+            style={[styles.modalButton2, styles.confirmButton, { marginTop: 20 }]}
+            onPress={handleDetailsPress}
+          >
+            <Icon name="search" size={20} color={COLORS.white} style={styles.buttonIcon} />
+            <Text style={styles.modalButtonText}>Подробнее</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <Text style={styles.detailsModalText}>Нет данных для отображения</Text>
+      )}
+    </Animatable.View>
+  </SafeAreaView>
+</Modal>
         {/* Create Wedding Event Modal (final save step) */}
         <Modal
           animationType="slide" transparent={true} visible={modalVisible}
