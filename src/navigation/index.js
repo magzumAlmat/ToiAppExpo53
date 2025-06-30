@@ -24,6 +24,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import SupplierScreen from '../screens/SupplierScreen';
 import AdminScreen from '../screens/AdminScreen';
 import CreateTraditionalFamilyEventScreen from '../screens/CreateTraditionalFamilyEventScreen';
+import BeforeTraditionalFamilyEventScreen from '../components/BeforeTraditionalFamilyEventScreen';
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -169,7 +171,7 @@ const CreateEventScreen = ({ navigation }) => {
         if (item === 'Свадьба') {
           navigation.navigate('BeforeHomeScreen');
         } else if (item === 'Традиционное семейное торжество') {
-          navigation.navigate('CreateTraditionalFamilyEvent');
+          navigation.navigate('BeforeCreateTraditionalFamilyEvent');
         }
       }}
     >
@@ -442,6 +444,7 @@ export default function Navigation() {
         <Stack.Screen name="NewScreen" component={NewScreen} />
         <Stack.Screen name="CreateEvent" component={CreateEventScreen} />
         <Stack.Screen name="CreateTraditionalFamilyEvent" component={CreateTraditionalFamilyEventScreen} />
+        <Stack.Screen name="BeforeCreateTraditionalFamilyEvent" component={BeforeTraditionalFamilyEventScreen} />
         <Stack.Screen name="BeforeHomeScreen" component={BeforeHomeScreen} />
         <Stack.Screen name="Details" component={DetailsScreen} options={{ title: 'Подробности' }} />
         <Stack.Screen name="Authenticated" component={AuthenticatedTabs} />

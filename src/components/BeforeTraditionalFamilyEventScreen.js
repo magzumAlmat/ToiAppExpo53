@@ -579,10 +579,17 @@ const BeforeTraditionalFamilyEventScreen = ({ navigation, route }) => {
       alert('Пожалуйста, выберите хотя бы одну категорию.');
       return;
     }
-    navigation.navigate('Authenticated', {
-      screen: 'Home',
-      params: { selectedCategories: selectedCategoriesList },
-    });
+    // navigation.navigate('Authenticated', {
+    //   screen: 'CreateTraditionalFamilyEvent',
+    //   params: { selectedCategories: selectedCategoriesList },
+    // });
+
+    navigation.navigate('CreateTraditionalFamilyEvent', {
+    selectedCategories: selectedCategoriesList,
+    
+  });
+
+
   };
 
   const renderCategory = (item) => {
