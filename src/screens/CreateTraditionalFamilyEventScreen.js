@@ -1,3 +1,51 @@
+// import React, { Component, useState, useRef, useEffect, useCallback, useMemo } from "react";
+// import {
+//   View,
+//   Image,
+//   StyleSheet,
+//   TouchableOpacity,
+//   Text,
+//   Dimensions,
+//   FlatList,
+//   Modal,
+//   TextInput,
+//   ActivityIndicator,
+//   ScrollView,
+//   SafeAreaView,
+// } from "react-native";
+// import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
+// import Ionicons from "react-native-vector-icons/Ionicons";
+// import { LinearGradient } from "expo-linear-gradient";
+// import { useDispatch, useSelector } from "react-redux";
+// import api from "../api/api";
+// import * as Animatable from "react-native-animatable";
+// import AntDesign from "@expo/vector-icons/AntDesign";
+// import { Calendar } from "react-native-calendars";
+// import Icon from "react-native-vector-icons/MaterialIcons";
+// import * as Haptics from "expo-haptics";
+// import * as Linking from "expo-linking";
+
+// const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+// export const COLORS = {
+//   background: "#EDE7D9",
+//   primary: '#FF6F61',
+//   secondary: '#4A90E2',
+//   card: '#FFFFFF',
+//   textPrimary: '#1A2533',
+//   textSecondary: '#64748B',
+//   accent: '#FBBF24',
+//   shadow: 'rgba(0, 0, 0, 0.08)',
+//   error: '#EF4444',
+//   white: '#FFFFFF',
+//   buttonGradientStart: '#FF6F61',
+//   buttonGradientEnd: '#F43F5E',
+//   border: '#E0E0E0',
+// };
+
+
+
+
 import React, { Component, useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   View,
@@ -10,7 +58,6 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
-  ScrollView,
   SafeAreaView,
 } from "react-native";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
@@ -27,6 +74,7 @@ import * as Linking from "expo-linking";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
+// COLORS and MODAL_COLORS remain unchanged
 export const COLORS = {
   background: "#EDE7D9",
   primary: '#FF6F61',
@@ -62,6 +110,7 @@ export const MODAL_COLORS = {
   closeButtonColor: '#1A1A1A',
   overlayBackground: 'rgba(0, 0, 0, 0.5)',
 };
+
 
 const typeOrder = {
   restaurant: 1,
@@ -551,6 +600,7 @@ const AddItemModal = ({
     </Modal>
   );
 };
+
 
 const SelectedItem = ({
   item,
@@ -1154,6 +1204,9 @@ const AddCategoryModal = ({ visible, onClose, onAddCategory }) => {
   );
 };
 
+
+
+
 const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
   const defaultCategories = [
     "Ресторан",
@@ -1214,7 +1267,6 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
   const [shouldFilter, setShouldFilter] = useState(false);
   const [blockedDays, setBlockedDays] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const scrollViewRef = useRef(null);
 
   const updateCategories = useCallback(
     (newCategory) => {
@@ -1238,131 +1290,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
     return result.sort((a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13));
   }, [data]);
 
-  const handleRemoveCategory = useCallback(
-    (category) => {
-      setDisabledCategories((prev) => {
-        if (prev.includes(category)) {
-          const updatedDisabledCategories = prev.filter(
-            (cat) => cat !== category
-          );
-          const type = categoryToTypeMap[category];
-          if (type) {
-            const itemsToAdd = combinedData.filter(
-              (item) => item.type === type
-            );
-
-            let remaining = parseFloat(budget) || 0;
-            const currentTotalSpent = filteredData.reduce((sum, dataItem) => {
-              const key = `${dataItem.type}-${dataItem.id}`;
-              const itemQuantity =
-                dataItem.type === "restaurant" || dataItem.type === "hotels"
-                  ? parseInt(guestCount, 10) || 1
-                  : parseInt(quantities[key] || "1");
-              const itemCost =
-                dataItem.type === "restaurant"
-                  ? dataItem.averageCost
-                  : dataItem.cost;
-              return sum + itemCost * itemQuantity;
-            }, 0);
-            remaining -= currentTotalSpent;
-
-            const filteredItemsToAdd = itemsToAdd
-              .filter((item) => {
-                const cost =
-                  item.type === "restaurant" ? item.averageCost : item.cost;
-                const effectiveQuantity =
-                  item.type === "restaurant" || item.type === "hotels"
-                    ? parseInt(guestCount, 10) || 1
-                    : 1;
-                const totalCost = cost * effectiveQuantity;
-                return totalCost <= remaining;
-              })
-              .sort((a, b) => {
-                const costA = a.type === "restaurant" ? a.averageCost : a.cost;
-                const costB = b.type === "restaurant" ? b.averageCost : b.cost;
-                return costA - costB;
-              });
-
-            const maxItemsToSelect = Math.min(1, filteredItemsToAdd.length);
-            const selectedItemsToAdd = [];
-            for (let i = 0; i < maxItemsToSelect; i++) {
-              const selectedItem = filteredItemsToAdd[i];
-              if (selectedItem) {
-                const cost =
-                  selectedItem.type === "restaurant"
-                    ? selectedItem.averageCost
-                    : selectedItem.cost;
-                const effectiveQuantity =
-                  selectedItem.type === "restaurant" || selectedItem.type === "hotels"
-                    ? parseInt(guestCount, 10) || 1
-                    : 1;
-                const totalCost = cost * effectiveQuantity;
-                selectedItemsToAdd.push({ ...selectedItem, totalCost });
-                remaining -= totalCost;
-              }
-            }
-
-            setFilteredData((prevData) => {
-              const updatedData = [...prevData, ...selectedItemsToAdd].sort(
-                (a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13)
-              );
-
-              setQuantities((prevQuantities) => ({
-                ...prevQuantities,
-                ...selectedItemsToAdd.reduce((acc, item) => {
-                  const itemKey = `${item.type}-${item.id}`;
-                  return { ...acc, [itemKey]: "1" };
-                }, {}),
-              }));
-
-              const totalSpent = updatedData.reduce((sum, dataItem) => {
-                const key = `${dataItem.type}-${dataItem.id}`;
-                const itemQuantity =
-                  dataItem.type === "restaurant" || dataItem.type === "hotels"
-                    ? parseInt(guestCount, 10) || 1
-                    : parseInt(quantities[key] || "1");
-                const itemCost =
-                  dataItem.type === "restaurant"
-                    ? dataItem.averageCost
-                    : dataItem.cost;
-                return sum + itemCost * itemQuantity;
-              }, 0);
-              setRemainingBudget(parseFloat(budget) - totalSpent);
-
-              return updatedData;
-            });
-          }
-          return updatedDisabledCategories;
-        } else {
-          const type = categoryToTypeMap[category];
-          if (type) {
-            setFilteredData((prevData) =>
-              prevData.filter((item) => item.type !== type)
-            );
-          }
-          setFilteredData((prevData) => {
-            const totalSpent = prevData.reduce((sum, dataItem) => {
-              const key = `${dataItem.type}-${dataItem.id}`;
-              const itemQuantity =
-                dataItem.type === "restaurant" || dataItem.type === "hotels"
-                  ? parseInt(guestCount, 10) || 1
-                  : parseInt(quantities[key] || "1");
-              const itemCost =
-                dataItem.type === "restaurant"
-                  ? dataItem.averageCost
-                  : dataItem.cost;
-              return sum + itemCost * itemQuantity;
-            }, 0);
-            setRemainingBudget(parseFloat(budget) - totalSpent);
-            return prevData;
-          });
-          return [...prev, category];
-        }
-      });
-    },
-    [quantities, budget, guestCount, combinedData]
-  );
-
+  // Fetch data and other useEffect hooks remain unchanged
   const fetchData = async () => {
     if (!token || !user?.id) return;
     setLoading(true);
@@ -1824,279 +1752,336 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
     }
   };
 
+  // const handleSubmit = async () => {
+  //   if (!eventName.trim()) {
+  //     alert("Пожалуйста, укажите название мероприятия");
+  //     return;
+  //   }
+  //   if (!eventDate) {
+  //     alert("Пожалуйста, выберите дату мероприятия");
+  //     return;
+  //   }
+  //   if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
+  //     alert("Пожалуйста, укажите корректный бюджет");
+  //     return;
+  //   }
+  //   if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
+  //     alert("Пожалуйста, укажите корректное количество гостей");
+  //     return;
+  //   }
+  //   if (filteredData.length === 0) {
+  //     alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     const categoryResponse = await api.createEventCategory(
+  //       { name: eventName },
+  //       token
+  //     );
+  //     const categoryId = categoryResponse.data.id;
+
+  //     for (const item of filteredData) {
+  //       const typeMapping = typesMapping.find(mapping => mapping.type === item.type);
+  //       if (!typeMapping) {
+  //         console.error(`Неизвестный тип услуги: ${item.type}`);
+  //         continue;
+  //       }
+
+  //   let serviceType = typeMapping.type;
+
+  //     // Adjust serviceType to match backend expectations if necessary
+  //     // For example, if backend expects 'TraditionalGifts' instead of 'traditional-gifts', adjust here
+  //     const serviceTypeMap = {
+  //       'restaurant': 'restaurant',
+  //       'hotels': 'hotels',
+  //       'tamada': 'tamada',
+  //       'program': 'program',
+  //       'flowers': 'flowers',
+  //       'transport': 'transport',
+  //       'cake': 'cake',
+  //       'alcohol': 'alcohol',
+  //       'jewelry': 'jewelry',
+  //       'typography': 'typography',
+  //       'technical-equipment-rental': 'technical-equipment-rental',
+  //       'traditional-gifts': 'traditional-gifts',
+  //       'national-costumes': 'national-costumes',
+  //       'musicians': 'musicians',
+  //       'photographers': 'photographers',
+  //       'videographers': 'videographers',
+  //       'decor': 'decor',
+  //       'event-category': 'event-category',
+  //     };
+
+  //     serviceType = serviceTypeMap[item.type] || item.type;
+
+
+  //       const quantity = item.type === "restaurant" || item.type === "hotels"
+  //         ? parseInt(guestCount, 10)
+  //         : parseInt(quantities[`${item.type}-${item.id}`] || "1");
+
+  //       try {
+  //         await api.addServiceToCategory(
+  //           categoryId,
+  //           { serviceId: item.id, serviceType, quantity },
+  //           token
+  //         );
+  //       } catch (error) {
+  //         console.error(`Ошибка при добавлении услуги ${serviceType}:`, error);
+  //       }
+  //     }
+
+  //     alert("Мероприятие успешно создано!");
+  //     setEventName("");
+  //     setEventDate(new Date());
+  //     setBudget("");
+  //     setGuestCount("");
+  //     setFilteredData([]);
+  //     setQuantities({});
+  //     setRemainingBudget(0);
+  //     navigation.goBack();
+  //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  //   } catch (error) {
+  //     console.error("Ошибка при создании мероприятия:", error);
+  //     alert("Ошибка: " + (error.response?.data?.error || error.message));
+  //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
   const handleSubmit = async () => {
-    if (!eventName.trim()) {
-      alert("Пожалуйста, укажите название мероприятия");
-      return;
-    }
-    if (!eventDate) {
-      alert("Пожалуйста, выберите дату мероприятия");
-      return;
-    }
-    if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
-      alert("Пожалуйста, укажите корректный бюджет");
-      return;
-    }
-    if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
-      alert("Пожалуйста, укажите корректное количество гостей");
-      return;
-    }
-    if (filteredData.length === 0) {
-      alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
-      return;
-    }
+  if (!eventName.trim()) {
+    alert("Пожалуйста, укажите название мероприятия");
+    return;
+  }
+  if (!eventDate) {
+    alert("Пожалуйста, выберите дату мероприятия");
+    return;
+  }
+  if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
+    alert("Пожалуйста, укажите корректный бюджет");
+    return;
+  }
+  if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
+    alert("Пожалуйста, укажите корректное количество гостей");
+    return;
+  }
+  if (filteredData.length === 0) {
+    alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const categoryResponse = await api.createEventCategory(
-        { name: eventName },
-        token
-      );
-      const categoryId = categoryResponse.data.id;
+  setLoading(true);
+  try {
+    const categoryResponse = await api.createEventCategory(
+      { name: eventName },
+      token
+    );
+    const categoryId = categoryResponse.data.id;
 
-      for (const item of filteredData) {
-        const typeMapping = typesMapping.find(mapping => mapping.type === item.type);
-        if (!typeMapping) {
-          console.error(`Неизвестный тип услуги: ${item.type}`);
-          continue;
-        }
+    for (const item of filteredData) {
+      const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
+      if (!typeMapping) {
+        console.error(`Неизвестный тип услуги: ${item.type}`);
+        continue;
+      }
 
-        const serviceType = item.type.charAt(0).toUpperCase() + item.type.slice(1);
-        const quantity = item.type === "restaurant" || item.type === "hotels"
+      // Map frontend types to backend-expected serviceType values
+      const serviceTypeMap = {
+        'restaurant': 'Restaurant', // Try capitalized form
+        'hotels': 'Hotel', // Backend might expect singular
+        'tamada': 'Tamada',
+        'program': 'Program',
+        'flowers': 'Flowers',
+        'transport': 'Transport',
+        'cake': 'Cakes',
+        'alcohol': 'Alcohol',
+        'jewelry': 'Jewelry',
+        'typography': 'Typography',
+        'technical-equipment-rental': 'TechnicalEquipmentRental', // CamelCase for multi-word
+        'traditional-gifts': 'TraditionalGifts', // CamelCase for multi-word
+        'national-costumes': 'NationalCostumes', // CamelCase for multi-word
+        'musicians': 'Musician', // Backend might expect singular
+        'photographers': 'Photographer', // Backend might expect singular
+        'videographers': 'Videographer', // Backend might expect singular
+        'decor': 'Decor',
+        'event-category': 'EventCategory', // CamelCase for multi-word
+      };
+
+      const serviceType = serviceTypeMap[item.type] || item.type;
+
+      const quantity =
+        item.type === 'restaurant' || item.type === 'hotels'
           ? parseInt(guestCount, 10)
-          : parseInt(quantities[`${item.type}-${item.id}`] || "1");
+          : parseInt(quantities[`${item.type}-${item.id}`] || '1');
 
-        try {
-          await api.addServiceToCategory(
-            categoryId,
-            { serviceId: item.id, serviceType, quantity },
-            token
+      try {
+        await api.addServiceToCategory(
+          categoryId,
+          { serviceId: item.id, serviceType, quantity },
+          token
+        );
+        console.log(`Услуга ${serviceType} успешно добавлена с ID ${item.id} и количеством ${quantity}`);
+      } catch (error) {
+        console.error(
+          `Ошибка при добавлении услуги ${serviceType} (ID: ${item.id}, Type: ${item.type}):`,
+          error.response?.data || error.message
+        );
+      }
+    }
+
+    alert('Мероприятие успешно создано!');
+    setEventName('');
+    setEventDate(new Date());
+    setBudget('');
+    setGuestCount('');
+    setFilteredData([]);
+    setQuantities({});
+    setRemainingBudget(0);
+    navigation.goBack();
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  } catch (error) {
+    console.error('Ошибка при создании мероприятия:', error.response?.data || error.message);
+    alert('Ошибка: ' + (error.response?.data?.error || error.message));
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
+
+
+
+  const handleRemoveCategory = useCallback(
+    (category) => {
+      setDisabledCategories((prev) => {
+        if (prev.includes(category)) {
+          const updatedDisabledCategories = prev.filter(
+            (cat) => cat !== category
           );
-        } catch (error) {
-          console.error(`Ошибка при добавлении услуги ${serviceType}:`, error);
-        }
-      }
-
-      alert("Мероприятие успешно создано!");
-      setEventName("");
-      setEventDate(new Date());
-      setBudget("");
-      setGuestCount("");
-      setFilteredData([]);
-      setQuantities({});
-      setRemainingBudget(0);
-      navigation.goBack();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (error) {
-      console.error("Ошибка при создании мероприятия:", error);
-      alert("Ошибка: " + (error.response?.data?.error || error.message));
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const renderCategory = ({ item }) => {
-    if (item === "Добавить") {
-      return (
-        <View style={styles.categoryRow}>
-          <TouchableOpacity
-            style={styles.categoryButtonAdd}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setAddCategoryModalVisible(true);
-            }}
-            accessible
-            accessibilityLabel="Добавить новую категорию"
-          >
-            <LinearGradient
-              colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-              style={styles.categoryButtonGradient}
-            >
-              <Text style={styles.categoryPlusText}>+</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    const isDisabled = disabledCategories.includes(item);
-    const type = categoryToTypeMap[item];
-    const itemsForCategory = filteredData.filter((dataItem) => dataItem.type === type);
-
-    return (
-      <View style={styles.categoryRow}>
-        <TouchableOpacity
-          style={[
-            styles.categoryButton,
-            isDisabled && styles.categoryButtonDisabled,
-          ]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            setSelectedCategoryItems(
-              combinedData.filter((dataItem) => dataItem.type === type)
+          const type = categoryToTypeMap[category];
+          if (type) {
+            const itemsToAdd = combinedData.filter(
+              (item) => item.type === type
             );
-            setSelectedCategoryLabel(item);
-            setSelectedCategoryType(type);
-            setCategoryModalVisible(true);
-          }}
-          accessible
-          accessibilityLabel={`Открыть категорию ${item}`}
-        >
-          <LinearGradient
-            colors={
-              isDisabled
-                ? [COLORS.textSecondary, COLORS.textSecondary]
-                : [COLORS.buttonGradientStart, COLORS.buttonGradientEnd]
+
+            let remaining = parseFloat(budget) || 0;
+            const currentTotalSpent = filteredData.reduce((sum, dataItem) => {
+              const key = `${dataItem.type}-${dataItem.id}`;
+              const itemQuantity =
+                dataItem.type === "restaurant" || dataItem.type === "hotels"
+                  ? parseInt(guestCount, 10) || 1
+                  : parseInt(quantities[key] || "1");
+              const itemCost =
+                dataItem.type === "restaurant"
+                  ? dataItem.averageCost
+                  : dataItem.cost;
+              return sum + itemCost * itemQuantity;
+            }, 0);
+            remaining -= currentTotalSpent;
+
+            const filteredItemsToAdd = itemsToAdd
+              .filter((item) => {
+                const cost =
+                  item.type === "restaurant" ? item.averageCost : item.cost;
+                const effectiveQuantity =
+                  item.type === "restaurant" || item.type === "hotels"
+                    ? parseInt(guestCount, 10) || 1
+                    : 1;
+                const totalCost = cost * effectiveQuantity;
+                return totalCost <= remaining;
+              })
+              .sort((a, b) => {
+                const costA = a.type === "restaurant" ? a.averageCost : a.cost;
+                const costB = b.type === "restaurant" ? b.averageCost : b.cost;
+                return costA - costB;
+              });
+
+            const maxItemsToSelect = Math.min(1, filteredItemsToAdd.length);
+            const selectedItemsToAdd = [];
+            for (let i = 0; i < maxItemsToSelect; i++) {
+              const selectedItem = filteredItemsToAdd[i];
+              if (selectedItem) {
+                const cost =
+                  selectedItem.type === "restaurant"
+                    ? selectedItem.averageCost
+                    : selectedItem.cost;
+                const effectiveQuantity =
+                  selectedItem.type === "restaurant" || selectedItem.type === "hotels"
+                    ? parseInt(guestCount, 10) || 1
+                    : 1;
+                const totalCost = cost * effectiveQuantity;
+                selectedItemsToAdd.push({ ...selectedItem, totalCost });
+                remaining -= totalCost;
+              }
             }
-            style={styles.categoryButtonGradient}
-          >
-            <Text
-              style={[
-                styles.categoryButtonText,
-                isDisabled && styles.categoryButtonTextDisabled,
-              ]}
-            >
-              {item} {itemsForCategory.length > 0 ? `(${itemsForCategory.length})` : ""}
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.removeCategoryButton}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            handleRemoveCategory(item);
-          }}
-          accessible
-          accessibilityLabel={isDisabled ? `Включить категорию ${item}` : `Отключить категорию ${item}`}
-        >
-          <Icon2
-            name={isDisabled ? "plus-circle-outline" : "minus-circle-outline"}
-            size={24}
-            color={isDisabled ? COLORS.accent : COLORS.error}
-          />
-        </TouchableOpacity>
-      </View>
-    );
-  };
 
-  const renderItem = ({ item }) => (
-    <SelectedItem
-      item={item}
-      quantities={quantities}
-      setQuantities={setQuantities}
-      filteredData={filteredData}
-      setFilteredData={setFilteredData}
-      budget={budget}
-      setRemainingBudget={setRemainingBudget}
-      handleRemoveItem={handleRemoveItem}
-      setDetailsModalVisible={setDetailsModalVisible}
-      setSelectedItem={setSelectedItem}
-      guestCount={guestCount}
-      setGuestCount={setGuestCount}
-    />
+            setFilteredData((prevData) => {
+              const updatedData = [...prevData, ...selectedItemsToAdd].sort(
+                (a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13)
+              );
+
+              setQuantities((prevQuantities) => ({
+                ...prevQuantities,
+                ...selectedItemsToAdd.reduce((acc, item) => {
+                  const itemKey = `${item.type}-${item.id}`;
+                  return { ...acc, [itemKey]: "1" };
+                }, {}),
+              }));
+
+              const totalSpent = updatedData.reduce((sum, dataItem) => {
+                const key = `${dataItem.type}-${dataItem.id}`;
+                const itemQuantity =
+                  dataItem.type === "restaurant" || dataItem.type === "hotels"
+                    ? parseInt(guestCount, 10) || 1
+                    : parseInt(quantities[key] || "1");
+                const itemCost =
+                  dataItem.type === "restaurant"
+                    ? dataItem.averageCost
+                    : dataItem.cost;
+                return sum + itemCost * itemQuantity;
+              }, 0);
+              setRemainingBudget(parseFloat(budget) - totalSpent);
+
+              return updatedData;
+            });
+          }
+          return updatedDisabledCategories;
+        } else {
+          const type = categoryToTypeMap[category];
+          if (type) {
+            setFilteredData((prevData) =>
+              prevData.filter((item) => item.type !== type)
+            );
+          }
+          setFilteredData((prevData) => {
+            const totalSpent = prevData.reduce((sum, dataItem) => {
+              const key = `${dataItem.type}-${dataItem.id}`;
+              const itemQuantity =
+                dataItem.type === "restaurant" || dataItem.type === "hotels"
+                  ? parseInt(guestCount, 10) || 1
+                  : parseInt(quantities[key] || "1");
+              const itemCost =
+                dataItem.type === "restaurant"
+                  ? dataItem.averageCost
+                  : dataItem.cost;
+              return sum + itemCost * itemQuantity;
+            }, 0);
+            setRemainingBudget(parseFloat(budget) - totalSpent);
+            return prevData;
+          });
+          return [...prev, category];
+        }
+      });
+    },
+    [quantities, budget, guestCount, combinedData]
   );
-
-  const DetailsModal = ({ visible, onClose, item }) => {
-    if (!item) return null;
-
-    const renderDetailRow = (label, value) => {
-      if (!value) return null;
-      return (
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>{label}:</Text>
-          <Text style={styles.detailValue}>{value}</Text>
-        </View>
-      );
-    };
-
-    const handleOpenLink = (url) => {
-      if (url) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Linking.openURL(url).catch((err) => console.error("Ошибка открытия ссылки:", err));
-      }
-    };
-
-    return (
-      <Modal
-        visible={visible}
-        transparent
-        animationType="fade"
-        onRequestClose={onClose}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.detailsModalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {item.type === "restaurant" ? item.name :
-                 item.type === "hotels" ? item.name :
-                 item.type === "tamada" ? item.name :
-                 item.type === "program" ? item.teamName :
-                 item.type === "flowers" ? `${item.salonName} - ${item.flowerName}` :
-                 item.type === "transport" ? `${item.salonName} - ${item.carName}` :
-                 item.type === "cake" ? item.name :
-                 item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
-                 item.type === "jewelry" ? `${item.storeName} - ${item.itemName}` :
-                 item.type === "traditional-gifts" ? `${item.salonName} - ${item.itemName}` :
-                 "Детали"}
-              </Text>
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={onClose}
-                accessible
-                accessibilityLabel="Закрыть модальное окно"
-              >
-                <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={[
-                { label: 'Тип', value: typeToCategoryMap[item.type] },
-                { label: 'Адрес', value: item.address },
-                { label: 'Телефон', value: item.phone },
-                { label: 'Кухня', value: item.cuisine },
-                { label: 'Вместимость', value: item.capacity },
-                { label: 'Категория', value: item.category },
-                { label: 'Бренд', value: item.brand },
-                { label: 'Пол', value: item.gender },
-                { label: 'Портфолио', value: item.portfolio },
-                { label: 'Тип торта', value: item.cakeType },
-                { label: 'Тип цветов', value: item.flowerType },
-                { label: 'Материал', value: item.material },
-                { label: 'Район', value: item.district },
-                { 
-                  label: 'Стоимость',
-                  value: `${(item.type === 'restaurant' ? item.averageCost : item.cost).toLocaleString()} ₸`
-                }
-              ].filter(d => d.value)}
-              renderItem={({ item }) => renderDetailRow(item.label, item.value)}
-
-
-
-              keyExtractor={(item, index) => `${item.label}-${index}`}
-              contentContainerStyle={styles.detailsModalContent}
-              showsVerticalScrollIndicator={false}
-            />
-            {item.portfolio && (
-              <TouchableOpacity
-                style={styles.portfolioButton}
-                onPress={() => handleOpenLink(item.portfolio)}
-                accessible
-                accessibilityLabel="Открыть портфолио"
-              >
-                <LinearGradient
-                  colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-                  style={styles.portfolioButtonGradient}
-                >
-                  <Text style={styles.portfolioButtonText}>Открыть портфолио</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </Modal>
-    );
-  };
 
   const handleDateSelect = (day) => {
     setEventDate(new Date(day.dateString));
@@ -2234,69 +2219,283 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
     </View>
   );
 
-  const renderCategories = () => (
-    <View style={styles.categoriesContainer}>
-      <Text style={styles.sectionTitle}>Категории</Text>
-      <FlatList
-        data={[...categories, 'Добавить']}
-        renderItem={renderCategory}
-        keyExtractor={(item) => item}
-        numColumns={2}
-        columnWrapperStyle={styles.categoryRowWrapper}
-        contentContainerStyle={styles.categoriesList}
-      />
-    </View>
+  const renderCategories = ({ item }) => {
+    if (item === "Добавить") {
+      return (
+        <View style={styles.categoryRow}>
+          <TouchableOpacity
+            style={styles.categoryButtonAdd}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setAddCategoryModalVisible(true);
+            }}
+            accessible
+            accessibilityLabel="Добавить новую категорию"
+          >
+            <LinearGradient
+              colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
+              style={styles.categoryButtonGradient}
+            >
+              <Text style={styles.categoryPlusText}>+</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    const isDisabled = disabledCategories.includes(item);
+    const type = categoryToTypeMap[item];
+    const itemsForCategory = filteredData.filter((dataItem) => dataItem.type === type);
+
+    return (
+      <View style={styles.categoryRow}>
+        <TouchableOpacity
+          style={[
+            styles.categoryButton,
+            isDisabled && styles.categoryButtonDisabled,
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleOpenCategoryModal(item, type);
+          }}
+          accessible
+          accessibilityLabel={`Открыть категорию ${item}`}
+        >
+          <LinearGradient
+            colors={
+              isDisabled
+                ? [COLORS.textSecondary, COLORS.textSecondary]
+                : [COLORS.buttonGradientStart, COLORS.buttonGradientEnd]
+            }
+            style={styles.categoryButtonGradient}
+          >
+            <Text
+              style={[
+                styles.categoryButtonText,
+                isDisabled && styles.categoryButtonTextDisabled,
+              ]}
+            >
+              {item} {itemsForCategory.length > 0 ? `(${itemsForCategory.length})` : ""}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.removeCategoryButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleRemoveCategory(item);
+          }}
+          accessible
+          accessibilityLabel={isDisabled ? `Включить категорию ${item}` : `Отключить категорию ${item}`}
+        >
+          <Icon2
+            name={isDisabled ? "plus-circle-outline" : "minus-circle-outline"}
+            size={24}
+            color={isDisabled ? COLORS.accent : COLORS.error}
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderSelectedItems = ({ item }) => (
+    <SelectedItem
+      item={item}
+      quantities={quantities}
+      setQuantities={setQuantities}
+      filteredData={filteredData}
+      setFilteredData={setFilteredData}
+      budget={budget}
+      setRemainingBudget={setRemainingBudget}
+      handleRemoveItem={handleRemoveItem}
+      setDetailsModalVisible={setDetailsModalVisible}
+      setSelectedItem={setSelectedItem}
+      guestCount={guestCount}
+      setGuestCount={setGuestCount}
+    />
   );
 
-  const renderSelectedItems = () => (
-    <View style={styles.selectedItemsContainer}>
-      <Text style={styles.sectionTitle}>Выбранные элементы</Text>
-      {isLoading ? (
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      ) : filteredData.length === 0 ? (
-        <Text style={styles.emptyText}>Нет выбранных элементов</Text>
-      ) : (
-        <FlatList
-          data={filteredData}
-          renderItem={renderItem}
-          keyExtractor={(item) => `${item.type}-${item.id}`}
-          contentContainerStyle={styles.selectedItemsList}
-        />
-      )}
-    </View>
-  );
+  const DetailsModal = ({ visible, onClose, item }) => {
+    if (!item) return null;
+
+    const renderDetailRow = (label, value) => {
+      if (!value) return null;
+      return (
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>{label}:</Text>
+          <Text style={styles.detailValue}>{value}</Text>
+        </View>
+      );
+    };
+
+    const handleOpenLink = (url) => {
+      if (url) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Linking.openURL(url).catch((err) => console.error("Ошибка открытия ссылки:", err));
+      }
+    };
+
+    return (
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.detailsModalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {item.type === "restaurant" ? item.name :
+                 item.type === "hotels" ? item.name :
+                 item.type === "tamada" ? item.name :
+                 item.type === "program" ? item.teamName :
+                 item.type === "flowers" ? `${item.salonName} - ${item.flowerName}` :
+                 item.type === "transport" ? `${item.salonName} - ${item.carName}` :
+                 item.type === "cake" ? item.name :
+                 item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
+                 item.type === "jewelry" ? `${item.storeName} - ${item.itemName}` :
+                 item.type === "traditional-gifts" ? `${item.salonName} - ${item.itemName}` :
+                 "Детали"}
+              </Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={onClose}
+                accessible
+                accessibilityLabel="Закрыть модальное окно"
+              >
+                <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={[
+                { label: 'Тип', value: typeToCategoryMap[item.type] },
+                { label: 'Адрес', value: item.address },
+                { label: 'Телефон', value: item.phone },
+                { label: 'Кухня', value: item.cuisine },
+                { label: 'Вместимость', value: item.capacity },
+                { label: 'Категория', value: item.category },
+                { label: 'Бренд', value: item.brand },
+                { label: 'Пол', value: item.gender },
+                { label: 'Портфолио', value: item.portfolio },
+                { label: 'Тип торта', value: item.cakeType },
+                { label: 'Тип цветов', value: item.flowerType },
+                { label: 'Материал', value: item.material },
+                { label: 'Район', value: item.district },
+                { 
+                  label: 'Стоимость',
+                  value: `${(item.type === 'restaurant' ? item.averageCost : item.cost).toLocaleString()} ₸`
+                }
+              ].filter(d => d.value)}
+              renderItem={({ item }) => renderDetailRow(item.label, item.value)}
+              keyExtractor={(item, index) => `${item.label}-${index}`}
+              contentContainerStyle={styles.detailsModalContent}
+              showsVerticalScrollIndicator={false}
+            />
+            {item.portfolio && (
+              <TouchableOpacity
+                style={styles.portfolioButton}
+                onPress={() => handleOpenLink(item.portfolio)}
+                accessible
+                accessibilityLabel="Открыть портфолио"
+              >
+                <LinearGradient
+                  colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
+                  style={styles.portfolioButtonGradient}
+                >
+                  <Text style={styles.portfolioButtonText}>Открыть портфолио</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  // Combine all sections into a single FlatList
+  const renderMainContent = () => {
+    const sections = [
+      { type: 'header', id: 'header' },
+      { type: 'eventDetails', id: 'eventDetails' },
+      { type: 'categories', id: 'categories' },
+      { type: 'selectedItemsHeader', id: 'selectedItemsHeader' },
+      ...filteredData.map(item => ({ type: 'selectedItem', id: `${item.type}-${item.id}`, data: item })),
+      { type: 'submitButton', id: 'submitButton' },
+    ];
+
+    return (
+      <FlatList
+        data={sections}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          switch (item.type) {
+            case 'header':
+              return renderHeader();
+            case 'eventDetails':
+              return renderEventDetails();
+            case 'categories':
+              return (
+                <View style={styles.categoriesContainer}>
+                  <Text style={styles.sectionTitle}>Категории</Text>
+                  <FlatList
+                    data={[...categories, 'Добавить']}
+                    renderItem={renderCategories}
+                    keyExtractor={(item) => item}
+                    numColumns={2}
+                    columnWrapperStyle={styles.categoryRowWrapper}
+                    contentContainerStyle={styles.categoriesList}
+                    nestedScrollEnabled
+                  />
+                </View>
+              );
+            case 'selectedItemsHeader':
+              return (
+                <View style={styles.selectedItemsContainer}>
+                  <Text style={styles.sectionTitle}>Выбранные элементы</Text>
+                  {isLoading && <ActivityIndicator size="large" color={COLORS.primary} />}
+                  {!isLoading && filteredData.length === 0 && (
+                    <Text style={styles.emptyText}>Нет выбранных элементов</Text>
+                  )}
+                </View>
+              );
+            case 'selectedItem':
+              return renderSelectedItems({ item: item.data });
+            case 'submitButton':
+              return (
+                <TouchableOpacity
+                  style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+                  onPress={handleSubmit}
+                  disabled={loading}
+                  accessible
+                  accessibilityLabel="Создать мероприятие"
+                >
+                  <LinearGradient
+                    colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
+                    style={styles.submitButtonGradient}
+                  >
+                    {loading ? (
+                      <ActivityIndicator size="small" color={COLORS.white} />
+                    ) : (
+                      <Text style={styles.submitButtonText}>Создать мероприятие</Text>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              );
+            default:
+              return null;
+          }
+        }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      />
+    );
+  };
 
   return (
     <ErrorBoundary>
       <SafeAreaView style={styles.container}>
-        <ScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {renderHeader()}
-          {renderEventDetails()}
-          {renderCategories()}
-          {renderSelectedItems()}
-          <TouchableOpacity
-            style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-            accessible
-            accessibilityLabel="Создать мероприятие"
-          >
-            <LinearGradient
-              colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-              style={styles.submitButtonGradient}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color={COLORS.white} />
-              ) : (
-                <Text style={styles.submitButtonText}>Создать мероприятие</Text>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-        </ScrollView>
+        {renderMainContent()}
 
         <AddItemModal
           visible={addItemModalVisible}
