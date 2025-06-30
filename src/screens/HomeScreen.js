@@ -314,7 +314,7 @@ const AddItemModal = ({
             onPress={() => {
               setSelectedItem(item);
               setDetailsModalVisible(true);
-              // Убрали onClose(), чтобы AddItemModal оставался открытым
+              
             }}
           >
             <Icon name="search" size={20} color={MODAL_COLORS.icon} />
@@ -1267,7 +1267,7 @@ const CreateEventScreen = ({ navigation, route }) => {
       const responses = await Promise.all([
         api.getRestaurants(), api.getClothing(), api.getTamada(), api.getPrograms(),
         api.getTraditionalGifts(), api.getFlowers(), api.getCakes(), api.getAlcohol(),
-        api.getTransport(), api.getGoods(token), api.getTJewelry(),
+        api.getTransport(), api.getGoods(token), api.getJewelry(),
       ]);
       const [
         restaurants, clothing, tamada, programs, traditionalGifts,
