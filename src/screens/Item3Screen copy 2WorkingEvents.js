@@ -24,7 +24,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import { Calendar } from 'react-native-calendars';
-import { Picker } from '@react-native-picker/picker';
 
 const COLORS = {
   primary: '#4A90E2',
@@ -50,21 +49,12 @@ export default function Item3Screen() {
   const [refreshing, setRefreshing] = useState(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [categoryDetailsModalVisible, setCategoryDetailsModalVisible] = useState(false);
-  const [serviceDetailsModalVisible, setServiceDetailsModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoryName, setCategoryName] = useState('');
-  const [categoryDescription, setCategoryDescription] = useState('');
-  const [categoryStatus, setCategoryStatus] = useState('active');
-  const [categoryServices, setCategoryServices] = useState([]);
-  const [availableServices, setAvailableServices] = useState([]);
-  const [servicesError, setServicesError] = useState(null);
   const [categoryDetails, setCategoryDetails] = useState(null);
-  const [selectedService, setSelectedService] = useState(null);
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [loadingServiceDetails, setLoadingServiceDetails] = useState(false);
   const [weddings, setWeddings] = useState([]);
   const [weddingModalVisible, setWeddingModalVisible] = useState(false);
-  const [weddingItemsCache, setWeddingItemsCache] = useState({});
+  const [weddingItems, setWeddingItems] = useState([]);
   const [editWeddingModalVisible, setEditWeddingModalVisible] = useState(false);
   const [wishlistModalVisible, setWishlistModalVisible] = useState(false);
   const [wishlistViewModalVisible, setWishlistViewModalVisible] = useState(false);
@@ -83,9 +73,11 @@ export default function Item3Screen() {
   const [isCustomGift, setIsCustomGift] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [activeWeddingId, setActiveWeddingId] = useState(null);
   const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
 
+  // Fetch Event Categories
   const fetchEventCategories = async () => {
     setLoadingCategories(true);
     try {
@@ -109,80 +101,25 @@ export default function Item3Screen() {
     }
   };
 
-  const fetchAvailableServices = async () => {
-    try {
-      console.log('Fetching available services...');
-      const response = await api.getServices();
-      console.log('Services Response:', JSON.stringify(response.data, null, 2));
-      setAvailableServices(response.data.data || response.data || []);
-      setServicesError(null);
-    } catch (error) {
-      console.error('Error fetching services:', error.message, error.response?.data);
-      setAvailableServices([]);
-      setServicesError('Не удалось загрузить услуги. Вы можете продолжить без выбора услуг.');
-      return [];
-    }
-  };
+  // Handle Refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchEventCategories();
+    setRefreshing(false);
+  }, []);
 
-  const fetchWeddings = async () => {
-    setLoadingWeddings(true);
-    try {
-      console.log('Fetching weddings...');
-      const response = await api.getWedding();
-      console.log('Weddings Response:', JSON.stringify(response.data, null, 2));
-      const weddingData = Array.isArray(response.data) ? response.data : response.data.data || [];
-      setWeddings(weddingData);
-      const itemsPromises = weddingData.map((wedding) =>
-        api.getWeddingItems(wedding.id).then((res) => ({
-          weddingId: wedding.id,
-          items: res.data.data || [],
-        }))
-      );
-      const itemsResults = await Promise.all(itemsPromises);
-      const newCache = itemsResults.reduce((acc, { weddingId, items }) => {
-        acc[weddingId] = items;
-        return acc;
-      }, {});
-      setWeddingItemsCache(newCache);
-      return weddingData;
-    } catch (error) {
-      console.error('Error fetching weddings:', error.message, error.response?.data);
-      Alert.alert('Ошибка', 'Не удалось загрузить свадьбы');
-      setWeddings([]);
-      setWeddingItemsCache({});
-      return [];
-    } finally {
-      setLoadingWeddings(false);
-    }
-  };
-
-  const fetchGoods = async () => {
-    try {
-      console.log('Fetching goods...');
-      const response = await api.getGoods();
-      console.log('Goods Response:', JSON.stringify(response.data, null, 2));
-      setGoods(Array.isArray(response.data) ? response.data : response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching goods:', error.message, error.response?.data);
-      Alert.alert('Ошибка', 'Не удалось загрузить товары');
-    }
-  };
-
+  // Fetch Event Category Details
   const fetchEventCategoryDetails = async (id) => {
     setLoadingDetails(true);
     try {
       console.log(`Fetching details for category ID: ${id}`);
       const response = await api.getEventCategoryWithServices(id);
       console.log('Category Details Response:', JSON.stringify(response.data, null, 2));
-      const details = response.data.data || response.data;
-      if (!details.services || details.services.length === 0) {
-        console.log('No services found for category ID:', id);
-      }
-      setCategoryDetails(details);
-      return details;
+      setCategoryDetails(response.data.data || null);
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching category details:', error.message, error.response?.data);
-      Alert.alert('Ошибка', `Не удалось загрузить детали категории: ${error.message}`);
+      Alert.alert('Ошибка', `Не удалось загрузить детали: ${error.message}`);
       setCategoryDetails(null);
       return null;
     } finally {
@@ -190,47 +127,19 @@ export default function Item3Screen() {
     }
   };
 
-  const fetchServiceDetails = async (serviceId, serviceType) => {
-    setLoadingServiceDetails(true);
-    try {
-      console.log(`Fetching details for service ID: ${serviceId}, type: ${serviceType}`);
-      const response = await api.fetchByEndpoint(`/api/${serviceType.toLowerCase()}/${serviceId}`);
-      console.log('Service Details Response:', JSON.stringify(response.data, null, 2));
-      return response.data.data || response.data;
-    } catch (error) {
-      console.error(`Error fetching service details for ${serviceType}/${serviceId}:`, error.message, error.response?.data);
-      return null;
-    } finally {
-      setLoadingServiceDetails(false);
-    }
-  };
-
+  // Create Event Category
   const handleCreateEventCategory = async () => {
     if (!categoryName.trim()) {
       Alert.alert('Ошибка', 'Введите название категории');
       return;
     }
     try {
-      console.log('Creating event category:', { name: categoryName, description: categoryDescription, status: categoryStatus });
-      const response = await api.createEventCategory({
-        name: categoryName,
-        description: categoryDescription,
-        status: categoryStatus,
-      });
+      console.log('Creating event category:', { name: categoryName });
+      const response = await api.createEventCategory({ name: categoryName });
       console.log('Created Event Category:', JSON.stringify(response.data, null, 2));
-      const newCategory = response.data.data || response.data;
-      setEventCategories((prev) => [...prev, newCategory]);
-      if (categoryServices.length > 0) {
-        await api.addServicesToCategory(newCategory.id, {
-          service_ids: categoryServices.map((s) => ({ serviceId: s.id, serviceType: s.serviceType })),
-        });
-        console.log('Added services to category:', categoryServices);
-      }
+      setEventCategories((prev) => [...prev, response.data.data]);
       Alert.alert('Успех', 'Категория мероприятия создана');
       setCategoryName('');
-      setCategoryDescription('');
-      setCategoryStatus('active');
-      setCategoryServices([]);
       setCategoryModalVisible(false);
     } catch (error) {
       console.error('Error creating event category:', error.message, error.response?.data);
@@ -238,36 +147,21 @@ export default function Item3Screen() {
     }
   };
 
+  // Update Event Category
   const handleUpdateEventCategory = async () => {
     if (!selectedCategory || !categoryName.trim()) {
       Alert.alert('Ошибка', 'Выберите категорию и введите название');
       return;
     }
     try {
-      console.log('Updating event category:', {
-        id: selectedCategory.id,
-        name: categoryName,
-        description: categoryDescription,
-        status: categoryStatus,
-      });
-      const response = await api.updateEventCategory(selectedCategory.id, {
-        name: categoryName,
-        description: categoryDescription,
-        status: categoryStatus,
-      });
+      console.log('Updating event category:', { id: selectedCategory.id, name: categoryName });
+      const response = await api.updateEventCategory(selectedCategory.id, { name: categoryName });
       console.log('Updated Event Category:', JSON.stringify(response.data, null, 2));
       setEventCategories((prev) =>
-        prev.map((cat) => (cat.id === selectedCategory.id ? response.data.data || response.data : cat))
+        prev.map((cat) => (cat.id === selectedCategory.id ? response.data.data : cat))
       );
-      await api.updateServicesForCategory(selectedCategory.id, {
-        service_ids: categoryServices.map((s) => ({ serviceId: s.id, serviceType: s.serviceType })),
-      });
-      console.log('Updated services for category:', categoryServices);
       Alert.alert('Успех', 'Категория мероприятия обновлена');
       setCategoryName('');
-      setCategoryDescription('');
-      setCategoryStatus('active');
-      setCategoryServices([]);
       setSelectedCategory(null);
       setCategoryModalVisible(false);
     } catch (error) {
@@ -276,6 +170,7 @@ export default function Item3Screen() {
     }
   };
 
+  // Delete Event Category
   const handleDeleteEventCategory = (id) => {
     Alert.alert(
       'Подтверждение',
@@ -300,14 +195,85 @@ export default function Item3Screen() {
     );
   };
 
+  // Fetch Weddings
+  const fetchWeddings = async () => {
+    setLoadingWeddings(true);
+    try {
+      console.log('Fetching weddings...');
+      const response = await api.getWedding();
+      console.log('Weddings Response:', JSON.stringify(response.data, null, 2));
+      const weddingData = Array.isArray(response.data) ? response.data : response.data.data || [];
+      setWeddings(weddingData);
+      return weddingData;
+    } catch (error) {
+      console.error('Error fetching weddings:', error.message, error.response?.data);
+      Alert.alert('Ошибка', 'Не удалось загрузить свадьбы');
+      setWeddings([]);
+      return [];
+    } finally {
+      setLoadingWeddings(false);
+    }
+  };
+
+  // Fetch Wedding Items
+  const fetchWeddingItems = async (weddingId) => {
+    if (!weddingId) {
+      setWeddingItems([]);
+      return;
+    }
+    try {
+      console.log(`Fetching wedding items for wedding ID: ${weddingId}`);
+      const response = await api.getWeddingItems(weddingId);
+      console.log('Wedding Items Response:', JSON.stringify(response.data, null, 2));
+      if (!response.data.success && response.data.error === 'Свадьба не создана') {
+        Alert.alert('Информация', 'Свадьба не найдена. Создайте свадьбу.');
+        setWeddingItems([]);
+        return;
+      }
+      setWeddingItems(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching wedding items:', error.message, error.response?.data);
+      Alert.alert('Ошибка', `Не удалось загрузить элементы свадьбы: ${error.message}`);
+      setWeddingItems([]);
+    }
+  };
+
+  // Fetch Goods
+  const fetchGoods = async () => {
+    try {
+      console.log('Fetching goods...');
+      const response = await api.getGoods();
+      console.log('Goods Response:', JSON.stringify(response.data, null, 2));
+      setGoods(Array.isArray(response.data) ? response.data : response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching goods:', error.message, error.response?.data);
+      Alert.alert('Ошибка', 'Не удалось загрузить товары');
+    }
+  };
+
+  // Initialize Component
+  useEffect(() => {
+    const initialize = async () => {
+      console.log('Initializing Item3Screen...');
+      await fetchEventCategories();
+      await fetchWeddings();
+      await fetchGoods();
+    };
+    initialize();
+  }, []);
+
+  // Refresh on Focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log('Screen focused, refreshing event categories...');
+      fetchEventCategories();
+    }, [])
+  );
+
+  // Create Wedding
   const handleCreateWedding = async () => {
     if (!weddingName || !weddingDate) {
       Alert.alert('Ошибка', 'Введите название и дату свадьбы');
-      return;
-    }
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(weddingDate)) {
-      Alert.alert('Ошибка', 'Дата должна быть в формате ГГГГ-ММ-ДД');
       return;
     }
     try {
@@ -315,26 +281,22 @@ export default function Item3Screen() {
       const response = await api.createWedding({ name: weddingName, date: weddingDate });
       const newWedding = response.data.data;
       setWeddings((prev) => [...prev, newWedding]);
-      setWeddingItemsCache((prev) => ({ ...prev, [newWedding.id]: [] }));
       Alert.alert('Успех', 'Свадьба создана');
       setWeddingModalVisible(false);
       setWeddingName('');
       setWeddingDate('');
       setActiveWeddingId(newWedding.id);
+      await fetchWeddingItems(newWedding.id);
     } catch (error) {
       console.error('Error creating wedding:', error.message, error.response?.data);
       Alert.alert('Ошибка', `Не удалось создать свадьбу: ${error.message}`);
     }
   };
 
+  // Update Wedding
   const handleUpdateWedding = async () => {
     if (!selectedWedding || !weddingName || !weddingDate) {
       Alert.alert('Ошибка', 'Введите название и дату свадьбы');
-      return;
-    }
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(weddingDate)) {
-      Alert.alert('Ошибка', 'Дата должна быть в формате ГГГГ-ММ-ДД');
       return;
     }
     try {
@@ -343,11 +305,6 @@ export default function Item3Screen() {
       setWeddings((prev) =>
         prev.map((w) => (w.id === selectedWedding.id ? response.data.data : w))
       );
-      const itemsResponse = await api.getWeddingItems(selectedWedding.id);
-      setWeddingItemsCache((prev) => ({
-        ...prev,
-        [selectedWedding.id]: itemsResponse.data.data || [],
-      }));
       Alert.alert('Успех', 'Свадьба обновлена');
       setEditWeddingModalVisible(false);
       setWeddingName('');
@@ -359,6 +316,7 @@ export default function Item3Screen() {
     }
   };
 
+  // Delete Wedding
   const handleDeleteWedding = (id) => {
     Alert.alert(
       'Подтверждение',
@@ -372,15 +330,11 @@ export default function Item3Screen() {
               console.log(`Deleting wedding ID: ${id}`);
               await api.deleteWedding(id);
               setWeddings((prev) => prev.filter((w) => w.id !== id));
-              setWeddingItemsCache((prev) => {
-                const newCache = { ...prev };
-                delete newCache[id];
-                return newCache;
-              });
               Alert.alert('Успех', 'Свадьба удалена');
               if (activeWeddingId === id) {
                 const newWeddingId = weddings.find((w) => w.id !== id)?.id || null;
                 setActiveWeddingId(newWeddingId);
+                await fetchWeddingItems(newWeddingId);
               }
             } catch (error) {
               console.error('Error deleting wedding:', error.message, error.response?.data);
@@ -392,6 +346,7 @@ export default function Item3Screen() {
     );
   };
 
+  // Delete Wedding Item
   const handleDeleteWeddingItem = async (weddingItemId) => {
     Alert.alert(
       'Подтверждение',
@@ -402,17 +357,11 @@ export default function Item3Screen() {
           text: 'Удалить',
           onPress: async () => {
             try {
-              const weddingItem = Object.values(weddingItemsCache)
-                .flat()
-                .find((item) => item.id === weddingItemId);
+              const weddingItem = weddingItems.find((item) => item.id === weddingItemId);
               const weddingId = weddingItem?.wedding_id;
               console.log(`Deleting wedding item ID: ${weddingItemId} for wedding ID: ${weddingId}`);
               await api.deleteWeddingItem(weddingItemId);
-              const itemsResponse = await api.getWeddingItems(weddingId);
-              setWeddingItemsCache((prev) => ({
-                ...prev,
-                [weddingId]: itemsResponse.data.data || [],
-              }));
+              await fetchWeddingItems(weddingId);
               Alert.alert('Успех', 'Элемент удален');
             } catch (error) {
               console.error('Error deleting wedding item:', error.message, error.response?.data);
@@ -424,6 +373,7 @@ export default function Item3Screen() {
     );
   };
 
+  // Add Wishlist Item
   const handleAddWishlistItem = async () => {
     if (selectedGoodIds.length === 0) {
       Alert.alert('Ошибка', 'Выберите хотя бы один подарок');
@@ -438,17 +388,14 @@ export default function Item3Screen() {
       Alert.alert('Успех', 'Подарки добавлены');
       setWishlistModalVisible(false);
       setSelectedGoodIds([]);
-      const itemsResponse = await api.getWeddingItems(selectedWedding.id);
-      setWeddingItemsCache((prev) => ({
-        ...prev,
-        [selectedWedding.id]: itemsResponse.data.data || [],
-      }));
+      await fetchWeddingItems(selectedWedding.id);
     } catch (error) {
       console.error('Error adding wishlist items:', error.message, error.response?.data);
       Alert.alert('Ошибка', `Не удалось добавить подарки: ${error.message}`);
     }
   };
 
+  // Add Custom Gift
   const handleAddCustomGift = async () => {
     if (!formData.item_name) {
       Alert.alert('Ошибка', 'Введите название подарка');
@@ -466,15 +413,16 @@ export default function Item3Screen() {
       const newGood = response.data.data;
       await api.createWish({ wedding_id: selectedWedding.id, good_id: newGood.id });
       Alert.alert('Успех', 'Собственный подарок добавлен');
-      setFormData({ ...formData, item_name: '' });
+      setFormData({ category: '', item_name: '' });
       setWishlistModalVisible(false);
       await fetchWishlistItems(selectedWedding.id);
     } catch (error) {
       console.error('Error adding custom gift:', error.message, error.response?.data);
       Alert.alert('Ошибка', `Не удалось добавить подарок: ${error.message}`);
     }
- };
+  };
 
+  // Fetch Wishlist Items
   const fetchWishlistItems = async (weddingId) => {
     try {
       console.log(`Fetching wishlist items for wedding ID: ${weddingId}`);
@@ -503,6 +451,7 @@ export default function Item3Screen() {
     }
   };
 
+  // Fetch Files for Good
   const fetchFiles = async (goodId) => {
     setLoadingFiles(true);
     setErrorFiles(null);
@@ -520,6 +469,7 @@ export default function Item3Screen() {
     }
   };
 
+  // Reserve Wishlist Item
   const handleReserveWishlistItem = async (wishlistId) => {
     Alert.alert(
       'Подтверждение',
@@ -548,6 +498,7 @@ export default function Item3Screen() {
     );
   };
 
+  // Share Wedding Link
   const handleShareWeddingLink = async (weddingId) => {
     try {
       console.log(`Sharing wedding link for wedding ID: ${weddingId}`);
@@ -562,17 +513,15 @@ export default function Item3Screen() {
     }
   };
 
-  const openEditCategoryModal = async (category) => {
+  // Open Edit Category Modal
+  const openEditCategoryModal = (category) => {
     console.log('Opening edit modal for category:', category);
     setSelectedCategory(category);
     setCategoryName(category.name);
-    setCategoryDescription(category.description || '');
-    setCategoryStatus(category.status || 'active');
-    const details = await fetchEventCategoryDetails(category.id);
-    setCategoryServices(details?.services?.map((s) => ({ id: s.serviceId, serviceType: s.serviceType })) || []);
     setCategoryModalVisible(true);
   };
 
+  // Open Category Details Modal
   const openCategoryDetailsModal = async (category) => {
     console.log('Opening details modal for category:', category);
     setSelectedCategory(category);
@@ -580,13 +529,7 @@ export default function Item3Screen() {
     setCategoryDetailsModalVisible(true);
   };
 
-  const openServiceDetailsModal = async (service) => {
-    console.log('Opening service details modal for:', service);
-    const details = await fetchServiceDetails(service.serviceId, service.serviceType);
-    setSelectedService(details ? { ...service, ...details } : service);
-    setServiceDetailsModalVisible(true);
-  };
-
+  // Open Edit Wedding Modal
   const openEditWeddingModal = (wedding) => {
     console.log('Opening edit modal for wedding:', wedding);
     setSelectedWedding(wedding);
@@ -595,12 +538,14 @@ export default function Item3Screen() {
     setEditWeddingModalVisible(true);
   };
 
+  // Handle Date Change
   const onDateChange = (day) => {
     console.log('Selected date:', day.dateString);
     setWeddingDate(day.dateString);
     setShowCalendar(false);
   };
 
+  // Fetch Item Details
   const fetchItemDetails = async (itemType, itemId) => {
     setLoadingDetails(true);
     try {
@@ -617,6 +562,7 @@ export default function Item3Screen() {
     }
   };
 
+  // Open Item Details Modal
   const openItemDetailsModal = async (weddingItem) => {
     console.log('Opening details modal for wedding item:', weddingItem);
     const details = await fetchItemDetails(weddingItem.item_type, weddingItem.item_id);
@@ -624,70 +570,12 @@ export default function Item3Screen() {
     setDetailsModalVisible(true);
   };
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await Promise.all([fetchEventCategories(), fetchAvailableServices(), fetchWeddings(), fetchGoods()]);
-    setRefreshing(false);
-  }, []);
-
-  useEffect(() => {
-    const initialize = async () => {
-      console.log('Initializing Item3Screen...');
-      setLoadingCategories(true);
-      try {
-        const [categoriesResponse, weddingsResponse, goodsResponse] = await Promise.all([
-          api.getEventCategories(),
-          api.getWedding(),
-          api.getGoods(),
-        ]);
-        setEventCategories(Array.isArray(categoriesResponse.data) ? categoriesResponse.data : categoriesResponse.data.data || []);
-        setWeddings(Array.isArray(weddingsResponse.data) ? weddingsResponse.data : weddingsResponse.data.data || []);
-        setGoods(Array.isArray(goodsResponse.data) ? goodsResponse.data : goodsResponse.data.data || []);
-        const itemsPromises = weddingsResponse.data.data.map((wedding) =>
-          api.getWeddingItems(wedding.id).then((res) => ({
-            weddingId: wedding.id,
-            items: res.data.data || [],
-          }))
-        );
-        const itemsResults = await Promise.all(itemsPromises);
-        const newCache = itemsResults.reduce((acc, { weddingId, items }) => {
-          acc[weddingId] = items;
-          return acc;
-        }, {});
-        setWeddingItemsCache(newCache);
-        // Attempt to fetch services, but don't fail initialization if it errors
-        await fetchAvailableServices();
-      } catch (error) {
-        console.error('Error initializing:', error.message, error.response?.data);
-        setEventCategories([]);
-        setWeddings([]);
-        setGoods([]);
-        setWeddingItemsCache({});
-      } finally {
-        setLoadingCategories(false);
-      }
-    };
-    initialize();
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      console.log('Screen focused, refreshing data...');
-      onRefresh();
-    }, [onRefresh])
-  );
-
+  // Render Event Category Item
   const renderEventCategoryItem = ({ item }) => {
     console.log('Rendering event category:', item);
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.itemText}>{item.name}</Text>
-        <Text style={styles.itemSubText}>
-          Статус: {item.status === 'active' ? 'Активно' : 'Неактивно'}
-        </Text>
-        <Text style={styles.itemSubText}>
-          Описание: {item.description || 'Нет описания'}
-        </Text>
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.actionButtonPrimary}
@@ -712,24 +600,9 @@ export default function Item3Screen() {
     );
   };
 
-  const renderServiceInCategory = ({ item }) => (
-    <View style={styles.serviceCard}>
-      <Text style={styles.serviceCardTitle}>{item.name}</Text>
-      <Text style={styles.serviceCardDescription}>
-        {item.description || 'Нет описания'}
-      </Text>
-      <Text style={styles.serviceCardType}>Тип: {item.serviceType}</Text>
-      <TouchableOpacity
-        style={styles.detailsButton}
-        onPress={() => openServiceDetailsModal(item)}
-      >
-        <Text style={styles.detailsButtonText}>Подробнее</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
+  // Render Wedding Item
   const renderWeddingItem = ({ item }) => {
-    const filteredItems = weddingItemsCache[item.id] || [];
+    const filteredItems = weddingItems.filter((wi) => wi.wedding_id === item.id);
     const groupedItems = groupItemsByCategory(filteredItems);
 
     return (
@@ -751,29 +624,29 @@ export default function Item3Screen() {
                       {(() => {
                         switch (weddingItem.item_type) {
                           case 'restaurant':
-                            return `Ресторан - ${weddingItem.total_cost || 0} тг`;
+                            return `Ресторан - ${weddingItem.total_cost} тг`;
                           case 'clothing':
-                            return `Одежда - ${weddingItem.total_cost || 0} тг`;
+                            return `Одежда - ${weddingItem.total_cost} тг`;
                           case 'tamada':
-                            return `Тамада - ${weddingItem.total_cost || 0} тг`;
+                            return `Тамада - ${weddingItem.total_cost} тг`;
                           case 'program':
-                            return `Программа - ${weddingItem.total_cost || 0} тг`;
+                            return `Программа - ${weddingItem.total_cost} тг`;
                           case 'traditionalGift':
-                            return `Традиционный подарок - ${weddingItem.total_cost || 0} тг`;
+                            return `Традиционный подарок - ${weddingItem.total_cost} тг`;
                           case 'flowers':
-                            return `Цветы - ${weddingItem.total_cost || 0} тг`;
+                            return `Цветы - ${weddingItem.total_cost} тг`;
                           case 'cake':
-                            return `Торт - ${weddingItem.total_cost || 0} тг`;
+                            return `Торт - ${weddingItem.total_cost} тг`;
                           case 'alcohol':
-                            return `Алкоголь - ${weddingItem.total_cost || 0} тг`;
+                            return `Алкоголь - ${weddingItem.total_cost} тг`;
                           case 'transport':
-                            return `Транспорт - ${weddingItem.total_cost || 0} тг`;
+                            return `Транспорт - ${weddingItem.total_cost} тг`;
                           case 'goods':
-                            return `Товар - ${weddingItem.total_cost || 0} тг`;
+                            return `Товар - ${weddingItem.total_cost} тг`;
                           case 'jewelry':
-                            return `Ювелирные изделия - ${weddingItem.total_cost || 0} тг`;
+                            return `Ювелирные изделия - ${weddingItem.total_cost} тг`;
                           default:
-                            return `Неизвестный элемент (${weddingItem.item_type}) - ${weddingItem.total_cost || 0} тг`;
+                            return `Неизвестный элемент - ${weddingItem.total_cost} тг`;
                         }
                       })()}
                     </Text>
@@ -851,6 +724,7 @@ export default function Item3Screen() {
     );
   };
 
+  // Render Good Card
   const renderGoodCard = ({ item }) => (
     <TouchableOpacity
       style={[
@@ -883,6 +757,7 @@ export default function Item3Screen() {
     </TouchableOpacity>
   );
 
+  // Render Wishlist Item
   const renderWishlistItem = ({ item }) => {
     const files = wishlistFiles[item.good_id] || [];
     return (
@@ -927,7 +802,7 @@ export default function Item3Screen() {
                         isLooping
                       />
                     ) : (
-                      <Text style={styles.detail}>Неподдерживаемый формат: ${file.mimetype}</Text>
+                      <Text style={styles.detail}>Неподдерживаемый формат: {file.mimetype}</Text>
                     )}
                   </View>
                 )}
@@ -945,33 +820,7 @@ export default function Item3Screen() {
     );
   };
 
-  const renderServiceItem = ({ item }) => (
-    <TouchableOpacity
-      style={[
-        styles.serviceCard,
-        categoryServices.some((s) => s.id === item.id && s.serviceType === item.serviceType) && styles.selectedServiceCard,
-      ]}
-      onPress={() => {
-        setCategoryServices((prev) => {
-          const exists = prev.some((s) => s.id === item.id && s.serviceType === item.serviceType);
-          if (exists) {
-            return prev.filter((s) => !(s.id === item.id && s.serviceType === item.serviceType));
-          }
-          return [...prev, { id: item.id, serviceType: item.serviceType }];
-        });
-      }}
-    >
-      <Text style={styles.serviceCardTitle}>{item.name}</Text>
-      <Text style={styles.serviceCardDescription}>
-        {item.description || 'Нет описания'}
-      </Text>
-      <Text style={styles.serviceCardType}>Тип: {item.serviceType}</Text>
-      {categoryServices.some((s) => s.id === item.id && s.serviceType === item.serviceType) && (
-        <Text style={styles.selectedIndicator}>✓</Text>
-      )}
-    </TouchableOpacity>
-  );
-
+  // Group Items by Category
   const groupItemsByCategory = (items) => {
     const categoryMap = {
       restaurant: 'Рестораны',
@@ -1000,14 +849,11 @@ export default function Item3Screen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Мои мероприятия</Text>
-      <View style={styles.buttonRow}>
+      {/* <View style={styles.buttonRow}>
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => {
             setCategoryName('');
-            setCategoryDescription('');
-            setCategoryStatus('active');
-            setCategoryServices([]);
             setSelectedCategory(null);
             setCategoryModalVisible(true);
           }}
@@ -1024,14 +870,14 @@ export default function Item3Screen() {
         >
           <Text style={styles.createButtonText}>Управление свадьбами</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
       {loadingCategories ? (
         <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
       ) : (
         <FlatList
           data={eventCategories}
           renderItem={renderEventCategoryItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.noItems}>Нет категорий мероприятий</Text>
@@ -1050,53 +896,19 @@ export default function Item3Screen() {
         />
       )}
 
+      {/* Event Category Modal */}
       <Modal visible={categoryModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.subtitle}>
             {selectedCategory ? 'Редактировать категорию' : 'Создать категорию'}
           </Text>
-          <ScrollView style={{ width: '100%' }}>
-            <TextInput
-              style={styles.input}
-              placeholder="Название категории"
-              placeholderTextColor={COLORS.muted}
-              value={categoryName}
-              onChangeText={setCategoryName}
-            />
-            <TextInput
-              style={[styles.input, styles.multilineInput]}
-              placeholder="Описание категории"
-              placeholderTextColor={COLORS.muted}
-              value={categoryDescription}
-              onChangeText={setCategoryDescription}
-              multiline
-              numberOfLines={4}
-            />
-            <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>Статус</Text>
-              <Picker
-                selectedValue={categoryStatus}
-                onValueChange={(value) => setCategoryStatus(value)}
-                style={styles.picker}
-              >
-                <Picker.Item label="Активно" value="active" />
-                <Picker.Item label="Неактивно" value="inactive" />
-              </Picker>
-            </View>
-            <Text
-Text style={styles.sectionTitle}>Выберите услуги</Text>
-            {servicesError ? (
-              <Text style={styles.errorText}>{servicesError}</Text>
-            ) : (
-              <FlatList
-                data={availableServices}
-                renderItem={renderServiceItem}
-                keyExtractor={(item) => `${item.id}-${item.serviceType}`}
-                ListEmptyComponent={<Text style={styles.noItems}>Услуги недоступны</Text>}
-                contentContainerStyle={styles.serviceList}
-              />
-            )}
-          </ScrollView>
+          <TextInput
+            style={styles.input}
+            placeholder="Название категории"
+            placeholderTextColor={COLORS.muted}
+            value={categoryName}
+            onChangeText={setCategoryName}
+          />
           <View style={styles.buttonRowModal}>
             <Button
               title={selectedCategory ? 'Сохранить' : 'Создать'}
@@ -1108,9 +920,6 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
               onPress={() => {
                 setCategoryModalVisible(false);
                 setCategoryName('');
-                setCategoryDescription('');
-                setCategoryStatus('active');
-                setCategoryServices([]);
                 setSelectedCategory(null);
               }}
               color={COLORS.muted}
@@ -1119,6 +928,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
         </SafeAreaView>
       </Modal>
 
+      {/* Event Category Details Modal */}
       <Modal visible={categoryDetailsModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.subtitle}>Детали категории</Text>
@@ -1128,10 +938,9 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
             <ScrollView style={{ width: '100%' }}>
               <Text style={styles.modalText}>Название: {categoryDetails.name}</Text>
               <Text style={styles.modalText}>
-                Описание: {categoryDetails.description || 'Нет описания'}
-              </Text>
-              <Text style={styles.modalText}>
-                Статус: {categoryDetails.status === 'active' ? 'Активно' : 'Неактивно'}
+                Услуги: {categoryDetails.services?.length > 0
+                  ? categoryDetails.services.map((s) => s.name).join(', ')
+                  : 'Нет услуг'}
               </Text>
               <Text style={styles.modalText}>
                 Создано: {new Date(categoryDetails.created_at).toLocaleString()}
@@ -1139,16 +948,6 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
               <Text style={styles.modalText}>
                 Обновлено: {new Date(categoryDetails.updated_at).toLocaleString()}
               </Text>
-              <Text style={styles.sectionTitle}>Услуги</Text>
-              <FlatList
-                data={categoryDetails.services || []}
-                renderItem={renderServiceInCategory}
-                keyExtractor={(item) => `${item.serviceId}-${item.serviceType}`}
-                ListEmptyComponent={
-                  <Text style={styles.noItems}>Нет услуг в этой категории</Text>
-                }
-                contentContainerStyle={styles.serviceList}
-              />
             </ScrollView>
           ) : (
             <Text style={styles.noItems}>Данные недоступны</Text>
@@ -1163,50 +962,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
         </SafeAreaView>
       </Modal>
 
-      <Modal visible={serviceDetailsModalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Детали услуги</Text>
-            {loadingServiceDetails ? (
-              <ActivityIndicator size="large" color={COLORS.primary} />
-            ) : selectedService ? (
-              <ScrollView style={{ width: '100%' }}>
-                <Text style={styles.modalText}>Название: {selectedService.name}</Text>
-                <Text style={styles.modalText}>
-                  Тип: {selectedService.serviceType}
-                </Text>
-                <Text style={styles.modalText}>
-                  Описание: {selectedService.description || 'Нет описания'}
-                </Text>
-                {selectedService.cost && (
-                  <Text style={styles.modalText}>
-                    Стоимость: {selectedService.cost} тг
-                  </Text>
-                )}
-                {selectedService.created_at && (
-                  <Text style={styles.modalText}>
-                    Создано: {new Date(selectedService.created_at).toLocaleString()}
-                  </Text>
-                )}
-                {selectedService.updated_at && (
-                  <Text style={styles.modalText}>
-                    Обновлено: {new Date(selectedService.updated_at).toLocaleString()}
-                  </Text>
-                )}
-              </ScrollView>
-            ) : (
-              <Text style={styles.modalText}>Данные недоступны</Text>
-            )}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setServiceDetailsModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Закрыть</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
+      {/* Wedding Management Modal */}
       <Modal visible={weddingModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.subtitle}>Управление свадьбами</Text>
@@ -1261,7 +1017,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
             <FlatList
               data={weddings}
               renderItem={renderWeddingItem}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
                   <Text style={styles.noItems}>Нет созданных свадеб</Text>
@@ -1273,6 +1029,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
         </SafeAreaView>
       </Modal>
 
+      {/* Wedding Edit Modal */}
       <Modal visible={editWeddingModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.subtitle}>Редактирование свадьбы</Text>
@@ -1324,6 +1081,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
         </SafeAreaView>
       </Modal>
 
+      {/* Wishlist Modal */}
       <Modal visible={wishlistModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.subtitle}>
@@ -1344,7 +1102,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
             <FlatList
               data={goods}
               renderItem={renderGoodCard}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
               ListEmptyComponent={<Text style={styles.noItems}>Товаров пока нет</Text>}
               contentContainerStyle={styles.listContainer}
             />
@@ -1391,6 +1149,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
         </SafeAreaView>
       </Modal>
 
+      {/* Wishlist View Modal */}
       <Modal visible={wishlistViewModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.subtitle}>
@@ -1399,7 +1158,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
           <FlatList
             data={wishlistItems}
             renderItem={renderWishlistItem}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
             numColumns={2}
             ListEmptyComponent={<Text style={styles.noItems}>Подарков пока нет</Text>}
             columnWrapperStyle={styles.columnWrapper}
@@ -1415,6 +1174,7 @@ Text style={styles.sectionTitle}>Выберите услуги</Text>
         </SafeAreaView>
       </Modal>
 
+      {/* Item Details Modal */}
       <Modal visible={detailsModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -1498,37 +1258,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     color: COLORS.text,
   },
-  multilineInput: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
-    marginBottom: 16,
-    backgroundColor: COLORS.white,
-  },
-  pickerLabel: {
-    fontSize: 16,
-    color: COLORS.text,
-    paddingHorizontal: 12,
-    paddingTop: 8,
-  },
-  picker: {
-    fontSize: 16,
-    color: COLORS.text,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginTop: 16,
-    marginBottom: 12,
-  },
-  serviceList: {
-    paddingBottom: 20,
-  },
   dateButton: {
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -1555,12 +1284,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: COLORS.text,
-    marginBottom: 8,
-  },
-  itemSubText: {
-    fontSize: 16,
-    color: COLORS.muted,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -1687,46 +1411,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  serviceCard: {
-    padding: 12,
-    marginVertical: 8,
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  selectedServiceCard: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-    backgroundColor: '#E6F0FA',
-  },
-  serviceCardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  serviceCardDescription: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginTop: 4,
-  },
-  serviceCardType: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginTop: 4,
-  },
-  detailsButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  detailsButtonText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: '500',
+  listContainer: {
+    paddingBottom: 20,
+    flexGrow: 1,
   },
   goodCard: {
     padding: 12,
@@ -1878,6 +1565,18 @@ const styles = StyleSheet.create({
   itemActions: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  detailsButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  detailsButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '500',
   },
   deleteButton: {
     backgroundColor: COLORS.error,

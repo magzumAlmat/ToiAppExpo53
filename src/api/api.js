@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_baseURL,
+  baseURL: `${process.env.EXPO_PUBLIC_API_baseURL}`,
   headers: {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${process.env.EXPO_PUBLIC_API_KEY}`
@@ -24,7 +24,8 @@ api.interceptors.request.use(
 // API методы
 export default {
   // Аутентификация и профиль
-  register: (userData) =>
+
+   register: (userData) =>
     api.post('/api/register', userData).catch((error) => {
       throw new Error(`Ошибка регистрации: ${error.response?.data?.message || error.message}`);
     }),
@@ -53,6 +54,36 @@ export default {
       throw new Error(`Ошибка получения профиля: ${error.response?.data?.message || error.message}`);
     }),
 
+
+  // register: (userData) =>
+  //   api.post('/api/register', userData).catch((error) => {
+  //     throw new Error(`Ошибка регистрации: ${error.response?.data?.message || error.message}`);
+  //   }),
+
+  // login: (credentials) =>
+  //   api.post('/api/auth/login', credentials).catch((error) => {
+  //     throw new Error(`Ошибка входа: ${error.response?.data?.message || error.message}`);
+  //   }),
+
+  // getUser: () =>
+  //   api.get('/api/auth/getAuthentificatedUserInfo').catch((error) => {
+  //     throw new Error(`Ошибка получения данных пользователя: ${error.response?.data?.message || error.message}`);
+  //   }),
+
+  // setToken: (token) => {
+  //   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  // },
+
+  // updateProfile: (data) =>
+  //   api.post('/api/auth/addfullprofile', data).catch((error) => {
+  //     throw new Error(`Ошибка обновления профиля: ${error.response?.data?.message || error.message}`);
+  //   }),
+
+  // getProfile: () =>
+  //   api.get('/api/auth/getAuthentificatedUserInfo').catch((error) => {
+  //     throw new Error(`Ошибка получения профиля: ${error.response?.data?.message || error.message}`);
+  //   }),
+
   // Рестораны
   createRestaurant: (data) =>
     api.post('/api/restaurant', data).catch((error) => {
@@ -69,8 +100,13 @@ export default {
       throw new Error(`Ошибка удаления ресторана: ${error.response?.data?.message || error.message}`);
     }),
 
-  getRestaurantById: (id) =>
+   getRestaurantById: (id) =>
     api.get(`/api/restaurantbyid/${id}`).catch((error) => {
+      if (error.response?.status === 404) {
+        return api.get(`/api/restaurantbyid/${id}`).catch((innerError) => {
+          throw new Error(`Ошибка получения ресторана: ${innerError.response?.data?.message || innerError.message}`);
+        });
+      }
       throw new Error(`Ошибка получения ресторана: ${error.response?.data?.message || error.message}`);
     }),
 
@@ -397,6 +433,25 @@ export default {
       throw new Error(`Ошибка создания категории мероприятия: ${error.response?.data?.message || error.message}`);
     }),
 
+    // Получить все доступные услуги
+  getServices: () =>
+    api.get('/api/services').catch((error) => {
+      throw new Error(`Ошибка получения списка услуг: ${error.response?.data?.message || error.message}`);
+    }),
+
+
+addServicesToCategory: (categoryId, data) =>
+  api.post(`/api/event-category/${categoryId}/services`, data).catch((error) => {
+    throw new Error(`Ошибка добавления услуг к категории: ${error.response?.data?.message || error.message}`);
+  }),
+
+// Обновить услуги для категории (bulk)
+updateServicesForCategory: (categoryId, data) =>
+  api.put(`/api/event-category/${categoryId}/services`, data).catch((error) => {
+    throw new Error(`Ошибка обновления услуг для категории: ${error.response?.data?.message || error.message}`);
+  }),
+
+
   getEventCategories: () =>
     api.get('/api/event-categories').catch((error) => {
       throw new Error(`Ошибка получения списка категорий мероприятий: ${error.response?.data?.message || error.message}`);
@@ -469,7 +524,7 @@ export default {
       throw new Error(`Ошибка получения свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
-  getWeddings: () =>
+  getWedding: () =>
     api.get('/api/getallweddings').catch((error) => {
       throw new Error(`Ошибка получения списка свадеб: ${error.response?.data?.message || error.message}`);
     }),
