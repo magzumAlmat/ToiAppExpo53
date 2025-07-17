@@ -76,7 +76,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 // COLORS and MODAL_COLORS remain unchanged
 export const COLORS = {
-  background: "#F1EBDD", // Updated to match provided design
+  background: "#F1EBDD",
   primary: '#5A4032',
   secondary: '#897066',
   card: '#FDFBF5',
@@ -89,7 +89,7 @@ export const COLORS = {
   buttonGradientStart: '#D3C5B7',
   buttonGradientEnd: '#A68A6E',
   border: '#B0A092',
-};
+}
 
 export const MODAL_COLORS = {
   background: '#EDE7D9',
@@ -2425,6 +2425,7 @@ const [categories, setCategories] = useState(selectedCategories);
     ];
 
     return (
+    
       <FlatList
         data={sections}
         keyExtractor={(item) => item.id}
@@ -2489,6 +2490,7 @@ const [categories, setCategories] = useState(selectedCategories);
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       />
+
     );
   };
 
