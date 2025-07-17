@@ -2113,12 +2113,14 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
 
 
         <Text style={styles.budgetText}>
+        
           Остаток бюджета: {remainingBudget.toLocaleString()} ₸
-        </Text>
 
 
-        <Text style={styles.budgetText}>
-          Общая стоимость: {calculateTotalCost.toLocaleString()} ₸
+         Общая стоимость: {calculateTotalCost.toLocaleString()} ₸
+
+    
+         
         </Text>
 
 
@@ -2227,7 +2229,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
             source={isDisabled ? categoryIcons[item]?.on : (categoryIcons[item]?.off || defaultIcon) }
             style={{ width: 60, height: 70, resizeMode: 'contain' }}
           />
-          
+
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.categoryButton, isDisabled && styles.disabledCategoryButton]}
@@ -2571,6 +2573,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   budgetText: {
+    flex:1,
     fontSize: 16,
     color: COLORS.textPrimary,
   },
