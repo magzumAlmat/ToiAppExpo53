@@ -136,7 +136,7 @@ const typeOrder = {
 const typesMapping = [
   { key: "restaurants", costField: "averageCost", type: "restaurant", label: "Ресторан" },
   { key: "hotels", costField: "cost", type: "hotels", label: "Гостиницы" },
-  { key: "tamada", costField: "cost", type: "tamada", label: "Ведущие" },
+  { key: "tamada", costField: "cost", type: "tamada", label: "Ведущий" },
   { key: "programs", costField: "cost", type: "program", label: "Шоу программы" },
   { key: "flowers", costField: "cost", type: "flowers", label: "Цветы" },
   { key: "transport", costField: "cost", type: "transport", label: "Прокат авто" },
@@ -157,7 +157,7 @@ const typesMapping = [
 const categoryToTypeMap = {
   "Ресторан": "restaurant",
   "Гостиницы": "hotels",
-  "Ведущие": "tamada",
+  "Ведущий": "tamada",
   "Шоу программы": "program",
   "Цветы": "flowers",
   "Прокат авто": "transport",
@@ -1216,7 +1216,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
   const defaultCategories = [
     "Ресторан",
     "Гостиницы",
-    "Ведущие",
+    "Ведущий",
     "Шоу программы",
     "Цветы",
     "Прокат авто",
@@ -1230,12 +1230,17 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
     "Видеографы",
     "Декор"
   ];
-  const selectedCategories = route?.params?.selectedCategories || defaultCategories;
+ 
+console.log('route.params:', route?.params);
+const selectedCategories = route?.params?.selectedCategories || [];
+console.log('Полученные категории:', selectedCategories);
+const [categories, setCategories] = useState(selectedCategories);
+
 
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
 
-  const [categories, setCategories] = useState(selectedCategories);
+
   const [disabledCategories, setDisabledCategories] = useState([]);
   const [data, setData] = useState({
     restaurants: [],
@@ -2156,6 +2161,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
     setCategoryModalVisible(false);
     setSelectedCategoryItems([]); setSelectedCategoryLabel(""); setSelectedCategoryType("");
   };
+
 
 
 

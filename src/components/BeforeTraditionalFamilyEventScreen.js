@@ -574,23 +574,54 @@ const BeforeTraditionalFamilyEventScreen = ({ navigation, route }) => {
     setGuestCount(filteredValue);
   };
 
-  const handleProceed = () => {
-    if (selectedCategoriesList.length === 0) {
-      alert('Пожалуйста, выберите хотя бы одну категорию.');
-      return;
-    }
-    // navigation.navigate('Authenticated', {
-    //   screen: 'CreateTraditionalFamilyEvent',
-    //   params: { selectedCategories: selectedCategoriesList },
-    // });
+  // const handleProceed = () => {
+  //   if (selectedCategoriesList.length === 0) {
+  //     alert('Пожалуйста, выберите хотя бы одну категорию.');
+  //     return;
+  //   }
+  //   // navigation.navigate('Authenticated', {
+  //   //   screen: 'CreateTraditionalFamilyEvent',
+  //   //   params: { selectedCategories: selectedCategoriesList },
+  //   // });
 
-    navigation.navigate('CreateTraditionalFamilyEvent', {
-    selectedCategories: selectedCategoriesList,
-    
+  //   navigation.navigate('CreateTraditionalFamilyEvent', {
+  //   selectedCategories: selectedCategoriesList,
+  //   params: { selectedCategories: selectedCategoriesList },
+  // });
+
+
+
+
+
+
+// const handleProceed = () => {
+//   if (selectedCategoriesList.length === 0) {
+//     alert('Пожалуйста, выберите хотя бы одну категорию.');
+//     return;
+//   }
+//   console.log('Передаваемые категории:', selectedCategoriesList);
+//   navigation.navigate('CreateTraditionalFamilyEventTabs', {
+//     screen: 'CreateTraditionalFamilyEvent',
+//     params: { selectedCategories: selectedCategoriesList },
+//   });
+// };
+
+
+const handleProceed = () => {
+  if (selectedCategoriesList.length === 0) {
+    alert('Пожалуйста, выберите хотя бы одну категорию.');
+    return;
+  }
+  console.log('Передаваемые категории:', selectedCategoriesList);
+  navigation.navigate('CreateTraditionalFamilyEvent', {
+    screen: 'CreateTraditionalFamilyEvent',
+    params: { selectedCategories: selectedCategoriesList },
   });
+};
 
 
-  };
+
+
 
   const renderCategory = (item) => {
     const isActive = activeCategories[item];
