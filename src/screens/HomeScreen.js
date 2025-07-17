@@ -1634,6 +1634,7 @@ const CreateEventScreen = ({ navigation, route }) => {
     }
 
     const isDisabled = disabledCategories.includes(item);
+    
     const categoryIcons = {
       Цветы: { on: require("../../assets/cvetyOn.png"), off: require("../../assets/cvetyOff.png") },
       "Прокат авто": { on: require("../../assets/prokatAvtoOn.png"), off: require("../../assets/prokatAutooff.png") },

@@ -2154,9 +2154,27 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
     const type = categoryToTypeMap[item];
     const itemsForCategory = filteredData.filter((dataItem) => dataItem.type === type);
 
+    // const isDisabled = disabledCategories.includes(item);
+    
+    const categoryIcons = {
+      Цветы: { on: require("../../assets/cvetyOn.png"), off: require("../../assets/cvetyOff.png") },
+      "Прокат авто": { on: require("../../assets/prokatAvtoOn.png"), off: require("../../assets/prokatAutooff.png") },
+      "Шоу программа": { on: require("../../assets/show.png"), off: require("../../assets/showTurnOff.png") },
+      Ресторан: { on: require("../../assets/restaurantOn.png"), off: require("../../assets/restaurantTurnOff.png") },
+      Ведущий: { on: require("../../assets/vedushieOn.png"), off: require("../../assets/vedushieOff.png") },
+      "Традиционные подарки": { on: require("../../assets/tradGiftsOn.png"), off: require("../../assets/tradGifts.png") },
+      "Свадебный салон": { on: require("../../assets/svadebnyisalon.png"), off: require("../../assets/svadeblyisalonOff.png") },
+      Алкоголь: { on: require("../../assets/alcoholOn.png"), off: require("../../assets/alcoholOff.png") },
+      "Ювелирные изделия": { on: require("../../assets/uvizdeliyaOn.png"), off: require("../../assets/uvIzdeliyaOff.png") },
+      Торты: { on: require("../../assets/torty.png"), off: require("../../assets/tortyTurnOff.png") },
+    };
+
+    const defaultIcon = require("../../assets/join.png"); // Fallback
+
+
     return (
       <View style={styles.categoryRow}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[
             styles.categoryButton,
             isDisabled && styles.categoryButtonDisabled,
@@ -2200,7 +2218,36 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
             size={24}
             color={isDisabled ? COLORS.accent : COLORS.error}
           />
+        </TouchableOpacity> */}
+
+
+
+         <TouchableOpacity style={styles.removeCategoryButton} onPress={() => handleRemoveCategory(item)}>
+          <Image
+            source={isDisabled ? categoryIcons[item]?.on : (categoryIcons[item]?.off || defaultIcon) }
+            style={{ width: 60, height: 70, resizeMode: 'contain' }}
+          />
+          
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.categoryButton, isDisabled && styles.disabledCategoryButton]}
+          onPress={() => { if (!isDisabled) handleCategoryPress(item); }}
+          disabled={isDisabled}
+        >
+          <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Icon
+                name={ item === "Ресторан" ? "restaurant" : item === "Прокат авто" ? "directions-car" :
+                       item === "Фото-видео съёмка" ? "camera-alt" : item === "Ведущий" ? "mic" :
+                       item === "Традиционные подарки" ? "card-giftcard" : item === "Свадебный салон" ? "store" :
+                       item === "Алкоголь" ? "local-drink" : item === "Ювелирные изделия" ? "diamond" :
+                       item === "Торты" ? "cake" : "category"
+                } size={20} color={COLORS.white} style={{ marginRight: 10 }} />
+              <Text style={styles.categoryText}>{item}</Text>
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
+
       </View>
     );
   };
@@ -2349,10 +2396,10 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
                     data={[...categories, 'Добавить']}
                     renderItem={renderCategories}
                     keyExtractor={(item) => item}
-                    numColumns={2}
-                    columnWrapperStyle={styles.categoryRowWrapper}
-                    contentContainerStyle={styles.categoriesList}
-                    nestedScrollEnabled
+                    // numColumns={2}
+                    // columnWrapperStyle={styles.categoryRowWrapper}
+                    // contentContainerStyle={styles.categoriesList}
+                    // nestedScrollEnabled
                   />
                 </View>
               );
