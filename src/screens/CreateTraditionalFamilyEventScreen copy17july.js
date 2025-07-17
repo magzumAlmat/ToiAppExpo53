@@ -76,39 +76,39 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 // COLORS and MODAL_COLORS remain unchanged
 export const COLORS = {
-  background: "#F1EBDD", // Updated to match provided design
-  primary: '#5A4032',
-  secondary: '#897066',
-  card: '#FDFBF5',
-  textPrimary: '#5A4032',
-  textSecondary: '#718096',
-  accent: '#D3C5B7',
-  shadow: 'rgba(45, 55, 72, 0.15)',
-  error: '#FF0000',
+  background: "#EDE7D9",
+  primary: '#FF6F61',
+  secondary: '#4A90E2',
+  card: '#FFFFFF',
+  textPrimary: '#1A2533',
+  textSecondary: '#64748B',
+  accent: '#FBBF24',
+  shadow: 'rgba(0, 0, 0, 0.08)',
+  error: '#EF4444',
   white: '#FFFFFF',
-  buttonGradientStart: '#D3C5B7',
-  buttonGradientEnd: '#A68A6E',
-  border: '#B0A092',
+  buttonGradientStart: '#FF6F61',
+  buttonGradientEnd: '#F43F5E',
+  border: '#E0E0E0',
 };
 
 export const MODAL_COLORS = {
-  background: '#EDE7D9',
-  cardBackground: '#FDFBF5',
-  primaryActionStart: '#D3C5B7',
-  primaryActionEnd: '#A68A6E',
-  textPrimary: '#5A4032',
-  textSecondary: '#718096',
-  inputBackground: '#FBF9F7',
-  inputBorder: '#B0A092',
-  activeFilter: '#A68A6E',
+  background: '#FFFFFF',
+  cardBackground: '#FFFFFF',
+  primaryActionStart: '#6A5AE0',
+  primaryActionEnd: '#8C7AFF',
+  textPrimary: '#1A1A1A',
+  textSecondary: '#666666',
+  inputBackground: '#F5F5F5',
+  inputBorder: '#E0E0E0',
+  activeFilter: '#6A5AE0',
   activeFilterText: '#FFFFFF',
-  inactiveFilter: '#EFEBE4',
-  inactiveFilterText: '#5A4032',
-  separator: '#B0A092',
-  shadow: 'rgba(45, 55, 72, 0.15)',
-  icon: '#5A4032',
-  closeButtonColor: '#5A4032',
-  overlayBackground: 'rgba(45, 55, 72, 0.65)',
+  inactiveFilter: '#F5F5F5',
+  inactiveFilterText: '#666666',
+  separator: '#E0E0E0',
+  shadow: 'rgba(0, 0, 0, 0.1)',
+  icon: '#666666',
+  closeButtonColor: '#1A1A1A',
+  overlayBackground: 'rgba(0, 0, 0, 0.5)',
 };
 
 
@@ -1752,6 +1752,105 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
     }
   };
 
+  // const handleSubmit = async () => {
+  //   if (!eventName.trim()) {
+  //     alert("Пожалуйста, укажите название мероприятия");
+  //     return;
+  //   }
+  //   if (!eventDate) {
+  //     alert("Пожалуйста, выберите дату мероприятия");
+  //     return;
+  //   }
+  //   if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
+  //     alert("Пожалуйста, укажите корректный бюджет");
+  //     return;
+  //   }
+  //   if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
+  //     alert("Пожалуйста, укажите корректное количество гостей");
+  //     return;
+  //   }
+  //   if (filteredData.length === 0) {
+  //     alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     const categoryResponse = await api.createEventCategory(
+  //       { name: eventName },
+  //       token
+  //     );
+  //     const categoryId = categoryResponse.data.id;
+
+  //     for (const item of filteredData) {
+  //       const typeMapping = typesMapping.find(mapping => mapping.type === item.type);
+  //       if (!typeMapping) {
+  //         console.error(`Неизвестный тип услуги: ${item.type}`);
+  //         continue;
+  //       }
+
+  //   let serviceType = typeMapping.type;
+
+  //     // Adjust serviceType to match backend expectations if necessary
+  //     // For example, if backend expects 'TraditionalGifts' instead of 'traditional-gifts', adjust here
+  //     const serviceTypeMap = {
+  //       'restaurant': 'restaurant',
+  //       'hotels': 'hotels',
+  //       'tamada': 'tamada',
+  //       'program': 'program',
+  //       'flowers': 'flowers',
+  //       'transport': 'transport',
+  //       'cake': 'cake',
+  //       'alcohol': 'alcohol',
+  //       'jewelry': 'jewelry',
+  //       'typography': 'typography',
+  //       'technical-equipment-rental': 'technical-equipment-rental',
+  //       'traditional-gifts': 'traditional-gifts',
+  //       'national-costumes': 'national-costumes',
+  //       'musicians': 'musicians',
+  //       'photographers': 'photographers',
+  //       'videographers': 'videographers',
+  //       'decor': 'decor',
+  //       'event-category': 'event-category',
+  //     };
+
+  //     serviceType = serviceTypeMap[item.type] || item.type;
+
+
+  //       const quantity = item.type === "restaurant" || item.type === "hotels"
+  //         ? parseInt(guestCount, 10)
+  //         : parseInt(quantities[`${item.type}-${item.id}`] || "1");
+
+  //       try {
+  //         await api.addServiceToCategory(
+  //           categoryId,
+  //           { serviceId: item.id, serviceType, quantity },
+  //           token
+  //         );
+  //       } catch (error) {
+  //         console.error(`Ошибка при добавлении услуги ${serviceType}:`, error);
+  //       }
+  //     }
+
+  //     alert("Мероприятие успешно создано!");
+  //     setEventName("");
+  //     setEventDate(new Date());
+  //     setBudget("");
+  //     setGuestCount("");
+  //     setFilteredData([]);
+  //     setQuantities({});
+  //     setRemainingBudget(0);
+  //     navigation.goBack();
+  //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  //   } catch (error) {
+  //     console.error("Ошибка при создании мероприятия:", error);
+  //     alert("Ошибка: " + (error.response?.data?.error || error.message));
+  //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
 
   const handleSubmit = async () => {
   if (!eventName.trim()) {
@@ -2453,56 +2552,55 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
   scrollContent: {
-    padding: 18,
-    paddingBottom: 120,
+    padding: 16,
+    paddingBottom: 100,
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   headerTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
   backButton: {
-    padding: 10,
+    padding: 8,
   },
   eventDetailsContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: COLORS.textPrimary,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   inputContainer: {
-    marginBottom: 18,
+    marginBottom: 16,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
-    color: COLORS.textPrimary,
-    marginBottom: 10,
+    color: MODAL_COLORS.textPrimary,
+    marginBottom: 8,
   },
   input: {
     backgroundColor: MODAL_COLORS.inputBackground,
     borderWidth: 1,
     borderColor: MODAL_COLORS.inputBorder,
-    borderRadius: 10,
-    padding: 14,
+    borderRadius: 8,
+    padding: 12,
     fontSize: 16,
-    color: COLORS.textPrimary,
+    color: MODAL_COLORS.textPrimary,
   },
   datePickerButton: {
     flexDirection: 'row',
@@ -2511,27 +2609,27 @@ const styles = StyleSheet.create({
     backgroundColor: MODAL_COLORS.inputBackground,
     borderWidth: 1,
     borderColor: MODAL_COLORS.inputBorder,
-    borderRadius: 10,
-    padding: 14,
+    borderRadius: 8,
+    padding: 12,
   },
   datePickerText: {
     fontSize: 16,
-    color: COLORS.textPrimary,
+    color: MODAL_COLORS.textPrimary,
   },
   budgetInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 16,
+    marginTop: 12,
   },
   budgetText: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
+    fontSize: 14,
+    color: MODAL_COLORS.textPrimary,
   },
   categoriesContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   categoriesList: {
-    paddingBottom: 18,
+    paddingBottom: 16,
   },
   categoryRowWrapper: {
     justifyContent: 'space-between',
@@ -2541,27 +2639,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 10,
+    marginRight: 8,
   },
   categoryButton: {
     flex: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     overflow: 'hidden',
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
   },
   categoryButtonDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   categoryButtonGradient: {
-    padding: 14,
+    padding: 12,
     alignItems: 'center',
   },
   categoryButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: COLORS.white,
   },
@@ -2570,37 +2663,32 @@ const styles = StyleSheet.create({
   },
   categoryButtonAdd: {
     width: '48%',
-    borderRadius: 10,
+    borderRadius: 8,
     overflow: 'hidden',
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
   },
   categoryPlusText: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
     color: COLORS.white,
     textAlign: 'center',
   },
   removeCategoryButton: {
-    padding: 10,
+    padding: 8,
   },
   selectedItemsContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   selectedItemsList: {
-    paddingBottom: 18,
+    paddingBottom: 16,
   },
   card: {
     backgroundColor: COLORS.card,
     borderRadius: 12,
-    padding: 18,
+    padding: 16,
     marginBottom: 12,
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -2608,7 +2696,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   titleText: {
     fontSize: 16,
@@ -2621,7 +2709,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButton: {
-    padding: 10,
+    padding: 8,
   },
   controlRow: {
     flexDirection: 'row',
@@ -2633,12 +2721,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quantityButton: {
-    padding: 10,
+    padding: 8,
     backgroundColor: MODAL_COLORS.inputBackground,
     borderRadius: 8,
   },
   totalCost: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: COLORS.textPrimary,
   },
@@ -2646,20 +2734,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: MODAL_COLORS.textSecondary,
     textAlign: 'center',
-    marginTop: 24,
+    marginTop: 20,
   },
   submitButton: {
     borderRadius: 12,
     overflow: 'hidden',
-    marginTop: 24,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: 20,
   },
   submitButtonDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   submitButtonGradient: {
     padding: 16,
@@ -2673,42 +2756,40 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: MODAL_COLORS.overlayBackground,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addModalContainer: {
     backgroundColor: MODAL_COLORS.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    width: '100%',
-    maxHeight: SCREEN_HEIGHT * 0.9,
-    padding: 18,
+    borderRadius: 16,
+    width: '90%',
+    maxHeight: SCREEN_HEIGHT * 0.85,
+    padding: 16,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: MODAL_COLORS.textPrimary,
   },
   modalCloseButton: {
-    padding: 10,
+    padding: 8,
   },
   addModalSearchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: MODAL_COLORS.inputBackground,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: MODAL_COLORS.inputBorder,
-    paddingHorizontal: 14,
-    marginBottom: 18,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
   },
   addModalSearchIcon: {
-    marginRight: 10,
+    marginRight: 8,
   },
   addModalSearchInput: {
     flex: 1,
@@ -2717,23 +2798,23 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   addModalClearIcon: {
-    padding: 10,
+    padding: 8,
   },
   addModalFilterScroll: {
-    maxHeight: 160,
-    marginBottom: 18,
+    maxHeight: 150,
+    marginBottom: 16,
   },
   addModalFilterLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: MODAL_COLORS.textPrimary,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   filterButtonBase: {
-    paddingVertical: 10,
-    paddingHorizontal: 18,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 20,
-    marginRight: 10,
+    marginRight: 8,
   },
   addModalTypeButton: {
     backgroundColor: MODAL_COLORS.inactiveFilter,
@@ -2776,20 +2857,20 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   addModalItemList: {
-    paddingBottom: 18,
+    paddingBottom: 16,
   },
   addModalItemCard: {
     flexDirection: 'row',
     backgroundColor: MODAL_COLORS.cardBackground,
     borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
+    padding: 12,
+    marginBottom: 8,
     alignItems: 'center',
     shadowColor: MODAL_COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   addModalItemContent: {
     flex: 1,
@@ -2797,75 +2878,70 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addModalItemText: {
-    fontSize: 16,
+    fontSize: 14,
     color: MODAL_COLORS.textPrimary,
     flex: 1,
   },
   addModalItemCount: {
-    fontSize: 14,
+    fontSize: 12,
     color: MODAL_COLORS.textSecondary,
-    marginLeft: 10,
+    marginLeft: 8,
   },
   detailsIconButton: {
-    padding: 10,
+    padding: 8,
   },
   addModalEmptyText: {
     fontSize: 16,
     color: MODAL_COLORS.textSecondary,
     textAlign: 'center',
-    marginTop: 24,
+    marginTop: 20,
   },
   addModalScrollView: {
     maxHeight: SCREEN_HEIGHT * 0.5,
   },
   selectedItemContainer: {
-    marginBottom: 18,
+    marginBottom: 16,
   },
   categoryHeader: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: MODAL_COLORS.textPrimary,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   detailsModalContainer: {
     backgroundColor: MODAL_COLORS.background,
     borderRadius: 16,
     width: '90%',
-    padding: 18,
+    padding: 16,
     maxHeight: SCREEN_HEIGHT * 0.7,
   },
   detailsModalContent: {
-    paddingBottom: 18,
+    paddingBottom: 16,
   },
   detailRow: {
     flexDirection: 'row',
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: MODAL_COLORS.separator,
   },
   detailLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: MODAL_COLORS.textPrimary,
     width: '40%',
   },
   detailValue: {
-    fontSize: 16,
+    fontSize: 14,
     color: MODAL_COLORS.textPrimary,
     flex: 1,
   },
   portfolioButton: {
-    borderRadius: 10,
+    borderRadius: 8,
     overflow: 'hidden',
-    marginTop: 18,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: 16,
   },
   portfolioButtonGradient: {
-    padding: 14,
+    padding: 12,
     alignItems: 'center',
   },
   portfolioButtonText: {
@@ -2876,11 +2952,11 @@ const styles = StyleSheet.create({
   calendarContainer: {
     backgroundColor: MODAL_COLORS.background,
     borderRadius: 16,
-    padding: 18,
+    padding: 16,
     width: '90%',
   },
   closeCalendarButton: {
-    marginTop: 18,
+    marginTop: 16,
     alignItems: 'center',
   },
   closeCalendarText: {
@@ -2892,7 +2968,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 18,
+    padding: 16,
   },
   errorText: {
     fontSize: 16,
@@ -2900,6 +2976,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
 
 export default CreateTraditionalFamilyEventScreen;
