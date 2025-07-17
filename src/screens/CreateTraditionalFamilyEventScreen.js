@@ -221,6 +221,10 @@ class ErrorBoundary extends Component {
   }
 }
 
+
+
+
+
 const AddItemModal = ({
   visible,
   onClose,
@@ -285,8 +289,7 @@ const AddItemModal = ({
           item.gender,
           item.portfolio,
           item.cakeType,
-          item.fਦ
-          .flowerType,
+          item.flowerType,
           item.material,
           item.type,
         ]
@@ -476,114 +479,115 @@ const AddItemModal = ({
           <FlatList
             style={styles.addModalFilterScroll}
             showsVerticalScrollIndicator={false}
-            data={[{ key: 'filters' }]}
+            data={[{ key: "filters" }]}
             renderItem={() => (
               <View>
-              <Text style={styles.addModalFilterLabel}>Тип</Text>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={uniqueTypes}
-                keyExtractor={(item) => item.type}
-                renderItem={({ item: typeObj }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.filterButtonBase,
-                      selectedTypeFilter === typeObj.type
-                        ? styles.addModalTypeButtonActive
-                        : styles.addModalTypeButton,
-                    ]}
-                    onPress={() => setSelectedTypeFilter(typeObj.type)}
-                    accessible
-                    accessibilityLabel={`Фильтр по типу ${typeObj.label}`}
-                  >
-                    <Text
+                <Text style={styles.addModalFilterLabel}>Тип</Text>
+                <FlatList
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={uniqueTypes}
+                  keyExtractor={(item) => item.type}
+                  renderItem={({ item: typeObj }) => (
+                    <TouchableOpacity
                       style={[
-                        styles.filterButtonTextBase,
+                        styles.filterButtonBase,
                         selectedTypeFilter === typeObj.type
-                          ? styles.addModalTypeButtonTextActive
-                          : styles.addModalTypeButtonText,
+                          ? styles.addModalTypeButtonActive
+                          : styles.addModalTypeButton,
                       ]}
+                      onPress={() => setSelectedTypeFilter(typeObj.type)}
+                      accessible
+                      accessibilityLabel={`Фильтр по типу ${typeObj.label}`}
                     >
-                      {typeObj.label}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
+                      <Text
+                        style={[
+                          styles.filterButtonTextBase,
+                          selectedTypeFilter === typeObj.type
+                            ? styles.addModalTypeButtonTextActive
+                            : styles.addModalTypeButtonText,
+                        ]}
+                      >
+                        {typeObj.label}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
 
-              <Text style={styles.addModalFilterLabel}>Район</Text>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={districts}
-                keyExtractor={(district) => district}
-                renderItem={({ item: district }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.filterButtonBase,
-                      selectedDistrict === district
-                        ? styles.addModalDistrictButtonActive
-                        : styles.addModalDistrictButton,
-                    ]}
-                    onPress={() => setSelectedDistrict(district)}
-                    accessible
-                    accessibilityLabel={`Фильтр по району ${district === "all" ? "Все" : district}`}
-                  >
-                    <Text
+                <Text style={styles.addModalFilterLabel}>Район</Text>
+                <FlatList
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={districts}
+                  keyExtractor={(district) => district}
+                  renderItem={({ item: district }) => (
+                    <TouchableOpacity
                       style={[
-                        styles.filterButtonTextBase,
+                        styles.filterButtonBase,
                         selectedDistrict === district
-                          ? styles.addModalDistrictButtonTextActive
-                          : styles.addModalDistrictButtonText,
+                          ? styles.addModalDistrictButtonActive
+                          : styles.addModalDistrictButton,
                       ]}
+                      onPress={() => setSelectedDistrict(district)}
+                      accessible
+                      accessibilityLabel={`Фильтр по району ${district === "all" ? "Все" : district}`}
                     >
-                      {district === "all" ? "Все" : district}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
+                      <Text
+                        style={[
+                          styles.filterButtonTextBase,
+                          selectedDistrict === district
+                            ? styles.addModalDistrictButtonTextActive
+                            : styles.addModalDistrictButtonText,
+                        ]}
+                      >
+                        {district === "all" ? "Все" : district}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
 
-              <Text style={styles.addModalFilterLabel}>Цена</Text>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={[
-                  { label: "Все", value: "all" },
-                  { label: "0-10k", value: "0-10000" },
-                  { label: "10k-50k", value: "10000-50000" },
-                  { label: "50k+", value: "50000+" },
-                ]}
-                keyExtractor={(item) => item.value}
-                renderItem={({ item: option }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.filterButtonBase,
-                      costRange === option.value
-                        ? styles.addModalPriceButtonActive
-                        : styles.addModalPriceButton,
-                    ]}
-                    onPress={() => setCostRange(option.value)}
-                    accessible
-                    accessibilityLabel={`Фильтр по цене ${option.label}`}
-                  >
-                    <Text
+                <Text style={styles.addModalFilterLabel}>Цена</Text>
+                <FlatList
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={[
+                    { label: "Все", value: "all" },
+                    { label: "0-10k", value: "0-10000" },
+                    { label: "10k-50k", value: "10000-50000" },
+                    { label: "50k+", value: "50000+" },
+                  ]}
+                  keyExtractor={(item) => item.value}
+                  renderItem={({ item: option }) => (
+                    <TouchableOpacity
                       style={[
-                        styles.filterButtonTextBase,
+                        styles.filterButtonBase,
                         costRange === option.value
-                          ? styles.addModalPriceButtonTextActive
-                          : styles.addModalPriceButtonText,
+                          ? styles.addModalPriceButtonActive
+                          : styles.addModalPriceButton,
                       ]}
+                      onPress={() => setCostRange(option.value)}
+                      accessible
+                      accessibilityLabel={`Фильтр по цене ${option.label}`}
                     >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
+
+                      
+                      <Text
+                        style={[
+                        styles.filterButtonBase,
+                        costRange === option.value ?
+                          styles.addModalPriceButtonActive : styles.addModalPriceButton,
+                      ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
               </View>
             )}
           />
 
-        <FlatList
+          <FlatList
             data={filteredDataMemo}
             renderItem={renderAddItem}
             keyExtractor={(item) => `${item.type}-${item.id}`}
@@ -600,6 +604,7 @@ const AddItemModal = ({
     </Modal>
   );
 };
+
 
 
 const SelectedItem = ({
@@ -1999,7 +2004,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      <Text style={styles.headerTitle}>Создать мероприятие</Text>
+  
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
@@ -2008,6 +2013,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
       >
         <Icon name="arrow-back" size={24} color={COLORS.textPrimary} />
       </TouchableOpacity>
+          <Text style={styles.headerTitle}>Создать мероприятие</Text>
     </View>
   );
 
@@ -2112,9 +2118,15 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
       <View style={styles.budgetInfo}>
 
 
+
+
         <Text style={styles.budgetText}>
         
           Остаток бюджета: {remainingBudget.toLocaleString()} ₸
+          {'\n'}
+          {'\n'}
+          
+
 
 
          Общая стоимость: {calculateTotalCost.toLocaleString()} ₸
@@ -2128,11 +2140,30 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
     </View>
   );
 
+
+  const handleCategoryPress = (category) => {
+    const type = categoryToTypeMap[category];
+    if (!type) return;
+    // Pass all items of this type from `combinedData` (all available API items)
+    const itemsForCategoryModal = combinedData.filter((item) => item.type === type);
+    setSelectedCategoryItems(itemsForCategoryModal);
+    setSelectedCategoryLabel(category);
+    setSelectedCategoryType(type);
+    setCategoryModalVisible(true);
+  };
+
+  const handleCloseCategoryModal = () => {
+    setCategoryModalVisible(false);
+    setSelectedCategoryItems([]); setSelectedCategoryLabel(""); setSelectedCategoryType("");
+  };
+
+
+
   const renderCategories = ({ item }) => {
     if (item === "Добавить") {
       return (
         <View style={styles.categoryRow}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.categoryButtonAdd}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -2147,7 +2178,14 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
             >
               <Text style={styles.categoryPlusText}>+</Text>
             </LinearGradient>
+          </TouchableOpacity> */}
+
+          <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => setAddItemModalVisible(true)}>
+            <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
+              <Text style={styles.categoryPlusText}>+</Text>
+            </LinearGradient>
           </TouchableOpacity>
+
         </View>
       );
     }
@@ -2424,7 +2462,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
                   onPress={handleSubmit}
                   disabled={loading}
                   accessible
-                  accessibilityLabel="Создать мероприятие"
+                  accessibilityLabel="Добавить мероприятие"
                 >
                   <LinearGradient
                     colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
@@ -2574,7 +2612,7 @@ const styles = StyleSheet.create({
   },
   budgetText: {
     flex:1,
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.textPrimary,
   },
   categoriesContainer: {
@@ -2923,11 +2961,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.white,
   },
+
   calendarContainer: {
     backgroundColor: MODAL_COLORS.background,
     borderRadius: 16,
     padding: 18,
-    width: '90%',
+    // width: '90%',
+    marginBottom:'50%',
+    margingLeft:'45%',
+    
+
   },
   closeCalendarButton: {
     marginTop: 18,
