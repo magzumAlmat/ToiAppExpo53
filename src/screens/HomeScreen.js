@@ -1530,7 +1530,7 @@ const CreateEventScreen = ({ navigation, route }) => {
 
   const fetchAllBlockedDays = async () => {
     try {
-      const response = await api.fetchAllBlockDays();
+      const response = await api.fetchAllBlockedDays();
       const blockedDaysData = {};
       response.data.forEach((entry) => {
         const { date, restaurantId, restaurantName } = entry;
