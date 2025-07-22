@@ -203,7 +203,21 @@ export default function Item3Screen() {
   const fetchServiceDetails = async (serviceId, serviceType) => {
     setLoadingServiceDetails(true);
     try {
-      const endpoint = `/api/${serviceType.toLowerCase()}s/${serviceId}`;
+      // Map serviceType to correct endpoint path
+      const endpointMap = {
+        restaurant: 'restaurants',
+        clothing: 'clothing',
+        tamada: 'tamada',
+        program: 'program',
+        traditionalGift: 'traditional-gift',
+        flowers: 'flowers',
+        cake: 'cakes',
+        alcohol: 'alcohol',
+        transport: 'transport',
+        jewelry: 'jewelry',
+      };
+      const endpointPath = endpointMap[serviceType] || serviceType;
+      const endpoint = `/api/${endpointPath}/${serviceId}`;
       const response = await api.fetchByEndpoint(endpoint);
       const data = response.data.data || response.data;
       return {
@@ -230,7 +244,22 @@ export default function Item3Screen() {
   const fetchItemDetails = async (itemType, itemId) => {
     setLoadingDetails(true);
     try {
-      const endpoint = `/api/${itemType}/${itemId}`;
+      // Map itemType to correct endpoint path
+      const endpointMap = {
+        restaurant: 'restaurants',
+        clothing: 'clothing',
+        tamada: 'tamada',
+        program: 'program',
+        traditionalGift: 'traditional-gift',
+        flowers: 'flowers',
+        cake: 'cake',
+        alcohol: 'alcohol',
+        transport: 'transport',
+        goods: 'goods',
+        jewelry: 'jewelry',
+      };
+      const endpointPath = endpointMap[itemType] || itemType;
+      const endpoint = `/api/${endpointPath}/${itemId}`;
       const response = await api.fetchByEndpoint(endpoint);
       const details = Array.isArray(response.data) ? response.data[0] : response.data;
       return details || null;
@@ -785,13 +814,13 @@ export default function Item3Screen() {
   // Group items by category
   const groupItemsByCategory = (items) => {
     const categoryMap = {
-      restaurant: 'Рестораны',
+      restaurants: 'Рестораны',
       clothing: 'Одежда',
       tamada: 'Тамада',
       program: 'Программы',
-      traditionalGift: 'Традиционные подарки',
+      'traditional-gift': 'Традиционные подарки',
       flowers: 'Цветы',
-      cake: 'Торты',
+      cakes: 'Торты',
       alcohol: 'Алкоголь',
       transport: 'Транспорт',
       goods: 'Товары',
@@ -909,7 +938,7 @@ export default function Item3Screen() {
                     <Text style={styles.subItemText}>
                       {(() => {
                         switch (weddingItem.item_type) {
-                          case 'restaurant':
+                          case 'restaurants':
                             return `Ресторан - ${weddingItem.total_cost || 0} тг`;
                           case 'clothing':
                             return `Одежда - ${weddingItem.total_cost || 0} тг`;
@@ -917,11 +946,11 @@ export default function Item3Screen() {
                             return `Тамада - ${weddingItem.total_cost || 0} тг`;
                           case 'program':
                             return `Программа - ${weddingItem.total_cost || 0} тг`;
-                          case 'traditionalGift':
+                          case 'traditional-gift':
                             return `Традиционный подарок - ${weddingItem.total_cost || 0} тг`;
                           case 'flowers':
                             return `Цветы - ${weddingItem.total_cost || 0} тг`;
-                          case 'cake':
+                          case 'cakes':
                             return `Торт - ${weddingItem.total_cost || 0} тг`;
                           case 'alcohol':
                             return `Алкоголь - ${weddingItem.total_cost || 0} тг`;
