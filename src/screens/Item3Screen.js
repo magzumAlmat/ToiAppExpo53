@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -22,7 +23,6 @@ import { useSelector } from 'react-redux';
 import api from '../api/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
-import { useFocusEffect } from '@react-navigation/native';
 import { Calendar } from 'react-native-calendars';
 import { Picker } from '@react-native-picker/picker';
 
@@ -48,6 +48,7 @@ export default function Item3Screen() {
   const [eventCategories, setEventCategories] = useState([]);
   const [weddings, setWeddings] = useState([]);
   const [weddingItemsCache, setWeddingItemsCache] = useState({});
+  const [categoryServicesCache, setCategoryServicesCache] = useState({});
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [loadingWeddings, setLoadingWeddings] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -87,18 +88,33 @@ export default function Item3Screen() {
   const [hasShownNoWeddingsAlert, setHasShownNoWeddingsAlert] = useState(false);
   const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
 
-  // Fetch event categories
+  // Fetch event categories with services
   const fetchEventCategories = async () => {
     setLoadingCategories(true);
     try {
       const response = await api.getEventCategories();
       const categories = Array.isArray(response.data) ? response.data : response.data.data || [];
       setEventCategories(categories);
+
+      // Fetch services for each category
+      const servicesPromises = categories.map((category) =>
+        api.getEventCategoryWithServices(category.id).then((res) => ({
+          categoryId: category.id,
+          services: res.data.data.services || [],
+        }))
+      );
+      const servicesResults = await Promise.all(servicesPromises);
+      const newCache = servicesResults.reduce((acc, { categoryId, services }) => {
+        acc[categoryId] = services;
+        return acc;
+      }, {});
+      setCategoryServicesCache(newCache);
       return categories;
     } catch (error) {
       console.error('Error fetching event categories:', error);
       Alert.alert('Ошибка', 'Не удалось загрузить категории мероприятий');
       setEventCategories([]);
+      setCategoryServicesCache({});
       return [];
     } finally {
       setLoadingCategories(false);
@@ -168,6 +184,10 @@ export default function Item3Screen() {
       const response = await api.getEventCategoryWithServices(id);
       const details = response.data.data || response.data;
       setCategoryDetails(details);
+      setCategoryServicesCache((prev) => ({
+        ...prev,
+        [id]: details.services || [],
+      }));
       return details;
     } catch (error) {
       console.error('Error fetching category details:', error);
@@ -180,39 +200,31 @@ export default function Item3Screen() {
   };
 
   // Fetch service details
-const fetchServiceDetails = async (serviceId, serviceType) => {
-  console.log('fetchServiceDetails started!', serviceId, serviceType);
-  setLoadingServiceDetails(true);
-  try {
-    const endpoint = `/api/${serviceType.toLowerCase()}s/${serviceId}`;
-    console.log('endpoint:', endpoint);
-    const response = await api.fetchByEndpoint(endpoint);
-    console.log('Service details response:', JSON.stringify(response.data, null, 2));
-    const data = response.data.data || response.data;
-    // Normalize field names
-    return {
-      serviceId,
-      serviceType,
-      name: data.name,
-      description: data.description || null,
-      cost: data.cost || null,
-      created_at: data.createdAt || data.created_at || null,
-      updated_at: data.updatedAt || data.updated_at || null,
-      address: data.address || null,
-      cuisine: data.cuisine || null,
-      // Add other fields as needed
-    };
-  } catch (error) {
-    console.error(`Error fetching service details for ${serviceType}/${serviceId}:`, error);
-    Alert.alert('Ошибка', `Не удалось загрузить детали услуги: ${error.message}`);
-    return null;
-  } finally {
-    setLoadingServiceDetails(false);
-  }
-};
-
-
-
+  const fetchServiceDetails = async (serviceId, serviceType) => {
+    setLoadingServiceDetails(true);
+    try {
+      const endpoint = `/api/${serviceType.toLowerCase()}s/${serviceId}`;
+      const response = await api.fetchByEndpoint(endpoint);
+      const data = response.data.data || response.data;
+      return {
+        serviceId,
+        serviceType,
+        name: data.name,
+        description: data.description || null,
+        cost: data.cost || null,
+        created_at: data.createdAt || data.created_at || null,
+        updated_at: data.updatedAt || data.updated_at || null,
+        address: data.address || null,
+        cuisine: data.cuisine || null,
+      };
+    } catch (error) {
+      console.error(`Error fetching service details for ${serviceType}/${serviceId}:`, error);
+      Alert.alert('Ошибка', `Не удалось загрузить детали услуги: ${error.message}`);
+      return null;
+    } finally {
+      setLoadingServiceDetails(false);
+    }
+  };
 
   // Fetch item details
   const fetchItemDetails = async (itemType, itemId) => {
@@ -265,6 +277,10 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
         await api.addServicesToCategory(newCategory.id, {
           service_ids: categoryServices.map((s) => ({ serviceId: s.id, serviceType: s.serviceType })),
         });
+        setCategoryServicesCache((prev) => ({
+          ...prev,
+          [newCategory.id]: categoryServices,
+        }));
       }
       Alert.alert('Успех', 'Категория мероприятия создана');
       setCategoryName('');
@@ -296,6 +312,10 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       await api.updateServicesForCategory(selectedCategory.id, {
         service_ids: categoryServices.map((s) => ({ serviceId: s.id, serviceType: s.serviceType })),
       });
+      setCategoryServicesCache((prev) => ({
+        ...prev,
+        [selectedCategory.id]: categoryServices,
+      }));
       Alert.alert('Успех', 'Категория мероприятия обновлена');
       setCategoryName('');
       setCategoryDescription('');
@@ -322,10 +342,44 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
             try {
               await api.deleteEventCategory(id);
               setEventCategories((prev) => prev.filter((cat) => cat.id !== id));
+              setCategoryServicesCache((prev) => {
+                const newCache = { ...prev };
+                delete newCache[id];
+                return newCache;
+              });
               Alert.alert('Успех', 'Категория мероприятия удалена');
             } catch (error) {
               console.error('Error deleting event category:', error);
               Alert.alert('Ошибка', `Не удалось удалить категорию: ${error.message}`);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Delete service from category
+  const handleDeleteCategoryService = async (categoryId, serviceId, serviceType) => {
+    Alert.alert(
+      'Подтверждение',
+      'Вы уверены, что хотите удалить эту услугу из категории?',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Удалить',
+          onPress: async () => {
+            try {
+              await api.removeServiceFromCategory(categoryId, { serviceId, serviceType });
+              setCategoryServicesCache((prev) => ({
+                ...prev,
+                [categoryId]: prev[categoryId].filter(
+                  (s) => !(s.serviceId === serviceId && s.serviceType === serviceType)
+                ),
+              }));
+              Alert.alert('Успех', 'Услуга удалена из категории');
+            } catch (error) {
+              console.error('Error deleting category service:', error);
+              Alert.alert('Ошибка', 'Не удалось удалить услугу: ' + error.message);
             }
           },
         },
@@ -602,39 +656,18 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
   };
 
   // Open service details modal
-  // const openServiceDetailsModal = async (service) => {
-  //   const details = await fetchServiceDetails(service.serviceId, service.serviceType);
-  //   setSelectedService(details ? { ...service, ...details } : service);
-  //   setServiceDetailsModalVisible(true);
-  // };
-
-
   const openServiceDetailsModal = async (service) => {
-  setLoadingServiceDetails(true);
-  const details = await fetchServiceDetails(service.serviceId, service.serviceType);
-  setLoadingServiceDetails(false);
-  if (!details) {
-    Alert.alert('Ошибка', `Не удалось загрузить детали услуги для ${service.serviceType}/${service.serviceId}`);
-    return;
-  }
-  // Normalize the data to match the expected structure
-  const normalizedDetails = {
-    serviceId: service.serviceId,
-    serviceType: service.serviceType,
-    name: details.name || service.name || 'Без названия',
-    description: details.description || service.description || 'Нет описания',
-    cost: details.cost || service.cost || null,
-    created_at: details.created_at || details.createdAt || service.created_at || null,
-    updated_at: details.updated_at || details.updatedAt || service.updated_at || null,
-    // Add other fields as needed based on API response
+    setServiceDetailsModalVisible(true);
+    setLoadingServiceDetails(true);
+    const details = await fetchServiceDetails(service.serviceId, service.serviceType);
+    if (details) {
+      setSelectedService(details);
+    } else {
+      setSelectedService(service);
+      Alert.alert('Ошибка', `Не удалось загрузить полные детали для услуги ${service.name}`);
+    }
+    setLoadingServiceDetails(false);
   };
-  console.log('Normalized selectedService:', normalizedDetails); // Log to verify
-  setSelectedService(normalizedDetails);
-  setServiceDetailsModalVisible(true);
-};
-
-
-
 
   // Open edit wedding modal
   const openEditWeddingModal = (wedding) => {
@@ -675,9 +708,12 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
           api.getWedding(token),
           api.getGoods(token),
         ]);
-        setEventCategories(Array.isArray(categoriesResponse.data) ? categoriesResponse.data : categoriesResponse.data.data || []);
+        const categories = Array.isArray(categoriesResponse.data) ? categoriesResponse.data : categoriesResponse.data.data || [];
+        setEventCategories(categories);
         setWeddings(Array.isArray(weddingsResponse.data) ? weddingsResponse.data : weddingsResponse.data.data || []);
         setGoods(Array.isArray(goodsResponse.data) ? goodsResponse.data : goodsResponse.data.data || []);
+
+        // Cache wedding items
         const itemsPromises = weddingsResponse.data.data.map((wedding) =>
           api.getWeddingItems(wedding.id, token).then((res) => ({
             weddingId: wedding.id,
@@ -685,11 +721,26 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
           }))
         );
         const itemsResults = await Promise.all(itemsPromises);
-        const newCache = itemsResults.reduce((acc, { weddingId, items }) => {
+        const newWeddingCache = itemsResults.reduce((acc, { weddingId, items }) => {
           acc[weddingId] = items;
           return acc;
         }, {});
-        setWeddingItemsCache(newCache);
+        setWeddingItemsCache(newWeddingCache);
+
+        // Cache category services
+        const servicesPromises = categories.map((category) =>
+          api.getEventCategoryWithServices(category.id).then((res) => ({
+            categoryId: category.id,
+            services: res.data.data.services || [],
+          }))
+        );
+        const servicesResults = await Promise.all(servicesPromises);
+        const newCategoryCache = servicesResults.reduce((acc, { categoryId, services }) => {
+          acc[categoryId] = services;
+          return acc;
+        }, {});
+        setCategoryServicesCache(newCategoryCache);
+
         await fetchAvailableServices();
       } catch (error) {
         console.error('Error initializing:', error);
@@ -697,6 +748,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
         setWeddings([]);
         setGoods([]);
         setWeddingItemsCache({});
+        setCategoryServicesCache({});
       } finally {
         setLoadingCategories(false);
         setLoadingWeddings(false);
@@ -746,7 +798,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       jewelry: 'Ювелирные изделия',
     };
     const grouped = items.reduce((acc, item) => {
-      const category = item.item_type;
+      const category = item.item_type || item.serviceType;
       if (!acc[category]) {
         acc[category] = { name: categoryMap[category] || category, items: [] };
       }
@@ -757,37 +809,83 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
   };
 
   // Render event category item
-  const renderEventCategoryItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.itemText}>{item.name}</Text>
-      <Text style={styles.itemSubText}>
-        Статус: {item.status === 'active' ? 'Активно' : 'Неактивно'}
-      </Text>
-      <Text style={styles.itemSubText}>
-        Описание: {item.description || 'Нет описания'}
-      </Text>
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={styles.actionButtonPrimary}
-          onPress={() => openCategoryDetailsModal(item)}
-        >
-          <Text style={styles.actionButtonText}>Подробнее</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.actionButtonSecondary}
-          onPress={() => openEditCategoryModal(item)}
-        >
-          <Text style={styles.actionButtonText}>Редактировать</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.actionButtonError}
-          onPress={() => handleDeleteEventCategory(item.id)}
-        >
-          <Text style={styles.actionButtonText}>Удалить</Text>
-        </TouchableOpacity>
+  const renderEventCategoryItem = ({ item }) => {
+    const filteredServices = categoryServicesCache[item.id] || [];
+    const groupedServices = groupItemsByCategory(filteredServices);
+    return (
+      <View style={styles.itemContainer}>
+        <Text style={styles.itemText}>
+          {item.name} ({item.status === 'active' ? 'Активно' : 'Неактивно'})
+        </Text>
+        <Text style={styles.itemSubText}>
+          Описание: {item.description || 'Нет описания'}
+        </Text>
+        {groupedServices.length > 0 ? (
+          <View style={styles.weddingItemsContainer}>
+            {groupedServices.map((group) => (
+              <View key={group.name} style={styles.categorySection}>
+                <Text style={styles.categoryTitle}>{group.name}</Text>
+                {group.items.map((service) => (
+                  <View
+                    key={`${service.serviceType}-${service.serviceId}`}
+                    style={styles.weddingItem}
+                  >
+                    <Text style={styles.subItemText}>
+                      {service.name} {service.cost ? `- ${service.cost} тг` : ''}
+                    </Text>
+                    <View style={styles.itemActions}>
+                      <TouchableOpacity
+                        style={styles.detailsButton}
+                        onPress={() => openServiceDetailsModal(service)}
+                      >
+                        <Text style={styles.detailsButtonText}>Подробнее</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => handleDeleteCategoryService(item.id, service.serviceId, service.serviceType)}
+                      >
+                        <Text style={styles.deleteButtonText}>Удалить</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.emptyItemsContainer}>
+            <Text style={styles.noItems}>Нет услуг для этой категории</Text>
+            <TouchableOpacity
+              style={styles.addItemsButton}
+              onPress={() => openEditCategoryModal(item)}
+            >
+              <Text style={styles.addItemsButtonText}>Добавить услуги</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.actionButtonPrimary}
+            onPress={() => openCategoryDetailsModal(item)}
+          >
+            <Text style={styles.actionButtonText}>Подробнее</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionButtonSecondary}
+            onPress={() => openEditCategoryModal(item)}
+          >
+            <Text style={styles.actionButtonText}>Редактировать</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionButtonError}
+            onPress={() => handleDeleteEventCategory(item.id)}
+          >
+            <Text style={styles.actionButtonText}>Удалить</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   // Render wedding item
   const renderWeddingItem = ({ item }) => {
@@ -1170,14 +1268,14 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
             <Button
               title="Отмена"
               onPress={() => {
-                setCategoryModalVisible(false);
                 setCategoryName('');
                 setCategoryDescription('');
                 setCategoryStatus('active');
                 setCategoryServices([]);
                 setSelectedCategory(null);
+                setCategoryModalVisible(false);
               }}
-              color={COLORS.muted}
+              color={COLORS.error}
             />
           </View>
         </SafeAreaView>
@@ -1186,7 +1284,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       {/* Wedding Modal */}
       <Modal visible={weddingModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
-          <Text style={styles.subtitle}>Создание свадьбы</Text>
+          <Text style={styles.subtitle}>Создать свадьбу</Text>
           <TextInput
             style={styles.input}
             placeholder="Название свадьбы"
@@ -1194,27 +1292,21 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
             value={weddingName}
             onChangeText={setWeddingName}
           />
-          <TouchableOpacity
-            style={styles.dateButton}
-            onPress={() => setShowCalendar(true)}
-          >
-            <Text style={styles.dateButtonText}>
-              {weddingDate || 'Выберите дату свадьбы'}
-            </Text>
-          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder="Дата свадьбы (ГГГГ-ММ-ДД)"
+            placeholderTextColor={COLORS.muted}
+            value={weddingDate}
+            onChangeText={setWeddingDate}
+            onFocus={() => setShowCalendar(true)}
+          />
           {showCalendar && (
             <Calendar
-              current={weddingDate || new Date().toISOString().split('T')[0]}
               onDayPress={onDateChange}
-              minDate={new Date().toISOString().split('T')[0]}
               markedDates={{
-                [weddingDate]: { selected: true, selectedColor: COLORS.primary },
+                [weddingDate]: { selected: true, marked: true, selectedColor: COLORS.primary },
               }}
-              theme={{
-                selectedDayBackgroundColor: COLORS.primary,
-                todayTextColor: COLORS.accent,
-                arrowColor: COLORS.primary,
-              }}
+              style={styles.calendar}
             />
           )}
           <View style={styles.buttonRowModal}>
@@ -1227,9 +1319,11 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
               title="Отмена"
               onPress={() => {
                 setWeddingModalVisible(false);
+                setWeddingName('');
+                setWeddingDate('');
                 setShowCalendar(false);
               }}
-              color={COLORS.muted}
+              color={COLORS.error}
             />
           </View>
         </SafeAreaView>
@@ -1238,7 +1332,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       {/* Edit Wedding Modal */}
       <Modal visible={editWeddingModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
-          <Text style={styles.subtitle}>Редактирование свадьбы</Text>
+          <Text style={styles.subtitle}>Редактировать свадьбу</Text>
           <TextInput
             style={styles.input}
             placeholder="Название свадьбы"
@@ -1246,27 +1340,21 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
             value={weddingName}
             onChangeText={setWeddingName}
           />
-          <TouchableOpacity
-            style={styles.dateButton}
-            onPress={() => setShowCalendar(true)}
-          >
-            <Text style={styles.dateButtonText}>
-              {weddingDate || 'Выберите дату свадьбы'}
-            </Text>
-          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder="Дата свадьбы (ГГГГ-ММ-ДД)"
+            placeholderTextColor={COLORS.muted}
+            value={weddingDate}
+            onChangeText={setWeddingDate}
+            onFocus={() => setShowCalendar(true)}
+          />
           {showCalendar && (
             <Calendar
-              current={weddingDate || new Date().toISOString().split('T')[0]}
               onDayPress={onDateChange}
-              minDate={new Date().toISOString().split('T')[0]}
               markedDates={{
-                [weddingDate]: { selected: true, selectedColor: COLORS.primary },
+                [weddingDate]: { selected: true, marked: true, selectedColor: COLORS.primary },
               }}
-              theme={{
-                selectedDayBackgroundColor: COLORS.primary,
-                todayTextColor: COLORS.accent,
-                arrowColor: COLORS.primary,
-              }}
+              style={styles.calendar}
             />
           )}
           <View style={styles.buttonRowModal}>
@@ -1279,9 +1367,12 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
               title="Отмена"
               onPress={() => {
                 setEditWeddingModalVisible(false);
+                setWeddingName('');
+                setWeddingDate('');
+                setSelectedWedding(null);
                 setShowCalendar(false);
               }}
-              color={COLORS.muted}
+              color={COLORS.error}
             />
           </View>
         </SafeAreaView>
@@ -1290,9 +1381,16 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       {/* Wishlist Modal */}
       <Modal visible={wishlistModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
-          <Text style={styles.subtitle}>
-            {isCustomGift ? 'Добавить свой подарок' : 'Добавить подарок'}
-          </Text>
+          <Text style={styles.subtitle}>Добавить подарок</Text>
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchLabel}>Добавить собственный подарок</Text>
+            <TouchableOpacity
+              style={[styles.switch, isCustomGift && styles.switchActive]}
+              onPress={() => setIsCustomGift(!isCustomGift)}
+            >
+              <Text style={styles.switchText}>{isCustomGift ? 'Вкл' : 'Выкл'}</Text>
+            </TouchableOpacity>
+          </View>
           {isCustomGift ? (
             <>
               <TextInput
@@ -1302,81 +1400,59 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
                 value={formData.item_name}
                 onChangeText={(text) => setFormData({ ...formData, item_name: text })}
               />
-              <Text style={styles.infoText}>Категория: Прочее</Text>
+              <Button
+                title="Добавить"
+                onPress={handleAddCustomGift}
+                color={COLORS.primary}
+              />
             </>
           ) : (
             <FlatList
               data={goods}
               renderItem={renderGoodCard}
               keyExtractor={(item) => item.id.toString()}
-              ListEmptyComponent={<Text style={styles.noItems}>Товаров пока нет</Text>}
+              ListEmptyComponent={<Text style={styles.noItems}>Товары недоступны</Text>}
               contentContainerStyle={styles.listContainer}
             />
           )}
-          <View style={styles.buttonRowModal}>
-            {isCustomGift ? (
-              <>
-                <Button
-                  title="Сохранить"
-                  onPress={handleAddCustomGift}
-                  color={COLORS.primary}
-                />
-                <Button
-                  title="Назад"
-                  onPress={() => setIsCustomGift(false)}
-                  color={COLORS.muted}
-                />
-              </>
-            ) : (
-              <>
-                <Button
-                  title="Добавить"
-                  onPress={handleAddWishlistItem}
-                  color={COLORS.primary}
-                  disabled={selectedGoodIds.length === 0}
-                />
-                <Button
-                  title="Добавить свой подарок"
-                  onPress={() => setIsCustomGift(true)}
-                  color={COLORS.secondary}
-                />
-              </>
-            )}
-            <Button
-              title="Отмена"
-              onPress={() => {
-                setWishlistModalVisible(false);
-                setIsCustomGift(false);
-                setSelectedGoodIds([]);
-              }}
-              color={COLORS.muted}
-            />
-          </View>
+          {!isCustomGift && (
+            <View style={styles.buttonRowModal}>
+              <Button
+                title="Добавить выбранные"
+                onPress={handleAddWishlistItem}
+                color={COLORS.primary}
+                disabled={selectedGoodIds.length === 0}
+              />
+              <Button
+                title="Отмена"
+                onPress={() => {
+                  setWishlistModalVisible(false);
+                  setSelectedGoodIds([]);
+                  setIsCustomGift(false);
+                }}
+                color={COLORS.error}
+              />
+            </View>
+          )}
         </SafeAreaView>
       </Modal>
 
       {/* Wishlist View Modal */}
       <Modal visible={wishlistViewModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
-          <Text style={styles.subtitle}>
-            Подарки для свадьбы: {selectedWedding?.name}
-          </Text>
+          <Text style={styles.subtitle}>Список желаний</Text>
           <FlatList
             data={wishlistItems}
             renderItem={renderWishlistItem}
             keyExtractor={(item) => item.id.toString()}
-            numColumns={2}
-            ListEmptyComponent={<Text style={styles.noItems}>Подарков пока нет</Text>}
-            columnWrapperStyle={styles.columnWrapper}
+            ListEmptyComponent={<Text style={styles.noItems}>Список желаний пуст</Text>}
             contentContainerStyle={styles.listContainer}
           />
-          <View style={styles.buttonRowModal}>
-            <Button
-              title="Закрыть"
-              onPress={() => setWishlistViewModalVisible(false)}
-              color={COLORS.muted}
-            />
-          </View>
+          <Button
+            title="Закрыть"
+            onPress={() => setWishlistViewModalVisible(false)}
+            color={COLORS.error}
+          />
         </SafeAreaView>
       </Modal>
 
@@ -1388,186 +1464,114 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
             <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
           ) : categoryDetails ? (
             <ScrollView style={{ width: '100%' }}>
-              <Text style={styles.modalText}>Название: {categoryDetails.name}</Text>
-              <Text style={styles.modalText}>
+              <Text style={styles.detail}>Название: {categoryDetails.name}</Text>
+              <Text style={styles.detail}>
                 Описание: {categoryDetails.description || 'Нет описания'}
               </Text>
-              <Text style={styles.modalText}>
+              <Text style={styles.detail}>
                 Статус: {categoryDetails.status === 'active' ? 'Активно' : 'Неактивно'}
-              </Text>
-              <Text style={styles.modalText}>
-                Создано: {new Date(categoryDetails.created_at).toLocaleString()}
-              </Text>
-              <Text style={styles.modalText}>
-                Обновлено: {new Date(categoryDetails.updated_at).toLocaleString()}
               </Text>
               <Text style={styles.sectionTitle}>Услуги</Text>
               <FlatList
-                data={categoryDetails.services || []}
+                data={categoryServicesCache[categoryDetails.id] || []}
                 renderItem={renderServiceInCategory}
-                keyExtractor={(item) => `${item.serviceId}-${item.serviceType}`}
-                ListEmptyComponent={
-                  <Text style={styles.noItems}>Нет услуг в этой категории</Text>
-                }
+                keyExtractor={(item) => `${item.serviceType}-${item.serviceId}`}
+                ListEmptyComponent={<Text style={styles.noItems}>Нет услуг</Text>}
                 contentContainerStyle={styles.serviceList}
               />
             </ScrollView>
           ) : (
-            <Text style={styles.noItems}>Данные недоступны</Text>
+            <Text style={styles.noItems}>Детали недоступны</Text>
           )}
-          <View style={styles.buttonRowModal}>
-            <Button
-              title="Закрыть"
-              onPress={() => setCategoryDetailsModalVisible(false)}
-              color={COLORS.muted}
-            />
-          </View>
+          <Button
+            title="Закрыть"
+            onPress={() => {
+              setCategoryDetailsModalVisible(false);
+              setCategoryDetails(null);
+            }}
+            color={COLORS.error}
+          />
         </SafeAreaView>
       </Modal>
 
       {/* Service Details Modal */}
-    
-
-      <Modal visible={serviceDetailsModalVisible} transparent animationType="slide">
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalContent}>
-      <Text style={styles.modalTitle}>Детали услуги</Text>
-      {loadingServiceDetails ? (
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      ) : selectedService ? (
-        <ScrollView style={{ width: '100%' }}>
-          <Text style={styles.modalText}>
-            Название: {selectedService.name || 'Без названия'}
-          </Text>
-          <Text style={styles.modalText}>
-            Тип: {selectedService.serviceType || 'Не указан'}
-          </Text>
-          <Text style={styles.modalText}>
-            Описание: {selectedService.description || 'Нет описания'}
-          </Text>
-          {selectedService.cost ? (
-            <Text style={styles.modalText}>
-              Стоимость: {selectedService.cost} тг
-            </Text>
+      <Modal visible={serviceDetailsModalVisible} animationType="slide">
+        <SafeAreaView style={styles.modalContainer}>
+          <Text style={styles.subtitle}>Детали услуги</Text>
+          {loadingServiceDetails ? (
+            <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          ) : selectedService ? (
+            <ScrollView style={{ width: '100%' }}>
+              <Text style={styles.detail}>Название: {selectedService.name}</Text>
+              <Text style={styles.detail}>
+                Тип: {selectedService.serviceType}
+              </Text>
+              <Text style={styles.detail}>
+                Описание: {selectedService.description || 'Нет описания'}
+              </Text>
+              <Text style={styles.detail}>
+                Стоимость: {selectedService.cost ? `${selectedService.cost} тг` : 'Не указана'}
+              </Text>
+              {selectedService.address && (
+                <Text style={styles.detail}>Адрес: {selectedService.address}</Text>
+              )}
+              {selectedService.cuisine && (
+                <Text style={styles.detail}>Кухня: {selectedService.cuisine}</Text>
+              )}
+              <Text style={styles.detail}>
+                Создано: {selectedService.created_at || 'Не указано'}
+              </Text>
+              <Text style={styles.detail}>
+                Обновлено: {selectedService.updated_at || 'Не указано'}
+              </Text>
+            </ScrollView>
           ) : (
-            <Text style={styles.modalText}>Стоимость: Не указана</Text>
+            <Text style={styles.noItems}>Детали недоступны</Text>
           )}
-          {selectedService.created_at ? (
-            <Text style={styles.modalText}>
-              Создано: {new Date(selectedService.created_at).toLocaleString()}
-            </Text>
-          ) : (
-            <Text style={styles.modalText}>Создано: Не указано</Text>
-          )}
-          {selectedService.updated_at ? (
-            <Text style={styles.modalText}>
-              Обновлено: {new Date(selectedService.updated_at).toLocaleString()}
-            </Text>
-          ) : (
-            <Text style={styles.modalText}>Обновлено: Не указано</Text>
-          )}
-        </ScrollView>
-      ) : (
-        <Text style={styles.modalText}>Данные недоступны</Text>
-      )}
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => setServiceDetailsModalVisible(false)}
-      >
-        <Text style={styles.closeButtonText}>Закрыть</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-</Modal>
-
-
-
+          <Button
+            title="Закрыть"
+            onPress={() => {
+              setServiceDetailsModalVisible(false);
+              setSelectedService(null);
+            }}
+            color={COLORS.error}
+          />
+        </SafeAreaView>
+      </Modal>
 
       {/* Item Details Modal */}
-      <Modal visible={detailsModalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Детали элемента</Text>
-            {loadingDetails ? (
-              <ActivityIndicator size="large" color={COLORS.primary} />
-            ) : selectedItem ? (
-              <ScrollView style={{ width: '100%' }}>
-                <Text style={styles.modalText}>ID: {selectedItem.id}</Text>
-                <Text style={styles.modalText}>Тип: {selectedItem.item_type}</Text>
-                <Text style={styles.modalText}>
-                  Наименование: {selectedItem.name || selectedItem.item_name || 'N/A'}
-                </Text>
-                <Text style={styles.modalText}>
-                  Стоимость: {selectedItem.total_cost || '0'} тг
-                </Text>
-                <Text style={styles.modalText}>
-                  Создан: {new Date(selectedItem.created_at).toLocaleString()}
-                </Text>
-                <Text style={styles.modalText}>
-                  Обновлен: {new Date(selectedItem.updated_at).toLocaleString()}
-                </Text>
-                {selectedItem.address && (
-                  <Text style={styles.modalText}>Адрес: {selectedItem.address}</Text>
-                )}
-                {selectedItem.phone && (
-                  <Text style={styles.modalText}>Телефон: {selectedItem.phone}</Text>
-                )}
-                {selectedItem.cuisine && (
-                  <Text style={styles.modalText}>Кухня: {selectedItem.cuisine}</Text>
-                )}
-                {selectedItem.capacity && (
-                  <Text style={styles.modalText}>
-                    Вместимость: {selectedItem.capacity}
-                  </Text>
-                )}
-                {selectedItem.averageCost && (
-                  <Text style={styles.modalText}>
-                    Средний чек: {selectedItem.averageCost} тг
-                  </Text>
-                )}
-                {selectedItem.brand && (
-                  <Text style={styles.modalText}>Бренд: {selectedItem.brand}</Text>
-                )}
-                {selectedItem.gender && (
-                  <Text style={styles.modalText}>Пол: {selectedItem.gender}</Text>
-                )}
-                {selectedItem.portfolio && (
-                  <Text style={styles.modalText}>
-                    Портфолио: {selectedItem.portfolio}
-                  </Text>
-                )}
-                {selectedItem.category && (
-                  <Text style={styles.modalText}>
-                    Категория: {selectedItem.category}
-                  </Text>
-                )}
-                {selectedItem.flowerType && (
-                  <Text style={styles.modalText}>
-                    Тип цветка: {selectedItem.flowerType}
-                  </Text>
-                )}
-                {selectedItem.cakeType && (
-                  <Text style={styles.modalText}>
-                    Тип торта: {selectedItem.cakeType}
-                  </Text>
-                )}
-                {selectedItem.material && (
-                  <Text style={styles.modalText}>
-                    Материал: {selectedItem.material}
-                  </Text>
-                )}
-              </ScrollView>
-            ) : (
-              <Text style={styles.modalText}>Данные недоступны</Text>
-            )}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setDetailsModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Закрыть</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      <Modal visible={detailsModalVisible} animationType="slide">
+        <SafeAreaView style={styles.modalContainer}>
+          <Text style={styles.subtitle}>Детали элемента</Text>
+          {loadingDetails ? (
+            <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          ) : selectedItem ? (
+            <ScrollView style={{ width: '100%' }}>
+              <Text style={styles.detail}>
+                Тип: {selectedItem.item_type || 'Не указано'}
+              </Text>
+              <Text style={styles.detail}>
+                Стоимость: {selectedItem.total_cost ? `${selectedItem.total_cost} тг` : 'Не указана'}
+              </Text>
+              {selectedItem.name && (
+                <Text style={styles.detail}>Название: {selectedItem.name}</Text>
+              )}
+              {selectedItem.description && (
+                <Text style={styles.detail}>Описание: {selectedItem.description}</Text>
+              )}
+            </ScrollView>
+          ) : (
+            <Text style={styles.noItems}>Детали недоступны</Text>
+          )}
+          <Button
+            title="Закрыть"
+            onPress={() => {
+              setDetailsModalVisible(false);
+              setSelectedItem(null);
+            }}
+            color={COLORS.error}
+          />
+        </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
@@ -1577,277 +1581,161 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: 16,
+    paddingHorizontal: 16,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: 'bold',
     color: COLORS.text,
+    marginVertical: 16,
     textAlign: 'center',
-    marginBottom: 16,
   },
   subtitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '600',
     color: COLORS.text,
+    marginVertical: 12,
     textAlign: 'center',
-    marginBottom: 20,
+  },
+  itemContainer: {
+    backgroundColor: COLORS.white,
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 8,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  itemText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  itemSubText: {
+    fontSize: 14,
+    color: COLORS.muted,
+    marginTop: 4,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    flexWrap: 'wrap',
+  },
+  buttonRowModal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 16,
   },
   createButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    margin: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 8,
     flex: 1,
-    alignItems: 'center',
+    marginHorizontal: 4,
   },
   createButtonText: {
     color: COLORS.white,
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
+  },
+  actionButtonPrimary: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginHorizontal: 4,
+    flex: 1,
+  },
+  actionButtonSecondary: {
+    backgroundColor: COLORS.secondary,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginHorizontal: 4,
+    flex: 1,
+  },
+  actionButtonAccent: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginHorizontal: 4,
+    flex: 1,
+  },
+  actionButtonError: {
+    backgroundColor: COLORS.error,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginHorizontal: 4,
+    flex: 1,
+  },
+  actionButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    padding: 16,
   },
   input: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 12,
-    marginBottom: 16,
+    marginVertical: 8,
     fontSize: 16,
-    backgroundColor: COLORS.white,
     color: COLORS.text,
+    backgroundColor: COLORS.white,
   },
   multilineInput: {
     height: 100,
     textAlignVertical: 'top',
   },
   pickerContainer: {
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
-    marginBottom: 16,
-    backgroundColor: COLORS.white,
+    marginVertical: 8,
   },
   pickerLabel: {
     fontSize: 16,
+    fontWeight: '600',
     color: COLORS.text,
-    paddingHorizontal: 12,
-    paddingTop: 8,
+    marginBottom: 4,
   },
   picker: {
-    fontSize: 16,
-    color: COLORS.text,
+    backgroundColor: COLORS.white,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.text,
-    marginTop: 16,
-    marginBottom: 12,
+    marginVertical: 12,
   },
-  dateButton: {
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    backgroundColor: COLORS.white,
-    alignItems: 'center',
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: COLORS.text,
-  },
-  itemContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    elevation: 4,
-  },
-  itemText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  itemSubText: {
-    fontSize: 16,
-    color: COLORS.muted,
-    marginBottom: 8,
-  },
-  weddingItemsContainer: {
-    marginBottom: 12,
-  },
-  categorySection: {
-    marginBottom: 16,
-  },
-  categoryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.primary,
-    marginBottom: 8,
-    borderBottomWidth: 2,
-    borderBottomColor: COLORS.primary,
-    paddingBottom: 4,
-  },
-  weddingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  subItemText: {
-    fontSize: 16,
-    color: COLORS.text,
-    flex: 1,
-    marginRight: 12,
-  },
-  itemActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  buttonRowModal: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
-    width: '100%',
-  },
-  actionButtonPrimary: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    flexGrow: 1,
-    margin: 4,
-    alignItems: 'center',
-  },
-  actionButtonSecondary: {
-    backgroundColor: COLORS.secondary,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    flexGrow: 1,
-    margin: 4,
-    alignItems: 'center',
-  },
-  actionButtonAccent: {
-    backgroundColor: COLORS.accent,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    flexGrow: 1,
-    margin: 4,
-    alignItems: 'center',
-  },
-  actionButtonError: {
-    backgroundColor: COLORS.error,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    flexGrow: 1,
-    margin: 4,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  noItems: {
-    fontSize: 18,
-    color: COLORS.muted,
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  emptyItemsContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-  },
-  addItemsButton: {
-    backgroundColor: COLORS.secondary,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  addItemsButtonText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    padding: 20,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-  },
-  modalContent: {
-    width: '90%',
-    maxHeight: '80%',
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 16,
-  },
-  modalText: {
-    fontSize: 16,
-    color: COLORS.text,
-    marginBottom: 10,
-    textAlign: 'left',
-    width: '100%',
-  },
-  closeButton: {
-    backgroundColor: COLORS.muted,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginTop: 20,
-  },
-  closeButtonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '600',
+  serviceList: {
+    paddingBottom: 16,
   },
   serviceCard: {
+    backgroundColor: COLORS.white,
     padding: 12,
     marginVertical: 8,
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   selectedServiceCard: {
     borderColor: COLORS.primary,
     borderWidth: 2,
-    backgroundColor: '#E6F0FA',
   },
   serviceCardTitle: {
     fontSize: 16,
@@ -1857,70 +1745,11 @@ const styles = StyleSheet.create({
   serviceCardDescription: {
     fontSize: 14,
     color: COLORS.muted,
-    marginTop: 4,
+    marginVertical: 4,
   },
   serviceCardType: {
     fontSize: 14,
     color: COLORS.muted,
-    marginTop: 4,
-  },
-  detailsButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  detailsButtonText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  deleteButton: {
-    backgroundColor: COLORS.error,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-  },
-  deleteButtonText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  goodCard: {
-    padding: 12,
-    marginVertical: 8,
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  selectedGoodCard: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-    backgroundColor: '#E6F0FA',
-  },
-  goodCardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  goodCardCategory: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginTop: 4,
-  },
-  goodCardCost: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginTop: 4,
-  },
-  linkText: {
-    fontSize: 14,
-    color: COLORS.primary,
-    marginTop: 6,
-    textDecorationLine: 'underline',
   },
   selectedIndicator: {
     position: 'absolute',
@@ -1930,91 +1759,202 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: 'bold',
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  noItems: {
+    fontSize: 16,
+    color: COLORS.muted,
+    textAlign: 'center',
+  },
+  loader: {
+    marginVertical: 16,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 8,
+  },
+  listContainer: {
+    paddingBottom: 16,
+  },
+  goodCard: {
+    backgroundColor: COLORS.white,
+    padding: 12,
+    marginVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  selectedGoodCard: {
+    borderColor: COLORS.primary,
+    borderWidth: 2,
+  },
+  goodCardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  goodCardCategory: {
+    fontSize: 14,
+    color: COLORS.muted,
+    marginVertical: 4,
+  },
+  goodCardCost: {
+    fontSize: 14,
+    color: COLORS.muted,
+  },
+  linkText: {
+    color: COLORS.primary,
+    fontSize: 14,
+    marginVertical: 4,
+    textDecorationLine: 'underline',
+  },
   wishlistCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
-    margin: '1%',
-    width: '48%',
+    padding: 12,
+    marginVertical: 8,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   wishlistCardContent: {
-    padding: 12,
+    paddingBottom: 16,
   },
   wishlistTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.text,
-    marginBottom: 6,
-  },
-  wishlistStatus: {
-    fontSize: 13,
-    color: COLORS.muted,
-    marginBottom: 8,
   },
   strikethroughText: {
     textDecorationLine: 'line-through',
+  },
+  wishlistStatus: {
+    fontSize: 14,
     color: COLORS.muted,
+    marginVertical: 4,
   },
   mediaSection: {
-    marginTop: 12,
-    minHeight: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginTop: 8,
   },
   mediaList: {
     paddingVertical: 8,
   },
   card: {
-    width: 150,
-    height: 150,
-    marginRight: 12,
-    borderRadius: 12,
+    marginRight: 8,
+    borderRadius: 8,
     overflow: 'hidden',
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   media: {
-    width: '100%',
-    height: '100%',
+    width: 100,
+    height: 100,
   },
   video: {
-    width: '100%',
-    height: '100%',
-  },
-  loader: {
-    marginVertical: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: COLORS.error,
-    textAlign: 'center',
-    marginVertical: 12,
+    width: 100,
+    height: 100,
   },
   noFilesText: {
     fontSize: 14,
     color: COLORS.muted,
-    textAlign: 'center',
-    marginVertical: 12,
   },
-  columnWrapper: {
+  switchContainer: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  switch: {
+    backgroundColor: COLORS.muted,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  switchActive: {
+    backgroundColor: COLORS.primary,
+  },
+  switchText: {
+    color: COLORS.white,
+    fontSize: 14,
+  },
+  calendar: {
+    marginVertical: 8,
+    borderRadius: 8,
+  },
+  weddingItemsContainer: {
+    marginTop: 8,
+  },
+  categorySection: {
+    marginVertical: 8,
+  },
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  weddingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  subItemText: {
+    fontSize: 14,
+    color: COLORS.text,
+    flex: 1,
+  },
+  itemActions: {
+    flexDirection: 'row',
+  },
+  detailsButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    marginHorizontal: 4,
+  },
+  detailsButtonText: {
+    color: COLORS.white,
+    fontSize: 12,
+  },
+  deleteButton: {
+    backgroundColor: COLORS.error,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    marginHorizontal: 4,
+  },
+  deleteButtonText: {
+    color: COLORS.white,
+    fontSize: 12,
+  },
+  emptyItemsContainer: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  addItemsButton: {
+    backgroundColor: COLORS.secondary,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    marginTop: 8,
+  },
+  addItemsButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
   detail: {
     fontSize: 14,
-    color: COLORS.muted,
-    textAlign: 'center',
-  },
-  infoText: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginBottom: 10,
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  serviceList: {
-    paddingBottom: 20,
+    color: COLORS.text,
+    marginVertical: 4,
   },
 });
