@@ -681,11 +681,18 @@ const createResourceMethods = () => {
 export default {
   // Аутентификация и профиль
 
+
+    getCakeById: (id) =>
+    api.get(`/api/cake/${id}`).catch((error) => {
+      throw new Error(`Ошибка получения торта: ${error.response?.data?.message || error.message}`);
+    }),
+
+
     getCakes: () =>
     api.get('/api/cake').catch((error) => {
       throw new Error(`Ошибка получения списка тортов: ${error.response?.data?.message || error.message}`);
     }),
-    
+
     createRestaurant: (data) =>
     api.post('/api/restaurant', data).catch((error) => {
       throw new Error(`Ошибка создания ресторана: ${error.response?.data?.message || error.message}`);

@@ -1320,7 +1320,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
           console.error("Ошибка получения транспорта:", err);
           return { data: [] };
         }),
-        api.getCakes().catch((err) => {
+        api.getCakeById().catch((err) => {
           console.error("Ошибка получения тортов:", err);
           return { data: [] };
         }),
@@ -1897,7 +1897,7 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
         'program': 'Program',
         'flowers': 'Flowers',
         'transport': 'Transport',
-        'cake': 'Cakes',
+        'cake': 'Cake',
         'alcohol': 'Alcohol',
         'jewelry': 'Jewelry',
         'typography': 'Typography',
