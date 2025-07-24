@@ -28,6 +28,9 @@ import CreateTraditionalFamilyEventScreen from '../screens/CreateTraditionalFami
 import BeforeTraditionalFamilyEventScreen from '../components/BeforeTraditionalFamilyEventScreen';
 import CorporateEventScreen from '../screens/CorporateEventScreen';
 import BeforeCorporateEventScreen from '../components/BeforeCorporateEventScreen';
+import BeforeConferenceEventScreen from '../components/BeforeConferenceEventScreen';
+import ConferenceEventScreen from '../screens/ConferencesEventScreen';
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -177,6 +180,10 @@ const CreateEventScreen = ({ navigation }) => {
         } else if (item === 'Корпоративное мероприятие') {
           navigation.navigate('BeforeCorporateEventScreen');
         }
+         else if (item === 'Конференции') {
+          navigation.navigate('BeforeConferenceEventScreen');
+        }
+    
       }}
     >
       <Text style={styles.categoryText}>{item}</Text>
@@ -220,6 +227,10 @@ const CreateEventScreen = ({ navigation }) => {
     </LinearGradient>
   );
 };
+
+
+
+
 
 function AuthenticatedTabs() {
   const { user, token } = useSelector((state) => state.auth);
@@ -504,6 +515,62 @@ function CreateCorporateEventTabs() {
   );
 }
 
+function CreateConferenceEventTabs() {
+  const { user, token } = useSelector((state) => state.auth);
+  const roleId = user?.roleId;
+
+  const tabBarOptions = {
+    tabBarStyle: styles.tabBar,
+    tabBarShowLabel: true,
+    tabBarLabelStyle: styles.tabLabel,
+    tabBarActiveTintColor: '#897066',
+    tabBarInactiveTintColor: '#666666',
+  };
+
+  if (!user || roleId === undefined) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <Tab.Navigator screenOptions={tabBarOptions}>
+      <Tab.Screen
+        name="CreateConferenceEvent"
+        component={ConferenceEventScreen}
+        options={{
+          title: 'Главная',
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="event" size={24} color={color} style={styles.tabIcon} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Item3"
+        component={Item3Screen}
+        options={{
+          title: 'Мои мероприятия',
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="event" size={24} color={color} style={styles.tabIcon} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Item4"
+        component={Item4Screen}
+        options={{
+          title: 'Профиль',
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name="person-outline" size={24} color={color} style={styles.tabIcon} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+
 export default function Navigation() {
   const { token, user } = useSelector((state) => state.auth);
   console.log('Navigation state:', { token, user });
@@ -570,6 +637,11 @@ export default function Navigation() {
         <Stack.Screen name="BeforeCorporateEventScreen" component={BeforeCorporateEventScreen} />
        
        
+        <Stack.Screen name="CreateConferenceEventTabs" component={CreateConferenceEventTabs} />
+        <Stack.Screen name="BeforeConferenceEventScreen" component={BeforeConferenceEventScreen} />
+       
+
+
         <Stack.Screen name="BeforeHomeScreen" component={BeforeHomeScreen} />
         <Stack.Screen name="Details" component={DetailsScreen} options={{ title: 'Подробности' }} />
         <Stack.Screen name="Authenticated" component={AuthenticatedTabs} />
