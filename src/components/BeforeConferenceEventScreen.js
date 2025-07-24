@@ -1038,17 +1038,32 @@ const BeforeConferenceEventScreen = ({ navigation, route }) => {
     setGuestCount(filteredValue);
   };
 
+  // const handleProceed = () => {
+  //   if (selectedCategoriesList.length === 0) {
+  //     alert('Пожалуйста, выберите хотя бы одну категорию.');
+  //     return;
+  //   }
+  //   console.log('Передаваемые категории:', selectedCategoriesList);
+  //   navigation.navigate('CreateConferenceEventTabs', {
+  //     screen: 'CreateConferenceEventScreen',
+  //     params: { selectedCategories: selectedCategoriesList },
+  //   });
+  // };
+
+
   const handleProceed = () => {
-    if (selectedCategoriesList.length === 0) {
-      alert('Пожалуйста, выберите хотя бы одну категорию.');
-      return;
-    }
-    console.log('Передаваемые категории:', selectedCategoriesList);
-    navigation.navigate('CreateConferenceEventTabs', {
-      screen: 'CreateConferenceEventScreen',
-      params: { selectedCategories: selectedCategoriesList },
-    });
-  };
+  if (selectedCategoriesList.length === 0) {
+    alert('Пожалуйста, выберите хотя бы одну категорию.');
+    return;
+  }
+  console.log('Передаваемые категории:', selectedCategoriesList);
+  navigation.navigate('CreateConferenceEventTabs', {
+    screen: 'CreateConferenceEvent', // Match the screen name in Tab.Navigator
+    params: { selectedCategories: selectedCategoriesList },
+  });
+};
+
+
 
   const renderCategory = (item) => {
     const isActive = activeCategories[item];

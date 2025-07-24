@@ -29,7 +29,7 @@ import BeforeTraditionalFamilyEventScreen from '../components/BeforeTraditionalF
 import CorporateEventScreen from '../screens/CorporateEventScreen';
 import BeforeCorporateEventScreen from '../components/BeforeCorporateEventScreen';
 import BeforeConferenceEventScreen from '../components/BeforeConferenceEventScreen';
-import ConferenceEventScreen from '../screens/ConferencesEventScreen';
+import ConferencesEventScreen from '../screens/ConferencesEventScreen';
 
 
 const Stack = createStackNavigator();
@@ -535,7 +535,7 @@ function CreateConferenceEventTabs() {
     <Tab.Navigator screenOptions={tabBarOptions}>
       <Tab.Screen
         name="CreateConferenceEvent"
-        component={ConferenceEventScreen}
+        component={ConferencesEventScreen}
         options={{
           title: 'Главная',
           headerShown: false,
