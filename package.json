@@ -19,7 +19,6 @@
     "@reduxjs/toolkit": "^2.7.0",
     "axios": "^1.8.3",
     "expo": "~53.0.7",
-    "expo-av": "~15.1.4",
     "expo-blur": "^14.1.4",
     "expo-calendar": "~14.1.4",
     "expo-checkbox": "~4.1.4",
@@ -31,7 +30,6 @@
     "expo-secure-store": "~14.2.3",
     "expo-status-bar": "~2.2.3",
     "expo-system-ui": "~5.0.7",
-    "expo-video": "~2.1.8",
     "lottie-react-native": "7.2.2",
     "react": "19.0.0",
     "react-native": "0.79.2",
@@ -42,12 +40,13 @@
     "react-native-progress": "^5.0.1",
     "react-native-reanimated": "^3.17.5",
     "react-native-swiper": "^1.6.0",
-    "react-native-video": "^6.13.0",
+    "react-native-video": "^6.16.1",
     "react-redux": "^9.2.0",
     "use-debounce": "^10.0.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0"
+    "@babel/core": "^7.26.0",
+     "@react-native-community/cli": "latest"
   },
   "private": true
 }

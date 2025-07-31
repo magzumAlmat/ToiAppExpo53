@@ -1,4 +1,5 @@
-import React, { Component, useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, {  useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { Component } from "react";
 import {
   View,
   Image,
@@ -2541,13 +2542,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.white,
   },
-  calendarContainer: {
-    backgroundColor: MODAL_COLORS.background,
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: '50%',
-    marginLeft: '45%',
-  },
+ calendarContainer: {
+  backgroundColor: MODAL_COLORS.background,
+  borderRadius: 16,
+  padding: 18,
+  width: '100%', // Ensure full width
+  maxHeight: SCREEN_HEIGHT * 0.7, // Adjust max height if needed
+},
   closeCalendarButton: {
     marginTop: 18,
     alignItems: 'center',
@@ -2573,6 +2574,22 @@ const styles = StyleSheet.create({
 export default ConferencesEventScreen;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//--------------------------------------------------------------------
 
 
 

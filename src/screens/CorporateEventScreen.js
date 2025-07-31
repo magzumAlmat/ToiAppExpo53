@@ -115,6 +115,8 @@ const useDebounce = (callback, delay) => {
   return debouncedCallback;
 };
 
+
+
 class ErrorBoundary extends Component {
   state = { hasError: false };
 
@@ -1767,7 +1769,9 @@ const CorporateEventScreen = ({ navigation, route }) => {
                     textDisabledColor: MODAL_COLORS.textSecondary,
                     arrowColor: COLORS.primary,
                   }}
+                  style={{ width: '100%' }}
                 />
+
                 <TouchableOpacity
                   style={styles.closeCalendarButton}
                   onPress={() => setShowDatePicker(false)}
@@ -2543,12 +2547,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   calendarContainer: {
-    backgroundColor: MODAL_COLORS.background,
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: '50%',
-    marginLeft: '45%',
-  },
+  backgroundColor: MODAL_COLORS.background,
+  borderRadius: 16,
+  padding: 18,
+  width: '100%', // Ensure full width
+  maxHeight: SCREEN_HEIGHT * 0.7, // Adjust max height if needed
+},
   closeCalendarButton: {
     marginTop: 18,
     alignItems: 'center',

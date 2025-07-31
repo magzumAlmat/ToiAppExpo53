@@ -5405,12 +5405,12 @@ export default function Item3Screen() {
           </View>
         )}
         <View style={styles.buttonRow}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.actionButtonPrimary}
             onPress={() => openCategoryDetailsModal(item)}
           >
             <Text style={styles.actionButtonText}>Подробнее</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.actionButtonSecondary}
             onPress={() => openEditCategoryModal(item)}
@@ -5815,8 +5815,8 @@ export default function Item3Screen() {
       {/* Wedding Modal */}
       <Modal visible={weddingModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
-          <Text style={styles.subtitle}>Создать свадьбу</Text>
-          <TextInput
+          <Text style={styles.subtitle}>Мои мероприятия</Text>
+          {/* <TextInput
             style={styles.input}
             placeholder="Название свадьбы"
             placeholderTextColor={COLORS.muted}
@@ -5856,7 +5856,7 @@ export default function Item3Screen() {
               }}
               color={COLORS.error}
             />
-          </View>
+          </View> */}
         </SafeAreaView>
       </Modal>
 
