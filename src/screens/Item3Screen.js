@@ -5813,10 +5813,10 @@ export default function Item3Screen() {
       </Modal>
 
       {/* Wedding Modal */}
-      <Modal visible={weddingModalVisible} animationType="slide">
+      {/* <Modal visible={weddingModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
-          <Text style={styles.subtitle}>Мои мероприятия</Text>
-          {/* <TextInput
+          <Text style={styles.subtitle}>Создать свадьбу</Text>
+          <TextInput
             style={styles.input}
             placeholder="Название свадьбы"
             placeholderTextColor={COLORS.muted}
@@ -5856,9 +5856,9 @@ export default function Item3Screen() {
               }}
               color={COLORS.error}
             />
-          </View> */}
+          </View>
         </SafeAreaView>
-      </Modal>
+      </Modal> */}
 
       {/* Edit Wedding Modal */}
       <Modal visible={editWeddingModalVisible} animationType="slide">
