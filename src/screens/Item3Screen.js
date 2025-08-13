@@ -1319,7 +1319,7 @@ const categoryMapRuToEn = {
     setSelectedWedding(wedding);
     setWeddingName(wedding.name);
     setWeddingDate(wedding.date);
-    setEditWeddingModalVisible(true);
+    // setEditWeddingModalVisible(true);
   };
 
   // Open item details modal
@@ -1663,7 +1663,7 @@ useEffect(() => {
   // Check for no weddings alert
   useEffect(() => {
     if (!loadingWeddings && weddings.length === 0 && !hasShownNoWeddingsAlert) {
-      setWeddingModalVisible(true);
+      // setWeddingModalVisible(true);
       setHasShownNoWeddingsAlert(true);
     }
   }, [loadingWeddings, weddings, hasShownNoWeddingsAlert]);
@@ -2409,7 +2409,7 @@ const renderEventCategoryItem = ({ item }) => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Мои мероприятия</Text>
       <View style={styles.buttonRow}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.createButton}
           onPress={() => {
             setCategoryModalVisible(true);
@@ -2423,7 +2423,7 @@ const renderEventCategoryItem = ({ item }) => {
           onPress={() => setWeddingModalVisible(true)}
         >
           <Text style={styles.createButtonText}>Создать свадьбу</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       {loadingCategories || loadingWeddings ? (
         <ActivityIndicator
@@ -2469,7 +2469,7 @@ const renderEventCategoryItem = ({ item }) => {
             initialNumToRender={10}
             windowSize={5}
           />
-          <View style={styles.buttonRowModal}>
+          {/* <View style={styles.buttonRowModal}>
             <Button
               title={selectedCategory ? "Сохранить" : "Создать"}
               onPress={
@@ -2491,7 +2491,7 @@ const renderEventCategoryItem = ({ item }) => {
               }}
               color={COLORS.error}
             />
-          </View>
+          </View> */}
         </SafeAreaView>
       </Modal>
 
