@@ -1051,6 +1051,9 @@ export default {
   removeServiceFromCategory: (categoryId, serviceId, data) =>
     api.delete(`/api/event-category/${categoryId}/service/${serviceId}`, { data }).catch((error) => handleError(error, 'удаления услуги из категории')),
 
+
+
+  
   // Получить все доступные услуги (не в роутере, требует проверки)
   getServices: () =>
     api.get('/api/services').catch((error) => handleError(error, 'получения списка услуг')),

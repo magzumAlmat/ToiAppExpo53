@@ -935,46 +935,113 @@ const categoryMapRuToEn = {
   };
 
   // Delete service from category
-  const handleDeleteCategoryService = async (
-    categoryId,
-    serviceId,
-    serviceType
-  ) => {
-    Alert.alert(
-      "Подтверждение",
-      "Вы уверены, что хотите удалить эту услугу из категории?",
-      [
-        { text: "Отмена", style: "cancel" },
-        {
-          text: "Удалить",
-          onPress: async () => {
-            try {
-              await api.removeServiceFromCategory(categoryId, {
-                serviceId,
-                serviceType,
-              });
-              setCategoryServicesCache((prev) => ({
-                ...prev,
-                [categoryId]: prev[categoryId].filter(
-                  (s) =>
-                    !(
-                      s.serviceId === serviceId && s.serviceType === serviceType
-                    )
-                ),
-              }));
-              Alert.alert("Успех", "Услуга удалена из категории");
-            } catch (error) {
-              console.error("Error deleting category service:", error);
-              Alert.alert(
-                "Ошибка",
-                "Не удалось удалить услугу: " + error.message
-              );
+  // const handleDeleteCategoryService = async (
+  //   categoryId,
+  //   serviceId,
+  //   serviceType
+  // ) => {
+  //   Alert.alert(
+  //     "Подтверждение",
+  //     "Вы уверены, что хотите удалить эту услугу из категории?",
+  //     [
+  //       { text: "Отмена", style: "cancel" },
+  //       {
+  //         text: "Удалить",
+  //         onPress: async () => {
+  //           try {
+  //             await api.removeServiceFromCategory(categoryId, {
+  //               serviceId,
+  //               serviceType,
+  //             });
+  //             setCategoryServicesCache((prev) => ({
+  //               ...prev,
+  //               [categoryId]: prev[categoryId].filter(
+  //                 (s) =>
+  //                   !(
+  //                     s.serviceId === serviceId && s.serviceType === serviceType
+  //                   )
+  //               ),
+  //             }));
+  //             Alert.alert("Успех", "Услуга удалена из категории");
+  //           } catch (error) {
+  //             console.error("Error deleting category service:", error);
+  //             Alert.alert(
+  //               "Ошибка",
+  //               "Не удалось удалить услугу: " + error.message
+  //             );
+  //           }
+  //         },
+  //       },
+  //     ]
+  //   );
+  // };
+
+
+  const handleDeleteCategoryService = async (categoryId, serviceId, serviceType) => {
+  Alert.alert(
+    'Подтверждение',
+    'Вы уверены, что хотите удалить эту услугу из категории?',
+    [
+      { text: 'Отмена', style: 'cancel' },
+      {
+        text: 'Удалить',
+        onPress: async () => {
+          try {
+            // Log input values
+            console.log('Deleting service with:', { categoryId, serviceId, serviceType });
+
+            // Validate inputs
+            if (!categoryId || !serviceId || !serviceType) {
+              Alert.alert('Ошибка', 'Некорректные данные для удаления услуги');
+              return;
             }
-          },
+
+            // Check if service exists in category
+            const serviceExists = categoryServicesCache[categoryId]?.some(
+              (s) => s.serviceId === serviceId && s.serviceType === serviceType
+            );
+            if (!serviceExists) {
+              Alert.alert('Ошибка', 'Услуга не найдена в этой категории');
+              return;
+            }
+
+            // Normalize serviceType
+            const normalizedServiceType = serviceType.toLowerCase().replace(/s$/, '');
+            console.log('Normalized serviceType:', normalizedServiceType);
+
+            // Make API call
+            console.log('categoryID= ',categoryId,'  serviceType ',normalizedServiceType)
+            await api.removeServiceFromCategory(categoryId, {
+              serviceId,
+              serviceType: normalizedServiceType,
+            });
+
+            // Update cache
+            setCategoryServicesCache((prev) => ({
+              ...prev,
+              [categoryId]: prev[categoryId].filter(
+                (s) => !(s.serviceId === serviceId && s.serviceType === serviceType)
+              ),
+            }));
+
+            Alert.alert('Успех', 'Услуга удалена из категории');
+          } catch (error) {
+            console.error('Error deleting category service:', error);
+            console.error('Error details:', {
+              message: error.message,
+              response: error.response?.data,
+              status: error.response?.status,
+            });
+            Alert.alert(
+              'Ошибка',
+              `Не удалось удалить услугу: ${error.response?.data?.error || error.message}`
+            );
+          }
         },
-      ]
-    );
-  };
+      },
+    ]
+  );
+};
 
   // Create wedding
   const handleCreateWedding = async () => {
@@ -1969,11 +2036,12 @@ const renderEventCategoryItem = ({ item }) => {
   return (
     <View style={styles.itemContainer}>
       <Text style={styles.itemText}>
-        {item.name} ({item.status === "active" ? "Активно" : "Неактивно"})
+        {item.name} 
+        {/* ({item.status === "active" ? "Активно" : "Неактивно"}) */}
       </Text>
-      <Text style={styles.itemSubText}>
+      {/* <Text style={styles.itemSubText}>
         Описание: {item.description || "Нет описания"}
-      </Text>
+      </Text> */}
       {groupedServices.length > 0 ? (
         <View style={styles.weddingItemsContainer}>
           {groupedServices.map((group) => (
@@ -1996,7 +2064,7 @@ const renderEventCategoryItem = ({ item }) => {
                       >
                         <Text style={styles.detailsButtonText}>Подробнее</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity
+                      {/* <TouchableOpacity
                         style={styles.deleteButton}
                         onPress={() =>
                           handleDeleteCategoryService(
@@ -2007,7 +2075,7 @@ const renderEventCategoryItem = ({ item }) => {
                         }
                       >
                         <Text style={styles.deleteButtonText}>Удалить</Text>
-                      </TouchableOpacity>
+                      </TouchableOpacity> */}
                     </View>
                   </View>
                 )}
@@ -2033,12 +2101,12 @@ const renderEventCategoryItem = ({ item }) => {
         </View>
       )}
       <View style={styles.buttonRow}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.actionButtonPrimary}
           onPress={() => openEditCategoryModal(item)}
         >
           <Text style={styles.actionButtonText}>Редактировать</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity
           style={styles.actionButtonError}
           onPress={() => handleDeleteEventCategory(item.id)}
