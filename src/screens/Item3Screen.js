@@ -512,7 +512,9 @@ const categoryMapRuToEn = {
     }
   }, [route.params?.selectedCategories]);
 
- const fetchEventCategories = async () => {
+
+
+  const fetchEventCategories = async () => {
   setLoadingCategories(true);
   try {
     const response = await api.getEventCategories();
@@ -520,38 +522,44 @@ const categoryMapRuToEn = {
       ? response.data
       : response.data.data || [];
     console.log('Raw Event Categories API response:', JSON.stringify(response.data, null, 2));
-    console.log('Full EventServices for categories:', JSON.stringify(categories.map(cat => cat.EventServices), null, 2));
 
     const servicesPromises = categories.map(async (category) => {
-      const apiServices = await api.getEventCategoryWithServices(category.id, { page: 1, limit: 100 }).then((res) => res.data.data.services || []);
+      const apiServices = await api.getEventCategoryWithServices(category.id, { page: 1, limit: 100 }).then((res) => {
+        console.log(`Raw services response for category ${category.id}:`, JSON.stringify(res.data, null, 2));
+        return res.data.data.services || [];
+      });
       const eventServices = category.EventServices || [];
 
-      // Fetch details for services listed in EventServices but not in apiServices
-      const missingServices = eventServices.filter(
-        (es) => !apiServices.some((as) => as.serviceId === es.serviceId && as.serviceType === es.serviceType)
-      );
-
-      const missingServiceDetails = await Promise.all(
-        missingServices.map(async (es) => {
+      // Fetch details for services listed in EventServices
+      const allServices = await Promise.all(
+        eventServices.map(async (es) => {
+          const existingService = apiServices.find(
+            (as) => as.serviceId === es.serviceId && as.serviceType === es.serviceType
+          );
+          if (existingService) {
+            return existingService;
+          }
           const details = await fetchServiceDetails(es.serviceId, es.serviceType);
-          return details ? { ...details, id: es.serviceId, serviceId: es.serviceId, serviceType: es.serviceType } : null;
+          return details ? { ...details, id: es.serviceId, serviceId: es.serviceId, serviceType: es.serviceType } : {
+            id: es.serviceId,
+            name: `Service ${es.serviceId}`,
+            serviceType: es.serviceType,
+            serviceId: es.serviceId,
+            cost: null,
+          };
         })
       );
 
-      const allServices = [
-        ...apiServices,
-        ...missingServiceDetails.filter((s) => s !== null),
-      ];
-
       return {
         categoryId: category.id,
-        services: allServices,
+        services: allServices.filter((s) => s !== null),
       };
     });
 
     const servicesResults = await Promise.all(servicesPromises);
     const newCache = servicesResults.reduce((acc, { categoryId, services }) => {
       acc[categoryId] = services;
+      console.log(`Services for category ${categoryId}:`, JSON.stringify(services, null, 2));
       return acc;
     }, {});
     setCategoryServicesCache(newCache);
@@ -977,7 +985,7 @@ const categoryMapRuToEn = {
   // };
 
 
-  const handleDeleteCategoryService = async (categoryId, serviceId, serviceType) => {
+const handleDeleteCategoryService = async (categoryId, serviceId, serviceType) => {
   Alert.alert(
     'Подтверждение',
     'Вы уверены, что хотите удалить эту услугу из категории?',
@@ -987,16 +995,13 @@ const categoryMapRuToEn = {
         text: 'Удалить',
         onPress: async () => {
           try {
-            // Log input values
             console.log('Deleting service with:', { categoryId, serviceId, serviceType });
 
-            // Validate inputs
             if (!categoryId || !serviceId || !serviceType) {
               Alert.alert('Ошибка', 'Некорректные данные для удаления услуги');
               return;
             }
 
-            // Check if service exists in category
             const serviceExists = categoryServicesCache[categoryId]?.some(
               (s) => s.serviceId === serviceId && s.serviceType === serviceType
             );
@@ -1005,18 +1010,23 @@ const categoryMapRuToEn = {
               return;
             }
 
-            // Normalize serviceType
             const normalizedServiceType = serviceType.toLowerCase().replace(/s$/, '');
             console.log('Normalized serviceType:', normalizedServiceType);
 
-            // Make API call
-            console.log('categoryID= ',categoryId,'  serviceType ',normalizedServiceType)
+            // Refetch services to ensure cache is up-to-date
+            const response = await api.getEventCategoryWithServices(categoryId);
+            const services = response.data.data.services || [];
+            setCategoryServicesCache((prev) => ({
+              ...prev,
+              [categoryId]: services,
+            }));
+
+            console.log('Calling API with:', { categoryId, serviceId, serviceType: normalizedServiceType });
             await api.removeServiceFromCategory(categoryId, {
               serviceId,
               serviceType: normalizedServiceType,
             });
 
-            // Update cache
             setCategoryServicesCache((prev) => ({
               ...prev,
               [categoryId]: prev[categoryId].filter(
@@ -1044,60 +1054,99 @@ const categoryMapRuToEn = {
 };
 
   // Create wedding
-  const handleCreateWedding = async () => {
-    if (!weddingName || !weddingDate) {
-      Alert.alert("Ошибка", "Введите название и дату свадьбы");
-      return;
-    }
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(weddingDate)) {
-      Alert.alert("Ошибка", "Дата должна быть в формате ГГГГ-ММ-ДД");
-      return;
-    }
-    try {
-      const items = selectedItems.map((item) => {
-        if (typeof item === "string") {
-          return {
-            id: null,
-            type: categoryMapRuToEn[item] || item.toLowerCase(),
-            totalCost: 0,
-          };
-        } else {
-          return {
-            id: item.id,
-            type: item.type,
-            totalCost: item.totalCost || 0,
-          };
-        }
-      });
-      const weddingData = {
-        name: weddingName,
-        date: weddingDate,
-        items,
-      };
-      const response = await api.createWedding(weddingData, token);
-      const newWedding = response.data.data;
-      setWeddings((prev) => [...prev, newWedding]);
-      const itemsResponse = await api.getWeddingItems(newWedding.id, token);
-      setWeddingItemsCache((prev) => ({
-        ...prev,
-        [newWedding.id]: itemsResponse.data.data || [],
-      }));
-      Alert.alert("Успех", "Свадьба создана");
-      setWeddingModalVisible(false);
-      setWeddingName("");
-      setWeddingDate("");
-      setHasShownNoWeddingsAlert(false);
-      setActiveWeddingId(newWedding.id);
-    } catch (error) {
-      console.error("Error creating wedding:", error);
-      Alert.alert(
-        "Ошибка",
-        error.response?.data?.error || "Не удалось создать свадьбу"
-      );
-    }
-  };
+const handleCreateWedding = async () => {
+  if (!weddingName || !weddingDate) {
+    Alert.alert("Ошибка", "Введите название и дату свадьбы");
+    return;
+  }
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(weddingDate)) {
+    Alert.alert("Ошибка", "Дата должна быть в формате ГГГГ-ММ-ДД");
+    return;
+  }
+  try {
+    // Create or find categories for selectedItems
+    let categories = [...eventCategories];
+    for (const categoryName of selectedItems) {
+      const existingCategory = categories.find((cat) => cat.name === categoryName);
+      if (!existingCategory) {
+        const response = await api.createEventCategory({
+          name: categoryName,
+          description: `Категория ${categoryName}`,
+          status: 'active',
+        });
+        const newCategory = response.data.data || response.data;
+        categories.push(newCategory);
+        console.log(`Created category for ${categoryName}:`, newCategory);
 
+        // Assign services to the new category
+        const serviceType = categoryMapRuToEn[categoryName];
+        if (serviceType) {
+          const servicesResponse = await api.getServices();
+          const services = servicesResponse.data.data || servicesResponse.data || [];
+          const matchingServices = services.filter(
+            (service) => service.serviceType.toLowerCase().replace(/s$/, '') === serviceType
+          );
+          if (matchingServices.length > 0) {
+            await api.addServicesToCategory(newCategory.id, {
+              service_ids: matchingServices.map((s) => ({
+                serviceId: s.id,
+                serviceType: s.serviceType,
+              })),
+            });
+            setCategoryServicesCache((prev) => ({
+              ...prev,
+              [newCategory.id]: matchingServices.map((service) => ({
+                id: service.id,
+                name: service.name,
+                serviceType: service.serviceType,
+                serviceId: service.id,
+                cost: service.cost || null,
+              })),
+            }));
+          }
+        }
+      }
+    }
+    setEventCategories(categories);
+
+    const items = selectedItems.map((item) => {
+      const serviceType = categoryMapRuToEn[item] || item.toLowerCase().replace(/s$/, '');
+      const category = categories.find((cat) => cat.name === item);
+      return {
+        id: null,
+        type: serviceType,
+        totalCost: 0,
+        categoryId: category?.id,
+      };
+    });
+    const weddingData = {
+      name: weddingName,
+      date: weddingDate,
+      items,
+    };
+    const response = await api.createWedding(weddingData, token);
+    const newWedding = response.data.data;
+    setWeddings((prev) => [...prev, newWedding]);
+    const itemsResponse = await api.getWeddingItems(newWedding.id, token);
+    setWeddingItemsCache((prev) => ({
+      ...prev,
+      [newWedding.id]: itemsResponse.data.data || [],
+    }));
+    Alert.alert("Успех", "Свадьба создана");
+    setWeddingModalVisible(false);
+    setWeddingName("");
+    setWeddingDate("");
+    setHasShownNoWeddingsAlert(false);
+    setActiveWeddingId(newWedding.id);
+  } catch (error) {
+    console.error("Error creating wedding:", error);
+    Alert.alert(
+      "Ошибка",
+      error.response?.data?.error || "Не удалось создать свадьбу"
+    );
+  }
+};
   // Update wedding
   const handleUpdateWedding = async () => {
     if (!selectedWedding || !weddingName || !weddingDate) {
@@ -1608,7 +1657,7 @@ useEffect(() => {
       let categories = Array.isArray(categoriesResponse.data)
         ? categoriesResponse.data
         : categoriesResponse.data.data || [];
-      console.log('Fetched Event Categories:', JSON.stringify(categories, null, 2));
+      console.log('Fetched категории мероприятий', JSON.stringify(categories, null, 2));
 
       // Handle selectedCategories
       if (route.params?.selectedCategories) {
@@ -1623,22 +1672,27 @@ useEffect(() => {
         // Create new categories
         for (const categoryName of newCategories) {
           try {
+            console.log(`Создание категории: ${categoryName}`);
             const response = await api.createEventCategory({
               name: categoryName,
               description: `Категория ${categoryName}`,
               status: 'active',
             });
             const newCategory = response.data.data || response.data;
+            console.log(`Создана категория: ${JSON.stringify(newCategory, null, 2)}`);
             categories.push(newCategory);
 
-            // Fetch or assign services for the new category
+            // Assign services to the new category
             const serviceType = categoryMapRuToEn[categoryName];
             if (serviceType) {
+              console.log(`Получение сервисов для serviceType: ${serviceType}`);
               const servicesResponse = await api.getServices();
               const services = servicesResponse.data.data || servicesResponse.data || [];
+              console.log(`Доступные сервисы: ${JSON.stringify(services, null, 2)}`);
               const matchingServices = services.filter(
                 (service) => service.serviceType.toLowerCase().replace(/s$/, '') === serviceType
               );
+              console.log(`Соответствующие сервисы для ${serviceType}: ${JSON.stringify(matchingServices, null, 2)}`);
               if (matchingServices.length > 0) {
                 await api.addServicesToCategory(newCategory.id, {
                   service_ids: matchingServices.map((s) => ({
@@ -1656,10 +1710,18 @@ useEffect(() => {
                     cost: service.cost || null,
                   })),
                 }));
+              } else {
+                console.warn(`Сервисы для serviceType ${serviceType} не найдены`);
+                setCategoryServicesCache((prev) => ({
+                  ...prev,
+                  [newCategory.id]: [],
+                }));
               }
+            } else {
+              console.warn(`serviceType для категории ${categoryName} не найден`);
             }
           } catch (error) {
-            console.error(`Error creating category ${categoryName}:`, error);
+            console.error(`Ошибка при создании категории ${categoryName}:`, error);
           }
         }
         setEventCategories(categories);
@@ -1672,8 +1734,9 @@ useEffect(() => {
         ? weddingsResponse.data
         : weddingsResponse.data.data || [];
       setWeddings(weddingsData);
-      console.log('Fetched Weddings:', weddingsData);
-      setGoods(Array.isArray(goodsResponse.data) ? goodsResponse.data : goodsResponse.data.data || []);
+      setGoods(Array.isArray(goodsResponse.data)
+        ? goodsResponse.data
+        : goodsResponse.data.data || []);
 
       if (weddingsData.length > 0) {
         const itemsPromises = weddingsData.map((wedding) =>
@@ -1683,37 +1746,19 @@ useEffect(() => {
           }))
         );
         const itemsResults = await Promise.all(itemsPromises);
-        const newWeddingCache = itemsResults.reduce((acc, { weddingId, items }) => {
-          acc[weddingId] = items;
-          return acc;
-        }, {});
-        setWeddingItemsCache(newWeddingCache);
-      }
-
-      if (categories.length > 0) {
-        const servicesPromises = categories.map((category) =>
-          api.getEventCategoryWithServices(category.id, { page: 1, limit: 100 }).then((res) => {
-            console.log(`Raw services response for category ${category.id}:`, JSON.stringify(res.data, null, 2));
-            return {
-              categoryId: category.id,
-              services: res.data.data.services || [],
-            };
-          })
+        const newWeddingCache = itemsResults.reduce(
+          (acc, { weddingId, items }) => {
+            acc[weddingId] = items;
+            return acc;
+          },
+          {}
         );
-        const servicesResults = await Promise.all(servicesPromises);
-        const newCategoryCache = servicesResults.reduce((acc, { categoryId, services }) => {
-          acc[categoryId] = services;
-          return acc;
-        }, {});
-        setCategoryServicesCache((prev) => ({
-          ...prev,
-          ...newCategoryCache,
-        }));
+        setWeddingItemsCache(newWeddingCache);
       }
 
       await fetchAvailableServices();
     } catch (error) {
-      console.error('Error initializing:', error);
+      console.error('Ошибка инициализации:', error);
       setEventCategories([]);
       setWeddings([]);
       setGoods([]);
@@ -2023,7 +2068,7 @@ const renderEventCategoryItem = ({ item }) => {
       )
       .map((es) => ({
         id: es.serviceId,
-        name: `Service ${es.serviceId}`, // Placeholder name, fetch details if needed
+        name: `Service ${es.serviceId}`,
         serviceType: es.serviceType,
         serviceId: es.serviceId,
         cost: null,
@@ -2036,12 +2081,11 @@ const renderEventCategoryItem = ({ item }) => {
   return (
     <View style={styles.itemContainer}>
       <Text style={styles.itemText}>
-        {item.name} 
-        {/* ({item.status === "active" ? "Активно" : "Неактивно"}) */}
+        {item.name} ({item.status === "active" ? "Активно" : "Неактивно"})
       </Text>
-      {/* <Text style={styles.itemSubText}>
+      <Text style={styles.itemSubText}>
         Описание: {item.description || "Нет описания"}
-      </Text> */}
+      </Text>
       {groupedServices.length > 0 ? (
         <View style={styles.weddingItemsContainer}>
           {groupedServices.map((group) => (
@@ -2064,7 +2108,7 @@ const renderEventCategoryItem = ({ item }) => {
                       >
                         <Text style={styles.detailsButtonText}>Подробнее</Text>
                       </TouchableOpacity>
-                      {/* <TouchableOpacity
+                      <TouchableOpacity
                         style={styles.deleteButton}
                         onPress={() =>
                           handleDeleteCategoryService(
@@ -2075,7 +2119,7 @@ const renderEventCategoryItem = ({ item }) => {
                         }
                       >
                         <Text style={styles.deleteButtonText}>Удалить</Text>
-                      </TouchableOpacity> */}
+                      </TouchableOpacity>
                     </View>
                   </View>
                 )}
@@ -2101,12 +2145,12 @@ const renderEventCategoryItem = ({ item }) => {
         </View>
       )}
       <View style={styles.buttonRow}>
-        {/* <TouchableOpacity
+        <TouchableOpacity
           style={styles.actionButtonPrimary}
           onPress={() => openEditCategoryModal(item)}
         >
           <Text style={styles.actionButtonText}>Редактировать</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionButtonError}
           onPress={() => handleDeleteEventCategory(item.id)}

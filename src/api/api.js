@@ -1027,6 +1027,8 @@ export default {
   getEventCategories: () =>
     api.get('/api/event-categories').catch((error) => handleError(error, 'получения списка категорий мероприятий')),
 
+
+  
   getEventCategoryById: (id) =>
     api.get(`/api/event-category/${id}`).catch((error) => handleError(error, 'получения категории мероприятия')),
 
@@ -1053,7 +1055,7 @@ export default {
 
 
 
-  
+
   // Получить все доступные услуги (не в роутере, требует проверки)
   getServices: () =>
     api.get('/api/services').catch((error) => handleError(error, 'получения списка услуг')),
