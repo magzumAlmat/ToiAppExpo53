@@ -450,23 +450,40 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     fontWeight: "600",
   },
+  // detailContainer: {
+  //   backgroundColor: COLORS.background,
+  //   padding: 16,
+  //   borderRadius: 8,
+  //   marginBottom: 16,
+  // },
+  // detailLabel: {
+  //   fontSize: 16,
+  //   fontWeight: "600",
+  //   color: COLORS.text,
+  //   marginBottom: 4,
+  // },
+  // detailValue: {
+  //   fontSize: 16,
+  //   color: COLORS.muted,
+  //   marginBottom: 12,
+  // },
   detailContainer: {
-    backgroundColor: COLORS.background,
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+    paddingBottom: 20, // Ensure space for the button
+  },
+  detail: {
+    marginVertical: 4,
   },
   detailLabel: {
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.text,
-    marginBottom: 4,
   },
   detailValue: {
     fontSize: 16,
     color: COLORS.muted,
-    marginBottom: 12,
   },
+
+  
 });
 
 export default function Item3Screen() {
@@ -790,7 +807,7 @@ export default function Item3Screen() {
   //   }
   // };
 
-  const fetchServiceDetails = async (serviceId, serviceType) => {
+const fetchServiceDetails = async (serviceId, serviceType) => {
   setLoadingServiceDetails(true);
   try {
     let normalizedServiceType = serviceType.toLowerCase();
@@ -821,16 +838,11 @@ export default function Item3Screen() {
     }
     const response = await api[methodName](serviceId);
     const data = response.data.data || response.data;
+    console.log('DATA= ', data);
     return {
       serviceId,
       serviceType: normalizedServiceType,
-      name: data.name,
-      description: data.description || null,
-      cost: data.cost || null,
-      created_at: data.createdAt || data.created_at || null,
-      updated_at: data.updatedAt || data.updated_at || null,
-      address: data.address || null,
-      cuisine: data.cuisine || null,
+      ...data, // Spread all fields from the server response
     };
   } catch (error) {
     console.error(
@@ -846,7 +858,6 @@ export default function Item3Screen() {
     setLoadingServiceDetails(false);
   }
 };
-
 
 
   const fetchItemDetails = async (itemType, itemId) => {
@@ -871,7 +882,9 @@ export default function Item3Screen() {
         throw new Error(`Неизвестный тип элемента: ${normalizedItemType}`);
       }
       const response = await api[methodName](itemId);
+      console.log("Full response from server for event details:", JSON.stringify(response, null, 2));
       const details = response.data.data || response.data;
+      console.log('DETAILS= ',details)
       return details || null;
     } catch (error) {
       console.error(`Error fetching details for ${itemType}:`, error);
@@ -881,6 +894,9 @@ export default function Item3Screen() {
       setLoadingDetails(false);
     }
   };
+
+
+
 
   const fetchFiles = async (goodId) => {
     setLoadingFiles(true);
@@ -1485,10 +1501,10 @@ export default function Item3Screen() {
         let categories = Array.isArray(categoriesResponse.data)
           ? categoriesResponse.data
           : categoriesResponse.data.data || [];
-        console.log('Fetched категории мероприятий', JSON.stringify(categories, null, 2));
+        // console.log('Fetched категории мероприятий', JSON.stringify(categories, null, 2));
 
         if (route.params?.selectedCategories) {
-          console.log('Полученные категории:', route.params.selectedCategories);
+          // console.log('Полученные категории:', route.params.selectedCategories);
           setSelectedItems(route.params.selectedCategories);
 
           const existingCategoryNames = categories.map((cat) => cat.name);
@@ -1743,8 +1759,8 @@ export default function Item3Screen() {
   const renderEventCategoryItem = ({ item }) => {
     const filteredServices = categoryServicesCache[item.id] || [];
     const eventServices = item.EventServices || [];
-    console.log(`Services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(filteredServices, null, 2));
-    console.log(`EventServices for category ${item.name} (ID: ${item.id}):`, JSON.stringify(eventServices, null, 2));
+    // console.log(`Services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(filteredServices, null, 2));
+    // console.log(`EventServices for category ${item.name} (ID: ${item.id}):`, JSON.stringify(eventServices, null, 2));
 
     const allServices = [
       ...filteredServices,
@@ -1762,7 +1778,7 @@ export default function Item3Screen() {
     ];
 
     const groupedServices = groupItemsByCategory(allServices);
-    console.log(`Grouped services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(groupedServices, null, 2));
+    // console.log(`Grouped services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(groupedServices, null, 2));
 
     return (
       <View style={styles.itemContainer}>
@@ -2200,76 +2216,62 @@ export default function Item3Screen() {
     return null;
   };
 
-  const renderServiceDetailsModal = () => (
-    <Modal visible={serviceDetailsModalVisible} animationType="fade" transparent={true}>
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.serviceDetailsModalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Детали услуги</Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => {
-                setServiceDetailsModalVisible(false);
-                setSelectedService(null);
-              }}
-            >
-              <Text style={styles.closeButtonText}>✕</Text>
-            </TouchableOpacity>
-          </View>
-          {loadingServiceDetails ? (
-            <ActivityIndicator
-              size="large"
-              color={COLORS.primary}
-              style={styles.loader}
-            />
-          ) : selectedService ? (
-            <View style={styles.detailContainer}>
-              <Text style={styles.detailLabel}>Название</Text>
-              <Text style={styles.detailValue}>{selectedService.name}</Text>
-              
-              <Text style={styles.detailLabel}>Тип</Text>
-              <Text style={styles.detailValue}>{categoryMap[selectedService.serviceType.toLowerCase().replace(/s$/, "")] || selectedService.serviceType}</Text>
-              
-              <Text style={styles.detailLabel}>Описание</Text>
-              <Text style={styles.detailValue}>
-                {selectedService.description || "Нет описания"}
-              </Text>
-              
-              <Text style={styles.detailLabel}>Стоимость</Text>
-              <Text style={styles.detailValue}>
-                {selectedService.cost ? `${selectedService.cost} тг` : "Не указана"}
-              </Text>
-              
-              {selectedService.address && (
-                <>
-                  <Text style={styles.detailLabel}>Адрес</Text>
-                  <Text style={styles.detailValue}>{selectedService.address}</Text>
-                </>
-              )}
-              
-              {selectedService.cuisine && (
-                <>
-                  <Text style={styles.detailLabel}>Кухня</Text>
-                  <Text style={styles.detailValue}>{selectedService.cuisine}</Text>
-                </>
-              )}
-            </View>
-          ) : (
-            <Text style={styles.noItems}>Детали недоступны</Text>
-          )}
+const renderServiceDetailsModal = () => (
+  <Modal visible={serviceDetailsModalVisible} animationType="fade" transparent={true}>
+    <SafeAreaView style={styles.modalContainer}>
+      <View style={styles.serviceDetailsModalContainer}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>Детали услуги</Text>
           <TouchableOpacity
-            style={[styles.createButton, { backgroundColor: COLORS.error }]}
+            style={styles.closeButton}
             onPress={() => {
               setServiceDetailsModalVisible(false);
               setSelectedService(null);
             }}
           >
-            <Text style={styles.createButtonText}>Закрыть</Text>
+            <Text style={styles.closeButtonText}>✕</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
-    </Modal>
-  );
+        {loadingServiceDetails ? (
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+            style={styles.loader}
+          />
+        ) : selectedService ? (
+          <View style={styles.detailContainer}>
+            {Object.entries(selectedService).map(([key, value]) => {
+              // Skip rendering internal React state or function references
+              if (typeof value === "function" || key.startsWith("_")) return null;
+              // Handle arrays or objects by stringifying them
+              const displayValue =
+                typeof value === "object" && value !== null
+                  ? JSON.stringify(value)
+                  : value || "Не указано";
+              return (
+                <View key={key}>
+                  <Text style={styles.detailLabel}>{key}</Text>
+                  <Text style={styles.detailValue}>{displayValue}</Text>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <Text style={styles.noItems}>Детали недоступны</Text>
+        )}
+        <TouchableOpacity
+          style={[styles.createButton, { backgroundColor: COLORS.error }]}
+          onPress={() => {
+            setServiceDetailsModalVisible(false);
+            setSelectedService(null);
+          }}
+        >
+          <Text style={styles.createButtonText}>Закрыть</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  </Modal>
+);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -2565,9 +2567,11 @@ export default function Item3Screen() {
       {renderServiceDetailsModal()}
 
       {/* Item Details Modal */}
-      <Modal visible={detailsModalVisible} animationType="slide">
+      {/* <Modal visible={detailsModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.subtitle}>Детали элемента</Text>
+         
+      
           {loadingDetails ? (
             <ActivityIndicator
               size="large"
@@ -2575,6 +2579,8 @@ export default function Item3Screen() {
               style={styles.loader}
             />
           ) : selectedItem ? (
+            
+
             <View style={{ width: "100%" }}>
               <Text style={styles.detail}>
                 Тип:{" "}
@@ -2651,7 +2657,439 @@ export default function Item3Screen() {
             color={COLORS.error}
           />
         </SafeAreaView>
-      </Modal>
+      </Modal> */}
+
+
+
+
+
+
+
+  <Modal visible={detailsModalVisible} animationType="slide">
+  <SafeAreaView style={styles.modalContainer}>
+    <Text style={styles.subtitle}>Детали элемента</Text>
+    {loadingDetails ? (
+      <ActivityIndicator
+        size="large"
+        color={COLORS.primary}
+        style={styles.loader}
+      />
+    ) : selectedItem ? (
+      <View style={{ width: "100%" }}>
+        {Object.entries(selectedItem).map(([key, value]) => {
+          // Log the key and value for debugging
+          console.log("Key:", key, "Value:", value);
+          // Skip rendering internal React state, function references, or excluded fields
+        if (
+            typeof value === "function" ||
+            key.startsWith("_") ||
+            ["supplier_id", "itemId", "serviceId", "Supplier_id", "ID", "ServiceId"].includes(
+              key.toLowerCase()
+            )
+          )
+            return null;
+          // Handle arrays or objects by stringifying them
+          const displayValue =
+            typeof value === "object" && value !== null
+              ? JSON.stringify(value)
+              : value || "Не указано";
+          return (
+            <View key={key} style={styles.detail}>
+              <Text style={styles.detailLabel}>{key}</Text>
+              <Text style={styles.detailValue}>{displayValue}</Text>
+            </View>
+          );
+        })}
+      </View>
+    ) : (
+      <Text style={styles.noItems}>Детали недоступны</Text>
+    )}
+    <Button
+      title="Закрыть"
+      onPress={() => {
+        setDetailsModalVisible(false);
+        setSelectedItem(null);
+      }}
+      color={COLORS.error}
+    />
+  </SafeAreaView>
+</Modal> 
+
+{/* <Modal visible={detailsModalVisible} animationType="slide">
+  <SafeAreaView style={styles.modalContainer}>
+    <Text style={styles.subtitle}>Детали элемента</Text>
+    {loadingDetails ? (
+      <ActivityIndicator
+        size="large"
+        color={COLORS.primary}
+        style={styles.loader}
+      />
+    ) : selectedItem ? (
+      <ScrollView style={{ width: "100%" }}>
+        <View style={styles.detailContainer}>
+          {selectedItem.item_type && (
+            <View style={styles.detail}>
+              <Text style={styles.detailLabel}>Тип</Text>
+              <Text style={styles.detailValue}>
+                {selectedItem.item_type || selectedItem.type || "Не указано"}
+              </Text>
+            </View>
+          )}
+          {selectedItem.total_cost || selectedItem.cost ? (
+            <View style={styles.detail}>
+              <Text style={styles.detailLabel}>Стоимость</Text>
+              <Text style={styles.detailValue}>
+                {`${selectedItem.total_cost || selectedItem.cost} тг` || "Не указана"}
+              </Text>
+            </View>
+          ) : null}
+          {selectedItem.item_type === "alcohol" && (
+            <View>
+              {selectedItem.address && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Адрес</Text>
+                  <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                </View>
+              )}
+              {selectedItem.alcoholName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название алкоголя</Text>
+                  <Text style={styles.detailValue}>{selectedItem.alcoholName}</Text>
+                </View>
+              )}
+              {selectedItem.category && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Категория</Text>
+                  <Text style={styles.detailValue}>{selectedItem.category}</Text>
+                </View>
+              )}
+              {selectedItem.district && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Район</Text>
+                  <Text style={styles.detailValue}>{selectedItem.district}</Text>
+                </View>
+              )}
+              {selectedItem.phone && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Телефон</Text>
+                  <Text style={styles.detailValue}>{selectedItem.phone}</Text>
+                </View>
+              )}
+              {selectedItem.salonName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название салона</Text>
+                  <Text style={styles.detailValue}>{selectedItem.salonName}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          {selectedItem.item_type === "program" && (
+            <View>
+              {selectedItem.teamName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название команды</Text>
+                  <Text style={styles.detailValue}>{selectedItem.teamName}</Text>
+                </View>
+              )}
+              {selectedItem.type && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Тип постановки</Text>
+                  <Text style={styles.detailValue}>{selectedItem.type}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          {selectedItem.item_type === "restaurant" && (
+            <View>
+              {selectedItem.address && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Адрес</Text>
+                  <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                </View>
+              )}
+              {selectedItem.averageCost && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Средняя стоимость</Text>
+                  <Text style={styles.detailValue}>{selectedItem.averageCost} тг</Text>
+                </View>
+              )}
+              {selectedItem.capacity && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Вместимость</Text>
+                  <Text style={styles.detailValue}>{selectedItem.capacity}</Text>
+                </View>
+              )}
+              {selectedItem.cuisine && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Кухня</Text>
+                  <Text style={styles.detailValue}>{selectedItem.cuisine}</Text>
+                </View>
+              )}
+              {selectedItem.district && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Район</Text>
+                  <Text style={styles.detailValue}>{selectedItem.district}</Text>
+                </View>
+              )}
+              {selectedItem.name && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название</Text>
+                  <Text style={styles.detailValue}>{selectedItem.name}</Text>
+                </View>
+              )}
+              {selectedItem.phone && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Телефон</Text>
+                  <Text style={styles.detailValue}>{selectedItem.phone}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          {selectedItem.item_type === "tamada" && (
+            <View>
+              {selectedItem.name && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Имя</Text>
+                  <Text style={styles.detailValue}>{selectedItem.name}</Text>
+                </View>
+              )}
+              {selectedItem.portfolio && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Портфолио</Text>
+                  <Text style={styles.detailValue}>{selectedItem.portfolio}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          {selectedItem.item_type === "cake" && (
+            <View>
+              {selectedItem.address && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Адрес</Text>
+                  <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                </View>
+              )}
+              {selectedItem.cakeType && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Тип торта</Text>
+                  <Text style={styles.detailValue}>{selectedItem.cakeType}</Text>
+                </View>
+              )}
+              {selectedItem.district && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Район</Text>
+                  <Text style={styles.detailValue}>{selectedItem.district}</Text>
+                </View>
+              )}
+              {selectedItem.name && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название</Text>
+                  <Text style={styles.detailValue}>{selectedItem.name}</Text>
+                </View>
+              )}
+              {selectedItem.phone && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Телефон</Text>
+                  <Text style={styles.detailValue}>{selectedItem.phone}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          {selectedItem.item_type === "transport" && (
+            <View>
+              {selectedItem.address && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Адрес</Text>
+                  <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                </View>
+              )}
+              {selectedItem.brand && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Марка</Text>
+                  <Text style={styles.detailValue}>{selectedItem.brand}</Text>
+                </View>
+              )}
+              {selectedItem.carName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название автомобиля</Text>
+                  <Text style={styles.detailValue}>{selectedItem.carName}</Text>
+                </View>
+              )}
+              {selectedItem.color && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Цвет</Text>
+                  <Text style={styles.detailValue}>{selectedItem.color}</Text>
+                </View>
+              )}
+              {selectedItem.district && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Район</Text>
+                  <Text style={styles.detailValue}>{selectedItem.district}</Text>
+                </View>
+              )}
+              {selectedItem.phone && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Телефон</Text>
+                  <Text style={styles.detailValue}>{selectedItem.phone}</Text>
+                </View>
+              )}
+              {selectedItem.salonName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название салона</Text>
+                  <Text style={styles.detailValue}>{selectedItem.salonName}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          {selectedItem.item_type === "flowers" && (
+            <View>
+              {selectedItem.address && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Адрес</Text>
+                  <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                </View>
+              )}
+              {selectedItem.flowerName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название цветов</Text>
+                  <Text style={styles.detailValue}>{selectedItem.flowerName}</Text>
+                </View>
+              )}
+              {selectedItem.flowerType && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Тип композиции</Text>
+                  <Text style={styles.detailValue}>{selectedItem.flowerType}</Text>
+                </View>
+              )}
+              {selectedItem.district && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Район</Text>
+                  <Text style={styles.detailValue}>{selectedItem.district}</Text>
+                </View>
+              )}
+              {selectedItem.phone && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Телефон</Text>
+                  <Text style={styles.detailValue}>{selectedItem.phone}</Text>
+                </View>
+              )}
+              {selectedItem.salonName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название салона</Text>
+                  <Text style={styles.detailValue}>{selectedItem.salonName}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          {selectedItem.item_type === "jewelry" && (
+            <View>
+              {selectedItem.address && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Адрес</Text>
+                  <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                </View>
+              )}
+              {selectedItem.itemName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название изделия</Text>
+                  <Text style={styles.detailValue}>{selectedItem.itemName}</Text>
+                </View>
+              )}
+              {selectedItem.material && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Материал</Text>
+                  <Text style={styles.detailValue}>{selectedItem.material}</Text>
+                </View>
+              )}
+              {selectedItem.district && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Район</Text>
+                  <Text style={styles.detailValue}>{selectedItem.district}</Text>
+                </View>
+              )}
+              {selectedItem.phone && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Телефон</Text>
+                  <Text style={styles.detailValue}>{selectedItem.phone}</Text>
+                </View>
+              )}
+              {selectedItem.storeName && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Название магазина</Text>
+                  <Text style={styles.detailValue}>{selectedItem.storeName}</Text>
+                </View>
+              )}
+              {selectedItem.type && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailLabel}>Тип</Text>
+                  <Text style={styles.detailValue}>{selectedItem.type}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          {(selectedItem.created_at || selectedItem.createdAt) && (
+            <View style={styles.detail}>
+              <Text style={styles.detailLabel}>Создано</Text>
+              <Text style={styles.detailValue}>
+                {selectedItem.created_at || selectedItem.createdAt}
+              </Text>
+            </View>
+          )}
+          {(selectedItem.updated_at || selectedItem.updatedAt) && (
+            <View style={styles.detail}>
+              <Text style={styles.detailLabel}>Обновлено</Text>
+              <Text style={styles.detailValue}>
+                {selectedItem.updated_at || selectedItem.updatedAt}
+              </Text>
+            </View>
+          )}
+          {selectedItem.wedding_id && (
+            <View style={styles.detail}>
+              <Text style={styles.detailLabel}>ID свадьбы</Text>
+              <Text style={styles.detailValue}>{selectedItem.wedding_id}</Text>
+            </View>
+          )}
+          {selectedItem.item_id && (
+            <View style={styles.detail}>
+              <Text style={styles.detailLabel}>ID элемента</Text>
+              <Text style={styles.detailValue}>{selectedItem.item_id}</Text>
+            </View>
+          )}
+          {selectedItem.status && (
+            <View style={styles.detail}>
+              <Text style={styles.detailLabel}>Статус</Text>
+              <Text style={styles.detailValue}>{selectedItem.status}</Text>
+            </View>
+          )}
+          {selectedItem.specs && typeof selectedItem.specs === "object" && (
+            <View style={styles.detail}>
+              <Text style={styles.detailLabel}>Характеристики</Text>
+              {Object.entries(selectedItem.specs).map(([key, value]) => (
+                <Text key={key} style={styles.detailValue}>
+                  {key}: {value}
+                </Text>
+              ))}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    ) : (
+      <Text style={styles.noItems}>Детали недоступны</Text>
+    )}
+    <Button
+      title="Закрыть"
+      onPress={() => {
+        setDetailsModalVisible(false);
+        setSelectedItem(null);
+      }}
+      color={COLORS.error}
+    />
+  </SafeAreaView>
+</Modal> */}
+
+
+
+
     </SafeAreaView>
   );
 }

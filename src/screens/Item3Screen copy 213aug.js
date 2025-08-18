@@ -1944,8 +1944,8 @@ useEffect(() => {
 const renderEventCategoryItem = ({ item }) => {
   const filteredServices = categoryServicesCache[item.id] || [];
   const eventServices = item.EventServices || [];
-  console.log(`Services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(filteredServices, null, 2));
-  console.log(`EventServices for category ${item.name} (ID: ${item.id}):`, JSON.stringify(eventServices, null, 2));
+  // console.log(`Services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(filteredServices, null, 2));
+  // console.log(`EventServices for category ${item.name} (ID: ${item.id}):`, JSON.stringify(eventServices, null, 2));
 
   // Combine services from categoryServicesCache and EventServices
   const allServices = [
@@ -1964,7 +1964,7 @@ const renderEventCategoryItem = ({ item }) => {
   ];
 
   const groupedServices = groupItemsByCategory(allServices);
-  console.log(`Grouped services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(groupedServices, null, 2));
+  // console.log(`Grouped services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(groupedServices, null, 2));
 
   return (
     <View style={styles.itemContainer}>
