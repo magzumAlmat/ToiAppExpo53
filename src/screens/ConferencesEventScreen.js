@@ -1,4 +1,5 @@
-import React, {  useState, useRef, useEffect, useCallback, useMemo } from "react";
+
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Component } from "react";
 import {
   View,
@@ -71,17 +72,9 @@ const typeOrder = {
   tamada: 5,
   program: 6,
   "technical-equipment-rental": 7,
+  flowers: 8,
+  jewelry: 9,
 };
-
-// const typesMapping = [
-//   { key: "transport", costField: "cost", type: "transport", label: "Прокат авто" },
-//   { key: "restaurants", costField: "averageCost", type: "restaurant", label: "Ресторан" },
-//   { key: "alcohol", costField: "cost", type: "alcohol", label: "Алкоголь" },
-//   { key: "cakes", costField: "cost", type: "cake", label: "Торты" },
-//   { key: "tamada", costField: "cost", type: "tamada", label: "Ведущий" },
-//   { key: "programs", costField: "cost", type: "program", label: "Шоу программа" },
-//   { key: "technical-equipment-rentals", costField: "cost", type: "technical-equipment-rental", label: "Аренда технического оборудования" },
-// ];
 
 const typesMapping = [
   { key: "transport", costField: "cost", type: "transport", label: "Прокат авто" },
@@ -95,7 +88,6 @@ const typesMapping = [
   { key: "jewelry", costField: "cost", type: "jewelry", label: "Ювелирные изделия" }
 ];
 
-
 const categoryToTypeMap = {
   "Прокат авто": "transport",
   "Ресторан": "restaurant",
@@ -104,6 +96,8 @@ const categoryToTypeMap = {
   "Ведущий": "tamada",
   "Шоу программа": "program",
   "Аренда технического оборудования": "technical-equipment-rental",
+  "Цветы": "flowers",
+  "Ювелирные изделия": "jewelry"
 };
 
 const typeToCategoryMap = Object.fromEntries(
@@ -286,6 +280,12 @@ const AddItemModal = ({
           break;
         case "technical-equipment-rental":
           title = `Техническое оборудование: ${item.name} (${cost} ₸)`;
+          break;
+        case "flowers":
+          title = `Цветы: ${item.name} (${cost} ₸)`;
+          break;
+        case "jewelry":
+          title = `Ювелирные изделия: ${item.name} (${cost} ₸)`;
           break;
         default:
           title = "Неизвестный элемент";
@@ -706,6 +706,12 @@ const SelectedItem = ({
     case "technical-equipment-rental":
       title = `${item.name} (${cost} ₸)`;
       break;
+    case "flowers":
+      title = `${item.name} (${cost} ₸)`;
+      break;
+    case "jewelry":
+      title = `${item.name} (${cost} ₸)`;
+      break;
     default:
       title = "Неизвестный элемент";
   }
@@ -890,6 +896,12 @@ const CategoryItemsModal = ({
         case "technical-equipment-rental":
           title = `${item.name} (${cost} ₸)`;
           break;
+        case "flowers":
+          title = `${item.name} (${cost} ₸)`;
+          break;
+        case "jewelry":
+          title = `${item.name} (${cost} ₸)`;
+          break;
         default:
           title = "Неизвестный элемент";
       }
@@ -1047,10 +1059,12 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     "Торты",
     "Ведущий",
     "Шоу программа",
-    "Аренда технического оборудования"
+    "Аренда технического оборудования",
+    "Цветы",
+    "Ювелирные изделия"
   ];
 
- console.log('route.params:', route?.params);
+  console.log('route.params:', route?.params);
   const selectedCategories = route?.params?.selectedCategories || [];
   console.log('Полученные категории:', selectedCategories);
   const [categories, setCategories] = useState(selectedCategories.length > 0 ? selectedCategories : defaultCategories);
@@ -1066,6 +1080,8 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     cakes: [],
     alcohol: [],
     "technical-equipment-rentals": [],
+    flowers: [],
+    jewelry: []
   });
   const [filteredData, setFilteredData] = useState([]);
   const [quantities, setQuantities] = useState({});
@@ -1086,6 +1102,18 @@ const ConferencesEventScreen = ({ navigation, route }) => {
   const [shouldFilter, setShouldFilter] = useState(false);
   const [blockedDays, setBlockedDays] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const serviceTypeMap = {
+    'transport': 'Transport',
+    'restaurant': 'Restaurant',
+    'alcohol': 'Alcohol',
+    'cake': 'Cakes',
+    'tamada': 'Tamada',
+    'program': 'Program',
+    'technical-equipment-rental': 'TechnicalEquipmentRental',
+    'flowers': 'Flowers',
+    'jewelry': 'Jewelry'
+  };
 
   const updateCategories = useCallback(
     (newCategory) => {
@@ -1109,77 +1137,77 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     return result.sort((a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13));
   }, [data]);
 
-const fetchData = async () => {
-  if (!token || !user?.id) return;
-  setLoading(true);
-  try {
-    const responses = await Promise.all([
-      api.getRestaurants().catch((err) => {
-        console.error("Ошибка получения ресторанов:", err);
-        return { data: [] };
-      }),
-      api.getTamada().catch((err) => {
-        console.error("Ошибка получения ведущих:", err);
-        return { data: [] };
-      }),
-      api.getPrograms().catch((err) => {
-        console.error("Ошибка получения программ:", err);
-        return { data: [] };
-      }),
-      api.getTransport().catch((err) => {
-        console.error("Ошибка получения транспорта:", err);
-        return { data: [] };
-      }),
-      api.getCakes().catch((err) => {
-        console.error("Ошибка получения тортов:", err);
-        return { data: [] };
-      }),
-      api.getAlcohol().catch((err) => {
-        console.error("Ошибка получения алкоголя:", err);
-        return { data: [] };
-      }),
-      api.getTechnicalEquipmentRentals().catch((err) => {
-        console.error("Ошибка получения аренды технического оснащения:", err);
-        return { data: [] };
-      }),
-      api.getFlowers().catch((err) => {
-        console.error("Ошибка получения цветов:", err);
-        return { data: [] };
-      }),
-      api.getJewelry().catch((err) => {
-        console.error("Ошибка получения ювелирных изделий:", err);
-        return { data: [] };
-      })
-    ]);
-    const [
-      restaurants,
-      tamada,
-      programs,
-      transport,
-      cakes,
-      alcohol,
-      technicalEquipmentRentals,
-      flowers,
-      jewelry
-    ] = responses.map((res) => res.data);
-    setData({
-    restaurants: restaurants.map(item => ({ ...item, averageCost: item.averageCost || 0 })),
-    tamada: tamada.map(item => ({ ...item, cost: item.cost || 0 })),
-    programs: programs.map(item => ({ ...item, cost: item.cost || 0 })),
-    transport: transport.map(item => ({ ...item, cost: item.cost || 0 })),
-    cakes: cakes.map(item => ({ ...item, cost: item.cost || 0 })),
-    alcohol: alcohol.map(item => ({ ...item, cost: item.cost || 0 })),
-    "technical-equipment-rentals": technicalEquipmentRentals.map(item => ({ ...item, cost: item.cost || 0 })),
-    flowers: flowers.map(item => ({ ...item, cost: item.cost || 0 })),
-    jewelry: jewelry.map(item => ({ ...item, cost: item.cost || 0 }))
-  });
-  } catch (error) {
-    console.error("Общая ошибка загрузки данных:", error);
-    alert("Ошибка загрузки данных. Попробуйте снова.");
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchData = async () => {
+    if (!token || !user?.id) return;
+    setLoading(true);
+    try {
+      const responses = await Promise.all([
+        api.getRestaurants().catch((err) => {
+          console.error("Ошибка получения ресторанов:", err);
+          return { data: [] };
+        }),
+        api.getTamada().catch((err) => {
+          console.error("Ошибка получения ведущих:", err);
+          return { data: [] };
+        }),
+        api.getPrograms().catch((err) => {
+          console.error("Ошибка получения программ:", err);
+          return { data: [] };
+        }),
+        api.getTransport().catch((err) => {
+          console.error("Ошибка получения транспорта:", err);
+          return { data: [] };
+        }),
+        api.getCakes().catch((err) => {
+          console.error("Ошибка получения тортов:", err);
+          return { data: [] };
+        }),
+        api.getAlcohol().catch((err) => {
+          console.error("Ошибка получения алкоголя:", err);
+          return { data: [] };
+        }),
+        api.getTechnicalEquipmentRentals().catch((err) => {
+          console.error("Ошибка получения аренды технического оснащения:", err);
+          return { data: [] };
+        }),
+        api.getFlowers().catch((err) => {
+          console.error("Ошибка получения цветов:", err);
+          return { data: [] };
+        }),
+        api.getJewelry().catch((err) => {
+          console.error("Ошибка получения ювелирных изделий:", err);
+          return { data: [] };
+        })
+      ]);
+      const [
+        restaurants,
+        tamada,
+        programs,
+        transport,
+        cakes,
+        alcohol,
+        technicalEquipmentRentals,
+        flowers,
+        jewelry
+      ] = responses.map((res) => res.data);
+      setData({
+        restaurants: restaurants.map(item => ({ ...item, averageCost: item.averageCost || 0 })),
+        tamada: tamada.map(item => ({ ...item, cost: item.cost || 0 })),
+        programs: programs.map(item => ({ ...item, cost: item.cost || 0 })),
+        transport: transport.map(item => ({ ...item, cost: item.cost || 0 })),
+        cakes: cakes.map(item => ({ ...item, cost: item.cost || 0 })),
+        alcohol: alcohol.map(item => ({ ...item, cost: item.cost || 0 })),
+        "technical-equipment-rentals": technicalEquipmentRentals.map(item => ({ ...item, cost: item.cost || 0 })),
+        flowers: flowers.map(item => ({ ...item, cost: item.cost || 0 })),
+        jewelry: jewelry.map(item => ({ ...item, cost: item.cost || 0 }))
+      });
+    } catch (error) {
+      console.error("Общая ошибка загрузки данных:", error);
+      alert("Ошибка загрузки данных. Попробуйте снова.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!token) navigation.navigate("Login");
@@ -1494,248 +1522,156 @@ const fetchData = async () => {
     }, 0);
   }, [filteredData, quantities, guestCount]);
 
-  // const handleSubmit = async () => {
-  //   if (!eventName.trim()) {
-  //     alert("Пожалуйста, укажите название мероприятия");
-  //     return;
-  //   }
-  //   if (!eventDate) {
-  //     alert("Пожалуйста, выберите дату мероприятия");
-  //     return;
-  //   }
-  //   if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
-  //     alert("Пожалуйста, укажите корректный бюджет");
-  //     return;
-  //   }
-  //   if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
-  //     alert("Пожалуйста, укажите корректное количество гостей");
-  //     return;
-  //   }
-  //   if (filteredData.length === 0) {
-  //     alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   try {
-  //     const categoryResponse = await api.createEventCategory(
-  //       { name: eventName },
-  //       token
-  //     );
-  //     const categoryId = categoryResponse.data.id;
-
-  //     for (const item of filteredData) {
-  //       const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
-  //       if (!typeMapping) {
-  //         console.error(`Неизвестный тип услуги: ${item.type}`);
-  //         continue;
-  //       }
-
-  //       const serviceTypeMap = {
-  //         'transport': 'Transport',
-  //         'restaurant': 'Restaurant',
-  //         'alcohol': 'Alcohol',
-  //         'cake': 'Cakes',
-  //         'tamada': 'Tamada',
-  //         'program': 'Program',
-  //         'technical-equipment-rental': 'TechnicalEquipmentRental',
-  //       };
-
-  //       const serviceType = serviceTypeMap[item.type] || item.type;
-
-  //       const quantity =
-  //         item.type === 'restaurant'
-  //           ? parseInt(guestCount, 10)
-  //           : parseInt(quantities[`${item.type}-${item.id}`] || '1');
-
-  //       try {
-  //         await api.addServiceToCategory(
-  //           categoryId,
-  //           { serviceId: item.id, serviceType, quantity },
-  //           token
-  //         );
-  //         console.log(`Услуга ${serviceType} успешно добавлена с ID ${item.id} и количеством ${quantity}`);
-  //       } catch (error) {
-  //         console.error(
-  //           `Ошибка при добавлении услуги ${serviceType} (ID: ${item.id}, Type: ${item.type}):`,
-  //           error.response?.data || error.message
-  //         );
-  //       }
-  //     }
-
-  //     alert('Корпоративное мероприятие успешно создано!');
-  //     setEventName('');
-  //     setEventDate(new Date());
-  //     setBudget('');
-  //     setGuestCount('');
-  //     setFilteredData([]);
-  //     setQuantities({});
-  //     setRemainingBudget(0);
-  //     navigation.goBack();
-  //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  //   } catch (error) {
-  //     console.error('Ошибка при создании мероприятия:', error.response?.data || error.message);
-  //     alert('Ошибка: ' + (error.response?.data?.error || error.message));
-  //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-const handleSubmit = async () => {
-  if (!eventName.trim()) {
-    alert("Пожалуйста, укажите название мероприятия");
-    return;
-  }
-  if (!eventDate) {
-    alert("Пожалуйста, выберите дату мероприятия");
-    return;
-  }
-  if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
-    alert("Пожалуйста, укажите корректный бюджет");
-    return;
-  }
-  if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
-    alert("Пожалуйста, укажите корректное количество гостей");
-    return;
-  }
-  if (filteredData.length === 0) {
-    alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const categoryResponse = await api.createEventCategory(
-      { name: eventName },
-      token
-    );
-    const categoryId = categoryResponse.data.id;
-
-    console.log('Создано мероприятие:', {
-      eventName,
-      eventDate: eventDate.toISOString(),
-      budget,
-      guestCount,
-      categoryId,
-      activeCategories: categories.filter(cat => !disabledCategories.includes(cat))
-    });
-
-    // Добавление выбранных услуг
-    const selectedServices = filteredData.map(item => ({
-      serviceId: item.id,
-      serviceType: serviceTypeMap[item.type] || item.type,
-      quantity: item.type === 'restaurant'
-        ? parseInt(guestCount, 10)
-        : parseInt(quantities[`${item.type}-${item.id}`] || '1'),
-      name: item.type === 'restaurant' ? item.name :
-            item.type === 'tamada' ? item.name :
-            item.type === 'program' ? item.teamName :
-            item.type === 'transport' ? `${item.salonName} - ${item.carName}` :
-            item.type === 'cake' ? item.name :
-            item.type === 'alcohol' ? `${item.salonName} - ${item.alcoholName}` :
-            item.type === 'technical-equipment-rental' ? item.name :
-            item.type === 'flowers' ? item.name :
-            item.type === 'jewelry' ? item.name : 'Неизвестный элемент'
-    }));
-
-    console.log('Выбранные услуги:', selectedServices);
-
-    for (const item of filteredData) {
-      const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
-      if (!typeMapping) {
-        console.error(`Неизвестный тип услуги: ${item.type}`);
-        continue;
-      }
-
-      const serviceType = serviceTypeMap[item.type] || item.type;
-      const quantity = item.type === 'restaurant'
-        ? parseInt(guestCount, 10)
-        : parseInt(quantities[`${item.type}-${item.id}`] || '1');
-
-      try {
-        await api.addServiceToCategory(
-          categoryId,
-          { serviceId: item.id, serviceType, quantity },
-          token
-        );
-        console.log(`Услуга ${serviceType} успешно добавлена с ID ${item.id} и количеством ${quantity}`);
-      } catch (error) {
-        console.error(
-          `Ошибка при добавлении услуги ${serviceType} (ID: ${item.id}, Type: ${item.type}):`,
-          error.response?.data || error.message
-        );
-      }
+  const handleSubmit = async () => {
+    if (!eventName.trim()) {
+      alert("Пожалуйста, укажите название мероприятия");
+      return;
+    }
+    if (!eventDate) {
+      alert("Пожалуйста, выберите дату мероприятия");
+      return;
+    }
+    if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
+      alert("Пожалуйста, укажите корректный бюджет");
+      return;
+    }
+    if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
+      alert("Пожалуйста, укажите корректное количество гостей");
+      return;
+    }
+    if (filteredData.length === 0) {
+      alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
+      return;
     }
 
-    // Добавление всех активных категорий
-    const activeCategories = categories.filter(
-      (cat) => !disabledCategories.includes(cat)
-    );
-    console.log('Активные категории:', activeCategories);
+    setLoading(true);
+    try {
+      const categoryResponse = await api.createEventCategory(
+        { name: eventName },
+        token
+      );
+      const categoryId = categoryResponse.data.id;
 
-    for (const category of activeCategories) {
-      const type = categoryToTypeMap[category];
-      if (!type) {
-        console.warn(`Тип не найден для категории ${category}`);
-        continue;
-      }
-      if (!filteredData.some((item) => item.type === type)) {
-        const serviceType = serviceTypeMap[type] || type;
+      console.log('Создано мероприятие:', {
+        eventName,
+        eventDate: eventDate.toISOString(),
+        budget,
+        guestCount,
+        categoryId,
+        activeCategories: categories.filter(cat => !disabledCategories.includes(cat))
+      });
+
+      // Добавление выбранных услуг
+      const selectedServices = filteredData.map(item => ({
+        serviceId: item.id,
+        serviceType: serviceTypeMap[item.type] || item.type,
+        quantity: item.type === 'restaurant'
+          ? parseInt(guestCount, 10)
+          : parseInt(quantities[`${item.type}-${item.id}`] || '1'),
+        name: item.type === 'restaurant' ? item.name :
+              item.type === 'tamada' ? item.name :
+              item.type === 'program' ? item.teamName :
+              item.type === 'transport' ? `${item.salonName} - ${item.carName}` :
+              item.type === 'cake' ? item.name :
+              item.type === 'alcohol' ? `${item.salonName} - ${item.alcoholName}` :
+              item.type === 'technical-equipment-rental' ? item.name :
+              item.type === 'flowers' ? item.name :
+              item.type === 'jewelry' ? item.name : 'Неизвестный элемент'
+      }));
+
+      console.log('Выбранные услуги:', selectedServices);
+
+      for (const item of filteredData) {
+        const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
+        if (!typeMapping) {
+          console.error(`Неизвестный тип услуги: ${item.type}`);
+          continue;
+        }
+
+        const serviceType = serviceTypeMap[item.type] || item.type;
+        const quantity = item.type === 'restaurant'
+          ? parseInt(guestCount, 10)
+          : parseInt(quantities[`${item.type}-${item.id}`] || '1');
+
         try {
-          const placeholderServiceId = await getPlaceholderServiceId(serviceType);
-          if (placeholderServiceId) {
-            await api.addServiceToCategory(
-              categoryId,
-              { serviceId: placeholderServiceId, serviceType, quantity: 0 },
-              token
-            );
-            console.log(`Категория ${category} добавлена с placeholder услугой (ID: ${placeholderServiceId})`);
-          } else {
-            console.warn(`Не удалось получить placeholderServiceId для ${serviceType}`);
-          }
+          await api.addServiceToCategory(
+            categoryId,
+            { serviceId: item.id, serviceType, quantity },
+            token
+          );
+          console.log(`Услуга ${serviceType} успешно добавлена с ID ${item.id} и количеством ${quantity}`);
         } catch (error) {
-          console.error(`Ошибка при добавлении категории ${category}:`, error);
+          console.error(
+            `Ошибка при добавлении услуги ${serviceType} (ID: ${item.id}, Type: ${item.type}):`,
+            error.response?.data || error.message
+          );
         }
       }
+
+      // Добавление всех активных категорий
+      const activeCategories = categories.filter(
+        (cat) => !disabledCategories.includes(cat)
+      );
+      console.log('Активные категории:', activeCategories);
+
+      for (const category of activeCategories) {
+        const type = categoryToTypeMap[category];
+        if (!type) {
+          console.warn(`Тип не найден для категории ${category}`);
+          continue;
+        }
+        if (!filteredData.some((item) => item.type === type)) {
+          const serviceType = serviceTypeMap[type] || type;
+          try {
+            const placeholderServiceId = await getPlaceholderServiceId(serviceType);
+            if (placeholderServiceId) {
+              await api.addServiceToCategory(
+                categoryId,
+                { serviceId: placeholderServiceId, serviceType, quantity: 0 },
+                token
+              );
+              console.log(`Категория ${category} добавлена с placeholder услугой (ID: ${placeholderServiceId})`);
+            } else {
+              console.warn(`Не удалось получить placeholderServiceId для ${serviceType}`);
+            }
+          } catch (error) {
+            console.error(`Ошибка при добавлении категории ${category}:`, error);
+          }
+        }
+      }
+
+      alert('Конференция успешно создана!');
+      setEventName('');
+      setEventDate(new Date());
+      setBudget('');
+      setGuestCount('');
+      setFilteredData([]);
+      setQuantities({});
+      setRemainingBudget(0);
+      navigation.goBack();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error('Ошибка при создании мероприятия:', error.response?.data || error.message);
+      alert('Ошибка: ' + (error.response?.data?.error || error.message));
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    alert('Конференция успешно создана!');
-    setEventName('');
-    setEventDate(new Date());
-    setBudget('');
-    setGuestCount('');
-    setFilteredData([]);
-    setQuantities({});
-    setRemainingBudget(0);
-    navigation.goBack();
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  } catch (error) {
-    console.error('Ошибка при создании мероприятия:', error.response?.data || error.message);
-    alert('Ошибка: ' + (error.response?.data?.error || error.message));
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const getPlaceholderServiceId = async (serviceType) => {
-  try {
-    const response = await api.getPlaceholderService(serviceType, token);
-    if (!response.data.id) {
-      const newPlaceholder = await api.createPlaceholderService({ type: serviceType }, token);
-      return newPlaceholder.data.id;
+  const getPlaceholderServiceId = async (serviceType) => {
+    try {
+      const response = await api.getPlaceholderService(serviceType, token);
+      if (!response.data.id) {
+        const newPlaceholder = await api.createPlaceholderService({ type: serviceType }, token);
+        return newPlaceholder.data.id;
+      }
+      return response.data.id;
+    } catch (error) {
+      console.error(`Ошибка при получении placeholder для ${serviceType}:`, error);
+      return null;
     }
-    return response.data.id;
-  } catch (error) {
-    console.error(`Ошибка при получении placeholder для ${serviceType}:`, error);
-    return null;
-  }
-};
-
-
-
-
+  };
 
   const handleRemoveCategory = useCallback(
     (category) => {
@@ -2039,7 +1975,10 @@ const getPlaceholderServiceId = async (serviceType) => {
       "Торты": { on: require("../../assets/torty.png"), off: require("../../assets/tortyTurnOff.png") },
       "Ведущий": { on: require("../../assets/vedushieOn.png"), off: require("../../assets/vedushieOff.png") },
       "Шоу программа": { on: require("../../assets/show.png"), off: require("../../assets/showTurnOff.png") },
-    //   "Аренда технического оборудования": { on: require("../../assets/techEquipmentOn.png"), off: require("../../assets/techEquipmentOff.png") },
+      // "Аренда технического оборудования": { on: require("../../assets/techEquipmentOn.png"), off: require("../../assets/techEquipmentOff.png") },
+      "Аренда технического оборудования": { on: require("../../assets/show.png"), off: require("../../assets/showTurnOff.png") },
+      "Цветы": { on: require("../../assets/cvetyOn.png"), off: require("../../assets/cvetyOff.png") },
+      "Ювелирные изделия": { on: require("../../assets/uvizdeliyaOn.png"), off: require("../../assets/uvIzdeliyaOff.png") }
     };
 
     const defaultIcon = require("../../assets/join.png");
@@ -2068,6 +2007,8 @@ const getPlaceholderServiceId = async (serviceType) => {
                   item === "Ведущий" ? "mic" :
                   item === "Шоу программа" ? "theater-comedy" :
                   item === "Аренда технического оборудования" ? "settings" :
+                  item === "Цветы" ? "local-florist" :
+                  item === "Ювелирные изделия" ? "diamond" :
                   "category"
                 }
                 size={20}
@@ -2137,6 +2078,8 @@ const getPlaceholderServiceId = async (serviceType) => {
                  item.type === "cake" ? item.name :
                  item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
                  item.type === "technical-equipment-rental" ? item.name :
+                 item.type === "flowers" ? item.name :
+                 item.type === "jewelry" ? item.name :
                  "Детали"}
               </Text>
               <TouchableOpacity
@@ -2722,13 +2665,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.white,
   },
- calendarContainer: {
-  backgroundColor: MODAL_COLORS.background,
-  borderRadius: 16,
-  padding: 18,
-  width: '100%', // Ensure full width
-  maxHeight: SCREEN_HEIGHT * 0.7, // Adjust max height if needed
-},
+  calendarContainer: {
+    backgroundColor: MODAL_COLORS.background,
+    borderRadius: 16,
+    padding: 18,
+    width: '100%', // Ensure full width
+    maxHeight: SCREEN_HEIGHT * 0.7, // Adjust max height if needed
+  },
   closeCalendarButton: {
     marginTop: 18,
     alignItems: 'center',
@@ -2752,22 +2695,3 @@ const styles = StyleSheet.create({
 });
 
 export default ConferencesEventScreen;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//--------------------------------------------------------------------
-
