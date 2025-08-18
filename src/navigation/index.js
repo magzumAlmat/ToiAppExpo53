@@ -69,7 +69,7 @@ const SplashScreen = ({ navigation }) => {
   const handlePress = () => {
     setShowSecondButton(true);
     setTimeout(() => {
-      navigation.replace('NewScreen');
+      navigation.replace('NewScreenTabs');
     }, 1000);
   };
 
@@ -137,7 +137,7 @@ const NewScreen = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.imageButton}
-            onPress={() => navigation.replace('Authenticated')}
+            onPress={() => navigation.navigate('Authenticated', { screen: 'Home' })}
           >
             <Image
               source={require('../../assets/join.png')}
@@ -213,7 +213,7 @@ const CreateEventScreen = ({ navigation }) => {
       />
       <View style={styles.bottomContainer}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('NewScreen')}
+          onPress={() => navigation.navigate('NewScreenTabs')}
           style={styles.imageButton}
         >
           <Image
@@ -332,6 +332,23 @@ function AuthenticatedTabs() {
               ),
             }}
           />
+          <Tab.Screen
+            name="NewScreen"
+            component={NewScreen}
+            options={{
+              title: 'Вход',
+              headerShown: false,
+              tabBarIcon: ({ focused, color }) => (
+                <Icon
+                  name="event"
+                  size={24}
+                  color={color}
+                  style={styles.tabIcon}
+                />
+              ),
+            }}
+          />
+
           <Tab.Screen
             name="Item3"
             component={Item3Screen}
@@ -570,6 +587,72 @@ function CreateConferenceEventTabs() {
   );
 }
 
+function NewScreenTabs() {
+  const { user, token } = useSelector((state) => state.auth);
+  const roleId = user?.roleId;
+
+  const tabBarOptions = {
+    tabBarStyle: styles.tabBar,
+    tabBarShowLabel: true,
+    tabBarLabelStyle: styles.tabLabel,
+    tabBarActiveTintColor: '#897066',
+    tabBarInactiveTintColor: '#666666',
+  };
+
+  if (!user || roleId === undefined) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <Tab.Navigator screenOptions={tabBarOptions}>
+      {/* <Tab.Screen
+        name="NewScreenContent"
+        component={NewScreen}
+        options={{
+          title: 'Вход',
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="event" size={24} color={color} style={styles.tabIcon} />
+          ),
+        }}
+      /> */}
+      <Tab.Screen
+        name="Home"
+        component={NewScreen}
+        options={{
+          title: 'Главная',
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="home" size={24} color={color} style={styles.tabIcon} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Item3"
+        component={Item3Screen}
+        options={{
+          title: 'Мои мероприятия',
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="event" size={24} color={color} style={styles.tabIcon} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Item4"
+        component={Item4Screen}
+        options={{
+          title: 'Профиль',
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name="person-outline" size={24} color={color} style={styles.tabIcon} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
 
 export default function Navigation() {
   const { token, user } = useSelector((state) => state.auth);
@@ -594,8 +677,8 @@ export default function Navigation() {
         console.log('User is authenticated with roleId 2, redirecting to Supplier');
         navigationRef.current?.navigate('Authenticated', { screen: 'Supplier' });
       } else {
-        console.log('User is authenticated, redirecting to SplashScreen');
-        navigationRef.current?.navigate('Splash');
+        console.log('User is authenticated, redirecting to NewScreenTabs');
+        navigationRef.current?.navigate('NewScreenTabs');
       }
     }
 
@@ -628,7 +711,7 @@ export default function Navigation() {
     <NavigationContainer ref={navigationRef} linking={linking}>
       <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="NewScreen" component={NewScreen} />
+        <Stack.Screen name="NewScreenTabs" component={NewScreenTabs} />
         <Stack.Screen name="CreateEvent" component={CreateEventScreen} />
         <Stack.Screen name="CreateTraditionalFamilyEvent" component={CreateTraditionalFamilyEventTabs} />
         <Stack.Screen name="BeforeCreateTraditionalFamilyEvent" component={BeforeTraditionalFamilyEventScreen} />
