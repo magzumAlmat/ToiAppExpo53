@@ -62,6 +62,8 @@ export const MODAL_COLORS = {
   overlayBackground: 'rgba(45, 55, 72, 0.65)',
 };
 
+// Replace the existing typeOrder, typesMapping, categoryToTypeMap, and typeToCategoryMap with the following:
+
 const typeOrder = {
   transport: 1,
   restaurant: 2,
@@ -70,6 +72,20 @@ const typeOrder = {
   tamada: 5,
   program: 6,
   "technical-equipment-rental": 7,
+  jewelry: 8,
+  flowers: 9,
+};
+
+const serviceTypeMap = {
+  transport: 'Transport',
+  restaurant: 'Restaurant',
+  alcohol: 'Alcohol',
+  cake: 'Cakes',
+  tamada: 'Tamada',
+  program: 'Program',
+  'technical-equipment-rental': 'TechnicalEquipmentRental',
+  jewelry: 'Jewelry',
+  flowers: 'Flowers',
 };
 
 const typesMapping = [
@@ -80,6 +96,8 @@ const typesMapping = [
   { key: "tamada", costField: "cost", type: "tamada", label: "Ведущий" },
   { key: "programs", costField: "cost", type: "program", label: "Шоу программа" },
   { key: "technical-equipment-rentals", costField: "cost", type: "technical-equipment-rental", label: "Аренда технического оборудования" },
+  { key: "jewelry", costField: "cost", type: "jewelry", label: "Ювелирные изделия" },
+  { key: "flowers", costField: "cost", type: "flowers", label: "Цветы" },
 ];
 
 const categoryToTypeMap = {
@@ -90,11 +108,30 @@ const categoryToTypeMap = {
   "Ведущий": "tamada",
   "Шоу программа": "program",
   "Аренда технического оборудования": "technical-equipment-rental",
+  "Ювелирные изделия": "jewelry",
+  "Цветы": "flowers",
 };
 
 const typeToCategoryMap = Object.fromEntries(
   Object.entries(categoryToTypeMap).map(([category, type]) => [type, category])
 );
+
+// Replace the defaultCategories definition with the following:
+
+const defaultCategories = [
+  "Прокат авто",
+  "Ресторан",
+  "Алкоголь",
+  "Торты",
+  "Ведущий",
+  "Шоу программа",
+  "Аренда технического оборудования",
+  "Ювелирные изделия",
+  "Цветы",
+];
+
+
+
 
 const useDebounce = (callback, delay) => {
   const callbackRef = useRef(callback);
@@ -239,88 +276,94 @@ const AddItemModal = ({
     costRange,
   ]);
 
-  const renderAddItem = useCallback(
-    ({ item }) => {
-      if (!item || !item.type || !item.id) {
-        console.warn("Некорректный элемент в renderAddItem:", item);
-        return null;
-      }
+const renderAddItem = useCallback(
+  ({ item }) => {
+    if (!item || !item.type || !item.id) {
+      console.warn("Некорректный элемент в renderAddItem:", item);
+      return null;
+    }
 
-      const count = filteredData.filter(
-        (selectedItem) =>
-          `${selectedItem.type}-${selectedItem.id}` ===
-          `${item.type}-${item.id}`
-      ).length;
-      const cost = item.type === "restaurant" ? item.averageCost : item.cost;
-      let title;
-      switch (item.type) {
-        case "restaurant":
-          title = `Ресторан: ${item.name} (${cost} ₸)`;
-          break;
-        case "tamada":
-          title = `Ведущий: ${item.name} (${cost} ₸)`;
-          break;
-        case "program":
-          title = `Шоу программа: ${item.teamName} (${cost} ₸)`;
-          break;
-        case "transport":
-          title = `Прокат авто: ${item.salonName} - ${item.carName} (${cost} ₸)`;
-          break;
-        case "cake":
-          title = `Торты: ${item.name} (${cost} ₸)`;
-          break;
-        case "alcohol":
-          title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
-          break;
-        case "technical-equipment-rental":
-          title = `Техническое оборудование: ${item.name} (${cost} ₸)`;
-          break;
-        default:
-          title = "Неизвестный элемент";
-      }
-      return (
-        <View style={styles.addModalItemCard}>
-          <TouchableOpacity
-            style={styles.addModalItemContent}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              handleAddItem(item);
-              const category = typeToCategoryMap[item.type];
-              if (category) {
-                updateCategories(category);
-              }
-            }}
-            accessible
-            accessibilityLabel={`Добавить ${title}`}
-          >
-            <Text style={styles.addModalItemText}>{title}</Text>
-            {count > 0 && (
-              <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.detailsIconButton}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedItem(item);
-              setDetailsModalVisible(true);
-            }}
-            accessible
-            accessibilityLabel="Посмотреть детали"
-          >
-            <Icon name="search" size={20} color={MODAL_COLORS.icon} />
-          </TouchableOpacity>
-        </View>
-      );
-    },
-    [
-      filteredData,
-      handleAddItem,
-      setDetailsModalVisible,
-      setSelectedItem,
-      updateCategories,
-    ]
-  );
+    const count = filteredData.filter(
+      (selectedItem) =>
+        `${selectedItem.type}-${selectedItem.id}` ===
+        `${item.type}-${item.id}`
+    ).length;
+    const cost = item.type === "restaurant" ? item.averageCost : item.cost;
+    let title;
+    switch (item.type) {
+      case "restaurant":
+        title = `Ресторан: ${item.name} (${cost} ₸)`;
+        break;
+      case "tamada":
+        title = `Ведущий: ${item.name} (${cost} ₸)`;
+        break;
+      case "program":
+        title = `Шоу программа: ${item.teamName} (${cost} ₸)`;
+        break;
+      case "transport":
+        title = `Прокат авто: ${item.salonName} - ${item.carName} (${cost} ₸)`;
+        break;
+      case "cake":
+        title = `Торты: ${item.name} (${cost} ₸)`;
+        break;
+      case "alcohol":
+        title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
+        break;
+      case "technical-equipment-rental":
+        title = `Техническое оборудование: ${item.name} (${cost} ₸)`;
+        break;
+      case "jewelry":
+        title = `Ювелирные изделия: ${item.name} (${cost} ₸)`;
+        break;
+      case "flowers":
+        title = `Цветы: ${item.name} (${cost} ₸)`;
+        break;
+      default:
+        title = "Неизвестный элемент";
+    }
+    return (
+      <View style={styles.addModalItemCard}>
+        <TouchableOpacity
+          style={styles.addModalItemContent}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleAddItem(item);
+            const category = typeToCategoryMap[item.type];
+            if (category) {
+              updateCategories(category);
+            }
+          }}
+          accessible
+          accessibilityLabel={`Добавить ${title}`}
+        >
+          <Text style={styles.addModalItemText}>{title}</Text>
+          {count > 0 && (
+            <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.detailsIconButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setSelectedItem(item);
+            setDetailsModalVisible(true);
+          }}
+          accessible
+          accessibilityLabel="Посмотреть детали"
+        >
+          <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+        </TouchableOpacity>
+      </View>
+    );
+  },
+  [
+    filteredData,
+    handleAddItem,
+    setDetailsModalVisible,
+    setSelectedItem,
+    updateCategories,
+  ]
+);
 
   const closeModal = () => {
     setSearchQuery("");
@@ -848,100 +891,106 @@ const CategoryItemsModal = ({
     )
     .sort((a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13));
 
-  const renderAvailableItem = useCallback(
-    ({ item }) => {
-      if (!item || !item.type || !item.id) {
-        console.warn("Некорректный элемент в renderAvailableItem:", item);
-        return null;
-      }
-      const cost = item.type === "restaurant" ? item.averageCost : item.cost;
-      let title;
-      switch (item.type) {
-        case "restaurant":
-          title = `${item.name} (${cost} ₸)`;
-          break;
-        case "tamada":
-          title = `${item.name} (${cost} ₸)`;
-          break;
-        case "program":
-          title = `${item.teamName} (${cost} ₸)`;
-          break;
-        case "transport":
-          title = `${item.salonName} - ${item.carName} (${cost} ₸)`;
-          break;
-        case "cake":
-          title = `${item.name} (${cost} ₸)`;
-          break;
-        case "alcohol":
-          title = `${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
-          break;
-        case "technical-equipment-rental":
-          title = `${item.name} (${cost} ₸)`;
-          break;
-        default:
-          title = "Неизвестный элемент";
-      }
-      return (
-        <View style={styles.addModalItemCard}>
-          <TouchableOpacity
-            style={styles.addModalItemContent}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              if (item.type === "restaurant" && guestCount) {
-                const totalGuests = parseInt(guestCount, 10);
-                if (totalGuests > item.capacity) {
-                  alert(
-                    `Этот ресторан не может вместить ${totalGuests} гостей. Максимальная вместимость: ${item.capacity}.`
-                  );
-                  return;
-                }
+const renderAvailableItem = useCallback(
+  ({ item }) => {
+    if (!item || !item.type || !item.id) {
+      console.warn("Некорректный элемент в renderAvailableItem:", item);
+      return null;
+    }
+    const cost = item.type === "restaurant" ? item.averageCost : item.cost;
+    let title;
+    switch (item.type) {
+      case "restaurant":
+        title = `${item.name} (${cost} ₸)`;
+        break;
+      case "tamada":
+        title = `${item.name} (${cost} ₸)`;
+        break;
+      case "program":
+        title = `${item.teamName} (${cost} ₸)`;
+        break;
+      case "transport":
+        title = `${item.salonName} - ${item.carName} (${cost} ₸)`;
+        break;
+      case "cake":
+        title = `${item.name} (${cost} ₸)`;
+        break;
+      case "alcohol":
+        title = `${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
+        break;
+      case "technical-equipment-rental":
+        title = `${item.name} (${cost} ₸)`;
+        break;
+      case "jewelry":
+        title = `${item.name} (${cost} ₸)`;
+        break;
+      case "flowers":
+        title = `${item.name} (${cost} ₸)`;
+        break;
+      default:
+        title = "Неизвестный элемент";
+    }
+    return (
+      <View style={styles.addModalItemCard}>
+        <TouchableOpacity
+          style={styles.addModalItemContent}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            if (item.type === "restaurant" && guestCount) {
+              const totalGuests = parseInt(guestCount, 10);
+              if (totalGuests > item.capacity) {
+                alert(
+                  `Этот ресторан не может вместить ${totalGuests} гостей. Максимальная вместимость: ${item.capacity}.`
+                );
+                return;
               }
-              handleAddItem(item);
-              const category = typeToCategoryMap[item.type];
-              if (category) {
-                updateCategories(category);
-              }
-            }}
-            accessible
-            accessibilityLabel={`Добавить ${title}`}
+            }
+            handleAddItem(item);
+            const category = typeToCategoryMap[item.type];
+            if (category) {
+              updateCategories(category);
+            }
+          }}
+          accessible
+          accessibilityLabel={`Добавить ${title}`}
+        >
+          <Icon2
+            name="plus-circle-outline"
+            size={22}
+            color={MODAL_COLORS.icon}
+            style={{ marginRight: 10 }}
+          />
+          <Text
+            style={styles.addModalItemText}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
-            <Icon2
-              name="plus-circle-outline"
-              size={22}
-              color={MODAL_COLORS.icon}
-              style={{ marginRight: 10 }}
-            />
-            <Text
-              style={styles.addModalItemText}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {title}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.detailsIconButton}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedItem(item);
-              setDetailsModalVisible(true);
-            }}
-            accessible
-            accessibilityLabel="Посмотреть детали"
-          >
-            <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
-          </TouchableOpacity>
-        </View>
-      );
-    },
-    [
-      handleAddItem,
-      setDetailsModalVisible,
-      setSelectedItem,
-      updateCategories,
-      guestCount,
-    ]
-  );
+            {title}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.detailsIconButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setSelectedItem(item);
+            setDetailsModalVisible(true);
+          }}
+          accessible
+          accessibilityLabel="Посмотреть детали"
+        >
+          <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
+        </TouchableOpacity>
+      </View>
+    );
+  },
+  [
+    handleAddItem,
+    setDetailsModalVisible,
+    setSelectedItem,
+    updateCategories,
+    guestCount,
+  ]
+);
 
   return (
     <Modal
@@ -1072,6 +1121,7 @@ const CorporateEventScreen = ({ navigation, route }) => {
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+
   const [shouldFilter, setShouldFilter] = useState(false);
   const [blockedDays, setBlockedDays] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -1098,65 +1148,78 @@ const CorporateEventScreen = ({ navigation, route }) => {
     return result.sort((a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13));
   }, [data]);
 
-  const fetchData = async () => {
-    if (!token || !user?.id) return;
-    setLoading(true);
-    try {
-      const responses = await Promise.all([
-        api.getRestaurants().catch((err) => {
-          console.error("Ошибка получения ресторанов:", err);
-          return { data: [] };
-        }),
-        api.getTamada().catch((err) => {
-          console.error("Ошибка получения ведущих:", err);
-          return { data: [] };
-        }),
-        api.getPrograms().catch((err) => {
-          console.error("Ошибка получения программ:", err);
-          return { data: [] };
-        }),
-        api.getTransport().catch((err) => {
-          console.error("Ошибка получения транспорта:", err);
-          return { data: [] };
-        }),
-        api.getCakes().catch((err) => {
-          console.error("Ошибка получения тортов:", err);
-          return { data: [] };
-        }),
-        api.getAlcohol().catch((err) => {
-          console.error("Ошибка получения алкоголя:", err);
-          return { data: [] };
-        }),
-        api.getTechnicalEquipmentRentals().catch((err) => {
-          console.error("Ошибка получения аренды технического оснащения:", err);
-          return { data: [] };
-        }),
-      ]);
-      const [
-        restaurants,
-        tamada,
-        programs,
-        transport,
-        cakes,
-        alcohol,
-        technicalEquipmentRentals,
-      ] = responses.map((res) => res.data);
-      setData({
-        restaurants,
-        tamada,
-        programs,
-        transport,
-        cakes,
-        alcohol,
-        "technical-equipment-rentals": technicalEquipmentRentals,
-      });
-    } catch (error) {
-      console.error("Общая ошибка загрузки данных:", error);
-      alert("Ошибка загрузки данных. Попробуйте снова.");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchData = async () => {
+  if (!token || !user?.id) return;
+  setLoading(true);
+  try {
+    const responses = await Promise.all([
+      api.getRestaurants().catch((err) => {
+        console.error("Ошибка получения ресторанов:", err);
+        return { data: [] };
+      }),
+      api.getTamada().catch((err) => {
+        console.error("Ошибка получения ведущих:", err);
+        return { data: [] };
+      }),
+      api.getPrograms().catch((err) => {
+        console.error("Ошибка получения программ:", err);
+        return { data: [] };
+      }),
+      api.getTransport().catch((err) => {
+        console.error("Ошибка получения транспорта:", err);
+        return { data: [] };
+      }),
+      api.getCakes().catch((err) => {
+        console.error("Ошибка получения тортов:", err);
+        return { data: [] };
+      }),
+      api.getAlcohol().catch((err) => {
+        console.error("Ошибка получения алкоголя:", err);
+        return { data: [] };
+      }),
+      api.getTechnicalEquipmentRentals().catch((err) => {
+        console.error("Ошибка получения аренды технического оснащения:", err);
+        return { data: [] };
+      }),
+      api.getJewelry().catch((err) => {
+        console.error("Ошибка получения ювелирных изделий:", err);
+        return { data: [] };
+      }),
+      api.getFlowers().catch((err) => {
+        console.error("Ошибка получения цветов:", err);
+        return { data: [] };
+      }),
+    ]);
+    const [
+      restaurants,
+      tamada,
+      programs,
+      transport,
+      cakes,
+      alcohol,
+      technicalEquipmentRentals,
+      jewelry,
+      flowers,
+    ] = responses.map((res) => res.data);
+    setData({
+      restaurants,
+      tamada,
+      programs,
+      transport,
+      cakes,
+      alcohol,
+      'technical-equipment-rentals': technicalEquipmentRentals,
+      jewelry,
+      flowers,
+    });
+    console.log('Fetched Data:', JSON.stringify({ jewelry, flowers }, null, 2));
+  } catch (error) {
+    console.error("Общая ошибка загрузки данных:", error);
+    alert("Ошибка загрузки данных. Попробуйте снова.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (!token) navigation.navigate("Login");
@@ -1508,16 +1571,6 @@ const CorporateEventScreen = ({ navigation, route }) => {
           continue;
         }
 
-        const serviceTypeMap = {
-          'transport': 'Transport',
-          'restaurant': 'Restaurant',
-          'alcohol': 'Alcohol',
-          'cake': 'Cakes',
-          'tamada': 'Tamada',
-          'program': 'Program',
-          'technical-equipment-rental': 'TechnicalEquipmentRental',
-        };
-
         const serviceType = serviceTypeMap[item.type] || item.type;
 
         const quantity =
@@ -1839,72 +1892,77 @@ const CorporateEventScreen = ({ navigation, route }) => {
     setSelectedCategoryType("");
   };
 
-  const renderCategories = ({ item }) => {
-    if (item === "Добавить") {
-      return (
-        <View style={styles.categoryRow}>
-          <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => setAddItemModalVisible(true)}>
-            <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
-              <Text style={styles.categoryPlusText}>+</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    const isDisabled = disabledCategories.includes(item);
-    const type = categoryToTypeMap[item];
-    const itemsForCategory = filteredData.filter((dataItem) => dataItem.type === type);
-
-    const categoryIcons = {
-      "Прокат авто": { on: require("../../assets/prokatAvtoOn.png"), off: require("../../assets/prokatAutooff.png") },
-      "Ресторан": { on: require("../../assets/restaurantOn.png"), off: require("../../assets/restaurantTurnOff.png") },
-      "Алкоголь": { on: require("../../assets/alcoholOn.png"), off: require("../../assets/alcoholOff.png") },
-      "Торты": { on: require("../../assets/torty.png"), off: require("../../assets/tortyTurnOff.png") },
-      "Ведущий": { on: require("../../assets/vedushieOn.png"), off: require("../../assets/vedushieOff.png") },
-      "Шоу программа": { on: require("../../assets/show.png"), off: require("../../assets/showTurnOff.png") },
-    //   "Аренда технического оборудования": { on: require("../../assets/techEquipmentOn.png"), off: require("../../assets/techEquipmentOff.png") },
-    };
-
-    const defaultIcon = require("../../assets/join.png");
-
+const renderCategories = ({ item }) => {
+  if (item === "Добавить") {
     return (
       <View style={styles.categoryRow}>
-        <TouchableOpacity style={styles.removeCategoryButton} onPress={() => handleRemoveCategory(item)}>
-          <Image
-            source={isDisabled ? categoryIcons[item]?.on : (categoryIcons[item]?.off || defaultIcon)}
-            style={{ width: 60, height: 70, resizeMode: 'contain' }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.categoryButton, isDisabled && styles.disabledCategoryButton]}
-          onPress={() => { if (!isDisabled) handleCategoryPress(item); }}
-          disabled={isDisabled}
-        >
+        <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => setAddItemModalVisible(true)}>
           <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Icon
-                name={
-                  item === "Прокат авто" ? "directions-car" :
-                  item === "Ресторан" ? "restaurant" :
-                  item === "Алкоголь" ? "local-drink" :
-                  item === "Торты" ? "cake" :
-                  item === "Ведущий" ? "mic" :
-                  item === "Шоу программа" ? "theater-comedy" :
-                  item === "Аренда технического оборудования" ? "settings" :
-                  "category"
-                }
-                size={20}
-                color={COLORS.white}
-                style={{ marginRight: 10 }}
-              />
-              <Text style={styles.categoryText}>{item}</Text>
-            </View>
+            <Text style={styles.categoryPlusText}>+</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
     );
+  }
+const isDisabled = disabledCategories.includes(item);
+  const type = categoryToTypeMap[item];
+  const itemsForCategory = filteredData.filter((dataItem) => dataItem.type === type);
+
+  const categoryIcons = {
+    "Прокат авто": { on: require("../../assets/prokatAvtoOn.png"), off: require("../../assets/prokatAutooff.png") },
+    "Ресторан": { on: require("../../assets/restaurantOn.png"), off: require("../../assets/restaurantTurnOff.png") },
+    "Алкоголь": { on: require("../../assets/alcoholOn.png"), off: require("../../assets/alcoholOff.png") },
+    "Торты": { on: require("../../assets/torty.png"), off: require("../../assets/tortyTurnOff.png") },
+    "Ведущий": { on: require("../../assets/vedushieOn.png"), off: require("../../assets/vedushieOff.png") },
+    "Шоу программа": { on: require("../../assets/show.png"), off: require("../../assets/showTurnOff.png") },
+    "Аренда технического оборудования":  { on: require("../../assets/show.png"), off: require("../../assets/showTurnOff.png") },
+    // { on: require("../../assets/techEquipmentOn.png"), off: require("../../assets/techEquipmentOff.png") },
+    // "Ювелирные изделия": { on: require("../../assets/uvizdeliyaOff.png"), off: require("../../assets/uvizdeliyaOff.png") },
+    "Ювелирные изделия": { on: require("../../assets/show.png"), off: require("../../assets/show.png") },
+    "Цветы": { on: require("../../assets/cvetyOn.png"), off: require("../../assets/cvetyOff.png") },
   };
+
+  const defaultIcon = require("../../assets/join.png");
+
+  return (
+    <View style={styles.categoryRow}>
+      <TouchableOpacity style={styles.removeCategoryButton} onPress={() => handleRemoveCategory(item)}>
+        <Image
+          source={isDisabled ? (categoryIcons[item]?.on || defaultIcon) : (categoryIcons[item]?.off || defaultIcon)}
+          style={{ width: 60, height: 70, resizeMode: 'contain' }}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.categoryButton, isDisabled && styles.disabledCategoryButton]}
+        onPress={() => { if (!isDisabled) handleCategoryPress(item); }}
+        disabled={isDisabled}
+      >
+        <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Icon
+              name={
+                item === "Прокат авто" ? "directions-car" :
+                item === "Ресторан" ? "restaurant" :
+                item === "Алкоголь" ? "local-drink" :
+                item === "Торты" ? "cake" :
+                item === "Ведущий" ? "mic" :
+                item === "Шоу программа" ? "theater-comedy" :
+                item === "Аренда технического оборудования" ? "settings" :
+                item === "Ювелирные изделия" ? "diamond" :
+                item === "Цветы" ? "local-florist" :
+                "category"
+              }
+              size={20}
+              color={COLORS.white}
+              style={{ marginRight: 10 }}
+            />
+            <Text style={styles.categoryText}>{item}</Text>
+          </View>
+        </LinearGradient>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
   const renderSelectedItems = ({ item }) => (
     <SelectedItem
@@ -1923,98 +1981,100 @@ const CorporateEventScreen = ({ navigation, route }) => {
     />
   );
 
-  const DetailsModal = ({ visible, onClose, item }) => {
-    if (!item) return null;
+const DetailsModal = ({ visible, onClose, item }) => {
+  if (!item) return null;
 
-    const renderDetailRow = (label, value) => {
-      if (!value) return null;
-      return (
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>{label}:</Text>
-          <Text style={styles.detailValue}>{value}</Text>
-        </View>
-      );
-    };
-
-    const handleOpenLink = (url) => {
-      if (url) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Linking.openURL(url).catch((err) => console.error("Ошибка открытия ссылки:", err));
-      }
-    };
-
+  const renderDetailRow = (label, value) => {
+    if (!value) return null;
     return (
-      <Modal
-        visible={visible}
-        transparent
-        animationType="fade"
-        onRequestClose={onClose}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.detailsModalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {item.type === "restaurant" ? item.name :
-                 item.type === "tamada" ? item.name :
-                 item.type === "program" ? item.teamName :
-                 item.type === "transport" ? `${item.salonName} - ${item.carName}` :
-                 item.type === "cake" ? item.name :
-                 item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
-                 item.type === "technical-equipment-rental" ? item.name :
-                 "Детали"}
-              </Text>
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={onClose}
-                accessible
-                accessibilityLabel="Закрыть модальное окно"
-              >
-                <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={[
-                { label: 'Тип', value: typeToCategoryMap[item.type] },
-                { label: 'Адрес', value: item.address },
-                { label: 'Телефон', value: item.phone },
-                { label: 'Кухня', value: item.cuisine },
-                { label: 'Вместимость', value: item.capacity },
-                { label: 'Категория', value: item.category },
-                { label: 'Бренд', value: item.brand },
-                { label: 'Портфолио', value: item.portfolio },
-                { label: 'Тип торта', value: item.cakeType },
-                { label: 'Материал', value: item.material },
-                { label: 'Район', value: item.district },
-                { 
-                  label: 'Стоимость',
-                  value: `${(item.type === 'restaurant' ? item.averageCost : item.cost).toLocaleString()} ₸`
-                }
-              ].filter(d => d.value)}
-              renderItem={({ item }) => renderDetailRow(item.label, item.value)}
-              keyExtractor={(item, index) => `${item.label}-${index}`}
-              contentContainerStyle={styles.detailsModalContent}
-              showsVerticalScrollIndicator={false}
-            />
-            {item.portfolio && (
-              <TouchableOpacity
-                style={styles.portfolioButton}
-                onPress={() => handleOpenLink(item.portfolio)}
-                accessible
-                accessibilityLabel="Открыть портфолио"
-              >
-                <LinearGradient
-                  colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-                  style={styles.portfolioButtonGradient}
-                >
-                  <Text style={styles.portfolioButtonText}>Открыть портфолио</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </Modal>
+      <View style={styles.detailRow}>
+        <Text style={styles.detailLabel}>{label}:</Text>
+        <Text style={styles.detailValue}>{value}</Text>
+      </View>
     );
   };
+
+  const handleOpenLink = (url) => {
+    if (url) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Linking.openURL(url).catch((err) => console.error("Ошибка открытия ссылки:", err));
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.detailsModalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>
+              {item.type === "restaurant" ? item.name :
+               item.type === "tamada" ? item.name :
+               item.type === "program" ? item.teamName :
+               item.type === "transport" ? `${item.salonName} - ${item.carName}` :
+               item.type === "cake" ? item.name :
+               item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
+               item.type === "technical-equipment-rental" ? item.name :
+               item.type === "jewelry" ? item.name :
+               item.type === "flowers" ? item.name :
+               "Детали"}
+            </Text>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={onClose}
+              accessible
+              accessibilityLabel="Закрыть модальное окно"
+            >
+              <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={[
+              { label: 'Тип', value: typeToCategoryMap[item.type] },
+              { label: 'Адрес', value: item.address },
+              { label: 'Телефон', value: item.phone },
+              { label: 'Кухня', value: item.cuisine },
+              { label: 'Вместимость', value: item.capacity },
+              { label: 'Категория', value: item.category },
+              { label: 'Бренд', value: item.brand },
+              { label: 'Портфолио', value: item.portfolio },
+              { label: 'Тип торта', value: item.cakeType },
+              { label: 'Материал', value: item.material },
+              { label: 'Район', value: item.district },
+              { 
+                label: 'Стоимость',
+                value: `${(item.type === 'restaurant' ? item.averageCost : item.cost).toLocaleString()} ₸`
+              }
+            ].filter(d => d.value)}
+            renderItem={({ item }) => renderDetailRow(item.label, item.value)}
+            keyExtractor={(item, index) => `${item.label}-${index}`}
+            contentContainerStyle={styles.detailsModalContent}
+            showsVerticalScrollIndicator={false}
+          />
+          {item.portfolio && (
+            <TouchableOpacity
+              style={styles.portfolioButton}
+              onPress={() => handleOpenLink(item.portfolio)}
+              accessible
+              accessibilityLabel="Открыть портфолио"
+            >
+              <LinearGradient
+                colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
+                style={styles.portfolioButtonGradient}
+              >
+                <Text style={styles.portfolioButtonText}>Открыть портфолио</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
   const renderMainContent = () => {
     const sections = [
@@ -2576,4 +2636,3 @@ const styles = StyleSheet.create({
 });
 
 export default CorporateEventScreen;
-
