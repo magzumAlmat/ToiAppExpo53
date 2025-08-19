@@ -111,7 +111,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
     marginHorizontal: 4,
-    flex: 1,
   },
   actionButtonSecondary: {
     backgroundColor: COLORS.secondary,
@@ -119,7 +118,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
     marginHorizontal: 4,
-    flex: 1,
   },
   actionButtonAccent: {
     backgroundColor: COLORS.accent,
@@ -127,7 +125,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
     marginHorizontal: 4,
-    flex: 1,
   },
   actionButtonError: {
     backgroundColor: COLORS.error,
@@ -135,7 +132,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
     marginHorizontal: 4,
-    flex: 1,
   },
   actionButtonText: {
     color: COLORS.white,
@@ -1625,6 +1621,9 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     }
   };
 
+
+
+  
   const handleAddCustomGift = async () => {
     if (!formData.item_name) {
       Alert.alert("Ошибка", "Введите название подарка");
@@ -2012,7 +2011,7 @@ const openItemDetailsModal = async (weddingItem) => {
 
   useEffect(() => {
     if (!loadingWeddings && weddings.length === 0 && !hasShownNoWeddingsAlert) {
-      // setWeddingModalVisible(true);
+      setWeddingModalVisible(true);
       setHasShownNoWeddingsAlert(true);
     }
   }, [loadingWeddings, weddings, hasShownNoWeddingsAlert]);
@@ -2180,16 +2179,18 @@ const openItemDetailsModal = async (weddingItem) => {
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.itemText}>
-          {item.name} ({item.status === "active" ? "Активно" : "Неактивно"})
+          {item.name} 
+          {/* ({item.status === "active" ? "Активно" : "Неактивно"}) */}
         </Text>
         <Text style={styles.itemSubText}>
-          Описание: {item.description || "Нет описания"}
+          {/* Описание: {item.description || "Нет описания"} */}
         </Text>
         {groupedServices.length > 0 ? (
           <View style={styles.weddingItemsContainer}>
             {groupedServices.map((group) => (
+              console.log('group- ',group),
               <View key={group.name} style={styles.categorySection}>
-                <Text style={styles.categoryTitle}>{group.name}</Text>
+             
                 <FlatList
                   data={group.items}
                   renderItem={({ item: service }) => (
@@ -2198,7 +2199,9 @@ const openItemDetailsModal = async (weddingItem) => {
                       style={styles.weddingItem}
                     >
                       <Text style={styles.subItemText}>
-                        {service.name} {service.cost ? `- ${service.cost} тг` : ""}
+                        {group.name}
+                        {/* {service.name} */}
+                         {/* {service.cost ? `- ${service.cost} тг` : ""} */}
                       </Text>
                       <View style={styles.itemActions}>
                         <TouchableOpacity
@@ -3147,6 +3150,148 @@ return (
       selectedItem,
       setSelectedItem,
     })}
+
+    {/* Add Gift Modal */}
+    <Modal
+      visible={wishlistModalVisible}
+      animationType="slide"
+      onRequestClose={() => setWishlistModalVisible(false)}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        {renderWishlistModalHeader()}
+        <FlatList
+          data={goods}
+          renderItem={renderGoodCard}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={<Text style={styles.noItems}>Нет доступных подарков</Text>}
+        />
+        {renderWishlistModalFooter()}
+      </SafeAreaView>
+    </Modal>
+
+    {/* View Wishlist Modal */}
+    <Modal
+      visible={wishlistViewModalVisible}
+      animationType="slide"
+      onRequestClose={() => setWishlistViewModalVisible(false)}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        <Text style={styles.subtitle}>Список подарков</Text>
+        <FlatList
+          data={wishlistItems}
+          renderItem={renderWishlistItem}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={<Text style={styles.noItems}>Список желаний пуст</Text>}
+        />
+        <Button title="Закрыть" onPress={() => setWishlistViewModalVisible(false)} color={COLORS.error} />
+      </SafeAreaView>
+    </Modal>
+
+    {/* Create/Edit Category Modal */}
+    <Modal
+      visible={categoryModalVisible}
+      animationType="slide"
+      onRequestClose={() => setCategoryModalVisible(false)}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        {renderCategoryModalHeader()}
+        <FlatList
+          data={availableServices}
+          renderItem={renderServiceItem}
+          keyExtractor={(item) => `${item.id}-${item.serviceType}`}
+          contentContainerStyle={styles.serviceList}
+          ListEmptyComponent={<Text style={styles.noItems}>Нет доступных услуг</Text>}
+        />
+        <View style={styles.buttonRowModal}>
+          <Button
+            title={selectedCategory ? "Обновить" : "Создать"}
+            onPress={selectedCategory ? handleUpdateEventCategory : handleCreateEventCategory}
+            color={COLORS.primary}
+          />
+          <Button title="Отмена" onPress={() => setCategoryModalVisible(false)} color={COLORS.error} />
+        </View>
+      </SafeAreaView>
+    </Modal>
+
+    {/* Category Details Modal */}
+    <Modal
+      visible={categoryDetailsModalVisible}
+      animationType="slide"
+      onRequestClose={() => setCategoryDetailsModalVisible(false)}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        {renderCategoryDetailsHeader()}
+        <FlatList
+          data={categoryDetails?.services || []}
+          renderItem={renderServiceInCategory}
+          keyExtractor={(item) => `${item.serviceId}-${item.serviceType}`}
+          ListEmptyComponent={<Text style={styles.noItems}>Для этой категории нет услуг</Text>}
+        />
+        <Button title="Закрыть" onPress={() => setCategoryDetailsModalVisible(false)} color={COLORS.error} />
+      </SafeAreaView>
+    </Modal>
+
+    {/* Create Wedding Modal */}
+    <Modal
+      visible={weddingModalVisible}
+      animationType="slide"
+      onRequestClose={() => setWeddingModalVisible(false)}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        <Text style={styles.subtitle}>Создать свадьбу</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Название свадьбы"
+          value={weddingName}
+          onChangeText={setWeddingName}
+        />
+        <TouchableOpacity onPress={() => setShowCalendar(true)}>
+          <Text style={styles.input}>{weddingDate || "Выберите дату"}</Text>
+        </TouchableOpacity>
+        {showCalendar && (
+          <Calendar
+            onDayPress={onDateChange}
+            markedDates={{ [weddingDate]: { selected: true, selectedColor: COLORS.primary } }}
+          />
+        )}
+        <View style={styles.buttonRowModal}>
+          <Button title="Создать" onPress={handleCreateWedding} color={COLORS.primary} />
+          <Button title="Отмена" onPress={() => setWeddingModalVisible(false)} color={COLORS.error} />
+        </View>
+      </SafeAreaView>
+    </Modal>
+
+    {/* Edit Wedding Modal */}
+    <Modal
+      visible={editWeddingModalVisible}
+      animationType="slide"
+      onRequestClose={() => setEditWeddingModalVisible(false)}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        <Text style={styles.subtitle}>Редактировать свадьбу</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Название свадьбы"
+          value={weddingName}
+          onChangeText={setWeddingName}
+        />
+        <TouchableOpacity onPress={() => setShowCalendar(true)}>
+          <Text style={styles.input}>{weddingDate || "Выберите дату"}</Text>
+        </TouchableOpacity>
+        {showCalendar && (
+          <Calendar
+            onDayPress={onDateChange}
+            markedDates={{ [weddingDate]: { selected: true, selectedColor: COLORS.primary } }}
+          />
+        )}
+        <View style={styles.buttonRowModal}>
+          <Button title="Обновить" onPress={handleUpdateWedding} color={COLORS.primary} />
+          <Button title="Отмена" onPress={() => setEditWeddingModalVisible(false)} color={COLORS.error} />
+        </View>
+      </SafeAreaView>
+    </Modal>
   </SafeAreaView>
 );
 }
