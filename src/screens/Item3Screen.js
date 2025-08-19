@@ -875,14 +875,14 @@ export default function Item3Screen() {
   };
 
   const fetchGoods = async () => {
-    try {
-      const response = await api.getGoods(token);
-      setGoods(response.data.data || response.data || []);
-    } catch (error) {
-      console.error("Error fetching goods:", error);
-      Alert.alert("Ошибка", "Не удалось загрузить товары");
-    }
-  };
+  try {
+    const response = await api.getGoods(token);
+    setGoods(response.data.data || response.data || []);
+  } catch (error) {
+    console.error("Error fetching goods:", error);
+    Alert.alert("Ошибка", "Не удалось загрузить товары. Проверьте соединение и попробуйте снова.");
+  }
+};
 
   // const fetchEventCategoryDetails = async (id) => {
   //   setLoadingDetails(true);
@@ -1841,17 +1841,33 @@ const openServiceDetailsModal = async (service) => {
     // setEditWeddingModalVisible(true);
   };
 
-  const openItemDetailsModal = async (weddingItem) => {
-    const normalizedItemType = weddingItem.item_type
-      .toLowerCase()
-      .replace(/s$/, "");
-    const details = await fetchItemDetails(
-      normalizedItemType,
-      weddingItem.item_id
-    );
-    setSelectedItem(details ? { ...weddingItem, ...details } : weddingItem);
-    setDetailsModalVisible(true);
-  };
+  // const openItemDetailsModal = async (weddingItem) => {
+  //   const normalizedItemType = weddingItem.item_type
+  //     .toLowerCase()
+  //     .replace(/s$/, "");
+  //   const details = await fetchItemDetails(
+  //     normalizedItemType,
+  //     weddingItem.item_id
+  //   );
+  //   setSelectedItem(details ? { ...weddingItem, ...details } : weddingItem);
+  //   setDetailsModalVisible(true);
+  // };
+
+
+
+
+
+
+const openItemDetailsModal = async (weddingItem) => {
+  const normalizedItemType = weddingItem.item_type
+    .toLowerCase()
+    .replace(/s$/, "");
+  const details = await fetchItemDetails(normalizedItemType, weddingItem.item_id);
+  setSelectedItem(details ? { ...weddingItem, ...details } : weddingItem);
+  setServiceDetailsModalVisible(true); // Use the same modal as service details
+};
+
+
 
   const onDateChange = (day) => {
     setWeddingDate(day.dateString);
@@ -2920,8 +2936,91 @@ const openServiceDetailsModal = async (service) => {
 // };
 
 
-const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetailsModalVisible, selectedService, setSelectedService, loadingServiceDetails }) => {
-  const category = selectedService?.originalServiceType ? selectedService.originalServiceType : determineCategory(selectedService);
+// const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetailsModalVisible, selectedService, setSelectedService, loadingServiceDetails }) => {
+//   const category = selectedService?.originalServiceType ? selectedService.originalServiceType : determineCategory(selectedService);
+//   const fieldLabels = fieldLabelsByCategory[category] || {};
+
+//   return (
+//     <Modal visible={serviceDetailsModalVisible} animationType="fade" transparent={true}>
+//       <SafeAreaView style={styles.modalContainer}>
+//         <View style={styles.serviceDetailsModalContainer}>
+//           <View style={styles.modalHeader}>
+//             <Text style={styles.modalTitle}>Детали услуги</Text>
+//             <TouchableOpacity
+//               style={styles.closeButton}
+//               onPress={() => {
+//                 setServiceDetailsModalVisible(false);
+//                 setSelectedService(null);
+//               }}
+//             >
+//               <Text style={styles.closeButtonText}>✕</Text>
+//             </TouchableOpacity>
+//           </View>
+//           {loadingServiceDetails ? (
+//             <ActivityIndicator
+//               size="large"
+//               color={COLORS.primary}
+//               style={styles.loader}
+//             />
+//           ) : selectedService ? (
+//             <View style={styles.detailContainer}>
+//               {Object.keys(fieldLabels).length > 0 ? (
+//                 Object.entries(fieldLabels).map(([key, label]) => {
+//                   if (selectedService[key] === undefined || selectedService[key] === null) return null;
+//                   return (
+//                     <View key={key} style={styles.detail}>
+//                       <Text style={styles.detailLabel}>{label}</Text>
+//                       <Text style={styles.detailValue}>
+//                         {key === 'cost' || key === 'averageCost' ? `${selectedService[key]} ₸` : selectedService[key]}
+//                       </Text>
+//                     </View>
+//                   );
+//                 })
+//               ) : (
+//                 // Fallback for unknown category
+//                 Object.entries(selectedService).map(([key, value]) => {
+//                   if (
+//                     typeof value === "function" ||
+//                     key.startsWith("_") ||
+//                     value === null ||
+//                     value === undefined ||
+//                     key === 'originalServiceType' // Exclude the stored type
+//                   )
+//                     return null;
+//                   const displayValue =
+//                     typeof value === "object" ? JSON.stringify(value) : value;
+//                   return (
+//                     <View key={key} style={styles.detail}>
+//                       <Text style={styles.detailLabel}>{key}</Text>
+//                       <Text style={styles.detailValue}>{displayValue}</Text>
+//                     </View>
+//                   );
+//                 })
+//               )}
+//             </View>
+//           ) : (
+//             <Text style={styles.noItems}>Детали недоступны</Text>
+//           )}
+//           <TouchableOpacity
+//             style={[styles.createButton, { backgroundColor: COLORS.error }]}
+//             onPress={() => {
+//               setServiceDetailsModalVisible(false);
+//               setSelectedService(null);
+//             }}
+//           >
+//             <Text style={styles.createButtonText}>Закрыть</Text>
+//           </TouchableOpacity>
+//         </View>
+//       </SafeAreaView>
+//     </Modal>
+//   );
+// };
+  
+const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetailsModalVisible, selectedService, setSelectedService, loadingServiceDetails, selectedItem, setSelectedItem }) => {
+  const isService = !!selectedService;
+  const isItem = !!selectedItem;
+  const data = isService ? selectedService : (isItem ? selectedItem : null);
+  const category = isService ? (selectedService?.originalServiceType ? selectedService.originalServiceType : determineCategory(selectedService)) : (isItem ? selectedItem.item_type.toLowerCase().replace(/s$/, "") : 'unknown');
   const fieldLabels = fieldLabelsByCategory[category] || {};
 
   return (
@@ -2929,12 +3028,13 @@ const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetai
       <SafeAreaView style={styles.modalContainer}>
         <View style={styles.serviceDetailsModalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Детали услуги</Text>
+            <Text style={styles.modalTitle}>Детали {isService ? "услуги" : "элемента"}</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => {
                 setServiceDetailsModalVisible(false);
                 setSelectedService(null);
+                setSelectedItem(null);
               }}
             >
               <Text style={styles.closeButtonText}>✕</Text>
@@ -2946,33 +3046,31 @@ const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetai
               color={COLORS.primary}
               style={styles.loader}
             />
-          ) : selectedService ? (
+          ) : data ? (
             <View style={styles.detailContainer}>
               {Object.keys(fieldLabels).length > 0 ? (
                 Object.entries(fieldLabels).map(([key, label]) => {
-                  if (selectedService[key] === undefined || selectedService[key] === null) return null;
+                  if (data[key] === undefined || data[key] === null) return null;
                   return (
                     <View key={key} style={styles.detail}>
                       <Text style={styles.detailLabel}>{label}</Text>
                       <Text style={styles.detailValue}>
-                        {key === 'cost' || key === 'averageCost' ? `${selectedService[key]} ₸` : selectedService[key]}
+                        {key === 'cost' || key === 'averageCost' || key === 'total_cost' ? `${data[key]} ₸` : data[key]}
                       </Text>
                     </View>
                   );
                 })
               ) : (
-                // Fallback for unknown category
-                Object.entries(selectedService).map(([key, value]) => {
+                Object.entries(data).map(([key, value]) => {
                   if (
                     typeof value === "function" ||
                     key.startsWith("_") ||
                     value === null ||
                     value === undefined ||
-                    key === 'originalServiceType' // Exclude the stored type
-                  )
-                    return null;
-                  const displayValue =
-                    typeof value === "object" ? JSON.stringify(value) : value;
+                    (isService && key === 'originalServiceType') ||
+                    ["id", "serviceId", "item_id"].includes(key.toLowerCase())
+                  ) return null;
+                  const displayValue = typeof value === "object" ? JSON.stringify(value) : value;
                   return (
                     <View key={key} style={styles.detail}>
                       <Text style={styles.detailLabel}>{key}</Text>
@@ -2990,6 +3088,7 @@ const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetai
             onPress={() => {
               setServiceDetailsModalVisible(false);
               setSelectedService(null);
+              setSelectedItem(null);
             }}
           >
             <Text style={styles.createButtonText}>Закрыть</Text>
@@ -2999,7 +3098,8 @@ const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetai
     </Modal>
   );
 };
-  
+
+
 
 
 return (
@@ -3037,63 +3137,16 @@ return (
       />
     )}
 
-    {/* Other modals (Category Modal, Wedding Modal, etc.) */}
-
-    {/* Service Details Modal */}
+    {/* Unified Service and Item Details Modal */}
     {renderServiceDetailsModal({
       serviceDetailsModalVisible,
       setServiceDetailsModalVisible,
       selectedService,
       setSelectedService,
       loadingServiceDetails,
+      selectedItem,
+      setSelectedItem,
     })}
-
-    {/* Item Details Modal */}
-    <Modal visible={detailsModalVisible} animationType="slide">
-      <SafeAreaView style={styles.modalContainer}>
-        <Text style={styles.subtitle}>Детали элемента</Text>
-        {loadingDetails ? (
-          <ActivityIndicator
-            size="large"
-            color={COLORS.primary}
-            style={styles.loader}
-          />
-        ) : selectedItem ? (
-          <View style={{ width: "100%" }}>
-            {Object.entries(selectedItem).map(([key, value]) => {
-              if (
-                typeof value === "function" ||
-                key.startsWith("_") ||
-                ["supplier_id", "itemId", "serviceId", "Supplier_id", "ID", "ServiceId"].includes(
-                  key.toLowerCase()
-                )
-              )
-                return null;
-              const displayValue =
-                typeof value === "object" && value !== null
-                  ? JSON.stringify(value)
-                  : value || "Не указано";
-              return (
-                <View key={key} style={styles.detail}>
-                  <Text style={styles.detailLabel}>{key}</Text>
-                  <Text style={styles.detailValue}>{displayValue}</Text>
-                </View>
-              );
-            })}
-          </View>
-        ) : (
-          <Text style={styles.noItems}>Детали недоступны</Text>
-        )}
-        <Button
-          title="Закрыть"
-          onPress={() => {
-            setDetailsModalVisible(false);
-            setSelectedItem(null);
-          }}
-          color={COLORS.error}
-        />
-      </SafeAreaView>
-    </Modal>
   </SafeAreaView>
 );
 }
