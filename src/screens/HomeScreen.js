@@ -3114,7 +3114,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   input: {
-    width: 56,
+    width: 150,
     height: 38,
     fontSize: 15,
     fontWeight: "500",

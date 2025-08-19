@@ -2047,7 +2047,7 @@ const openItemDetailsModal = async (weddingItem) => {
 
   useEffect(() => {
     if (!loadingWeddings && weddings.length === 0 && !hasShownNoWeddingsAlert) {
-      setWeddingModalVisible(true);
+      // setWeddingModalVisible(true);
       setHasShownNoWeddingsAlert(true);
     }
   }, [loadingWeddings, weddings, hasShownNoWeddingsAlert]);
@@ -2072,7 +2072,7 @@ const openItemDetailsModal = async (weddingItem) => {
       clothing: "Одежда",
       tamada: "Тамада",
       program: "Программы",
-      "traditional-gift": "Традиционные подарки",
+      "traditionalgift": "Традиционные подарки",
       flower: "Цветы",
       cake: "Торты",
       alcohol: "Алкоголь",
@@ -2311,7 +2311,8 @@ const openItemDetailsModal = async (weddingItem) => {
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.itemText}>
-          {item.name} ({item.date})
+          {item.name}
+           {/* ({item.date}) */}
         </Text>
         {/* <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
           <Text style={styles.itemSubText}>Общая сумма: {item.total_cost || 0} тг</Text>
@@ -2350,7 +2351,7 @@ const openItemDetailsModal = async (weddingItem) => {
                             return `Программа - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
-                          case "traditional-gift":
+                          case "traditionalGift":
                             return `Традиционный подарок - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
