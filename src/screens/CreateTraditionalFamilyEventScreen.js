@@ -158,7 +158,7 @@ const categoryToTypeMap = {
   "Ресторан": "restaurant",
   "Гостиницы": "hotels",
   "Ведущий": "tamada",
-  "Шоу программы": "program",
+  "Шоу программа": "program",
   "Цветы": "flowers",
   "Прокат авто": "transport",
   "Торты": "cake",
