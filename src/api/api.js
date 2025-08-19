@@ -749,6 +749,21 @@ export default {
       throw new Error(`Ошибка удаления свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
+  updateWeddingTotalCost: (id, data) =>
+    api.patch(`/api/weddings/${id}/total_cost`, data).catch((error) => {
+      throw new Error(`Ошибка обновления общей суммы свадьбы: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateWeddingPaidAmount: (id, data) =>
+    api.patch(`/api/weddings/${id}/paid_amount`, data).catch((error) => {
+      throw new Error(`Ошибка обновления потраченной суммы свадьбы: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateWeddingRemainingBalance: (id, data) =>
+    api.patch(`/api/weddings/${id}/remaining_balance`, data).catch((error) => {
+      throw new Error(`Ошибка обновления остатка свадьбы: ${error.response?.data?.message || error.message}`);
+    }),
+
   getWeddingItems: (id) =>
     api.get(`/api/wedding-items/${id}`).catch((error) => {
       throw new Error(`Ошибка получения элементов свадьбы: ${error.response?.data?.message || error.message}`);
@@ -831,6 +846,21 @@ export default {
   deleteWedding: (id) =>
     api.delete(`/api/weddings/${id}`).catch((error) => {
       throw new Error(`Ошибка удаления свадьбы: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateWeddingTotalCost: (id, data) =>
+    api.patch(`/api/weddings/${id}/total_cost`, data).catch((error) => {
+      throw new Error(`Ошибка обновления общей суммы свадьбы: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateWeddingPaidAmount: (id, data) =>
+    api.patch(`/api/weddings/${id}/paid_amount`, data).catch((error) => {
+      throw new Error(`Ошибка обновления потраченной суммы свадьбы: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateWeddingRemainingBalance: (id, data) =>
+    api.patch(`/api/weddings/${id}/remaining_balance`, data).catch((error) => {
+      throw new Error(`Ошибка обновления остатка свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
   getWeddingItems: (id) =>
@@ -1040,6 +1070,21 @@ export default {
 
   deleteEventCategory: (id) =>
     api.delete(`/api/event-category/${id}`).catch((error) => handleError(error, 'удаления категории мероприятия')),
+
+  updateEventCategoryTotalCost: (id, data) =>
+    api.patch(`/api/event-category/${id}/total_cost`, data).catch((error) => {
+      throw new Error(`Ошибка обновления общей суммы категории мероприятия: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateEventCategoryPaidAmount: (id, data) =>
+    api.patch(`/api/event-category/${id}/paid_amount`, data).catch((error) => {
+      throw new Error(`Ошибка обновления потраченной суммы категории мероприятия: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateEventCategoryRemainingBalance: (id, data) =>
+    api.patch(`/api/event-category/${id}/remaining_balance`, data).catch((error) => {
+      throw new Error(`Ошибка обновления остатка категории мероприятия: ${error.response?.data?.message || error.message}`);
+    }),
 
   addServicesToCategory: (categoryId, data) =>
     api.post(`/api/event-category/${categoryId}/services`, data).catch((error) => handleError(error, 'добавления услуг к категории')),

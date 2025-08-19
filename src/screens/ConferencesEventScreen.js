@@ -1552,6 +1552,11 @@ const ConferencesEventScreen = ({ navigation, route }) => {
       );
       const categoryId = categoryResponse.data.id;
 
+      const totalCost = calculateTotalCost;
+      await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalCost });
+      await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: 0 });
+      await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: totalCost });
+
       console.log('Создано мероприятие:', {
         eventName,
         eventDate: eventDate.toISOString(),

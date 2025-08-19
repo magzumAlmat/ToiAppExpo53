@@ -1564,6 +1564,14 @@ const fetchData = async () => {
       );
       const categoryId = categoryResponse.data.id;
 
+      const totalBudget = parseFloat(budget);
+      const spentAmount = calculateTotalCost;
+      const remaining = remainingBudget;
+
+      await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalBudget });
+      await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: spentAmount });
+      await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: remaining });
+
       for (const item of filteredData) {
         const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
         if (!typeMapping) {

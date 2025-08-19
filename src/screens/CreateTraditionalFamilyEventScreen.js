@@ -1793,6 +1793,11 @@ const [categories, setCategories] = useState(selectedCategories);
     );
     const categoryId = categoryResponse.data.id;
 
+    const totalCost = calculateTotalCost;
+    await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalCost });
+    await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: 0 });
+    await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: totalCost });
+
     for (const item of filteredData) {
       const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
       if (!typeMapping) {
