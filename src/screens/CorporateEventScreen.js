@@ -15,7 +15,8 @@ import {
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux'
+import { setEventCosts } from "../store/authSlice";
 import api from "../api/api";
 import * as Animatable from "react-native-animatable";
 import AntDesign from "@expo/vector-icons/AntDesign";

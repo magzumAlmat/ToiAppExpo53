@@ -135,7 +135,7 @@ const NewScreen = ({ navigation }) => {
               resizeMode="contain"
             />
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.imageButton}
             onPress={() => navigation.navigate('Authenticated', { screen: 'Home' })}
           >
@@ -144,7 +144,7 @@ const NewScreen = ({ navigation }) => {
               style={styles.buttonImage}
               resizeMode="contain"
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     </LinearGradient>

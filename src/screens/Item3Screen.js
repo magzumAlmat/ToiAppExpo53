@@ -24,6 +24,8 @@ import axios from "axios";
 import { Calendar } from "react-native-calendars";
 import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native";
+
+
 const COLORS = {
   primary: "#4A90E2",
   secondary: "#50C878",
@@ -143,6 +145,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: 16,
+    height:'60%',
   },
   input: {
     borderWidth: 1,
@@ -481,12 +484,6 @@ const styles = StyleSheet.create({
 
 
 
-modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
   serviceDetailsModalContainer: {
     width: "90%",
     maxHeight: "80%", // Ограничиваем максимальную высоту
@@ -518,7 +515,7 @@ modalContainer: {
     color: COLORS.error,
   },
   detailScrollContainer: {
-    maxHeight: "60%", // Ограничиваем высоту области прокрутки
+    maxHeight: "90%", // Ограничиваем высоту области прокрутки
     marginBottom: 20,
   },
   detailContainer: {
@@ -613,6 +610,14 @@ const fieldLabelsByCategory = {
     address: 'Адрес',
     district: 'Район',
     phone: 'Телефон',
+  },
+  cake: {
+    name: "Название кондитерской",
+    cakeType: "Тип торта",
+    cost: "Стоимость",
+    address: "Адрес",
+    district: "Район",
+    phone: "Телефон",
   },
   car: {
     salonName: 'Название салона',
@@ -1479,16 +1484,21 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       const newWedding = response.data.data;
 
       if (newWedding && newWedding.id) {
-        const totalCost = newWedding.total_cost || 0;
-        await api.updateWeddingPaidAmount(newWedding.id, { paid_amount: 0 });
-        await api.updateWeddingRemainingBalance(newWedding.id, { remaining_balance: totalCost });
+        const totalBudget = parseFloat(budget); // Use the budget from state
+        const spentAmount = newWedding.total_cost || 0; // This is the total cost of items
+        const remaining = totalBudget - spentAmount;
+
+        await api.updateWeddingTotalCost(newWedding.id, { total_cost: totalBudget });
+        await api.updateWeddingPaidAmount(newWedding.id, { paid_amount: spentAmount });
+        await api.updateWeddingRemainingBalance(newWedding.id, { remaining_balance: remaining });
 
         const updatedWedding = {
             ...newWedding,
-            paid_amount: '0.00',
-            remaining_balance: totalCost.toString()
+            paid_amount: spentAmount.toString(),
+            remaining_balance: remaining.toString()
         };
         setWeddings((prev) => [...prev, updatedWedding]);
+        dispatch(setEventCosts({ totalCost: totalBudget, paidAmount: spentAmount, remainingBalance: remaining }));
       } else {
         setWeddings((prev) => [...prev, newWedding]);
       }
@@ -2125,9 +2135,13 @@ const openItemDetailsModal = async (weddingItem) => {
   );
 
   const renderWishlistModalHeader = () => (
-    <View>
-      <Text style={styles.subtitle}>Добавить подарок</Text>
+   <SafeAreaView>
+   <View>
+
+      
       <View style={styles.switchContainer}>
+      
+      
         <Text style={styles.switchLabel}>Добавить собственный подарок</Text>
         <TouchableOpacity
           style={[styles.switch, isCustomGift && styles.switchActive]}
@@ -2155,6 +2169,7 @@ const openItemDetailsModal = async (weddingItem) => {
         </>
       )}
     </View>
+    </SafeAreaView>
   );
 
   const renderWishlistModalFooter = () =>
@@ -2236,7 +2251,7 @@ const openItemDetailsModal = async (weddingItem) => {
                         >
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                           style={styles.deleteButton}
                           onPress={() =>
                             handleDeleteCategoryService(
@@ -2247,7 +2262,7 @@ const openItemDetailsModal = async (weddingItem) => {
                           }
                         >
                           <Text style={styles.deleteButtonText}>Удалить</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                       </View>
                     </View>
                   )}
@@ -2273,12 +2288,12 @@ const openItemDetailsModal = async (weddingItem) => {
           </View>
         )}
         <View style={styles.buttonRow}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.actionButtonPrimary}
             onPress={() => openEditCategoryModal(item)}
           >
             <Text style={styles.actionButtonText}>Редактировать</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.actionButtonError}
             onPress={() => handleDeleteEventCategory(item.id)}
@@ -2408,12 +2423,12 @@ const openItemDetailsModal = async (weddingItem) => {
           </View>
         )}
         <View style={styles.buttonRow}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.actionButtonPrimary}
             onPress={() => openEditWeddingModal(item)}
           >
             <Text style={styles.actionButtonText}>Редактировать</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.actionButtonSecondary}
             onPress={() => {
@@ -3317,16 +3332,33 @@ const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetai
       cost: "Стоимость",
       type: "Тип",
     },
+
     // другие категории, если есть
   };
   const fieldLabels = fieldLabelsByCategory[category] || {
-    address: "Адрес",
-    cost: "Стоимость",
-    district: "Район",
-    itemName: "Наименование",
-    phone: "Телефон",
     salonName: "Название салона",
+    itemName: "Наименование",
+    alcoholName: "Наименование",
+    storeName: "Название салона",
+    flowerName:"Наименование",
+    flowerType:"Тип",
+    gender: "Пол",
+    name:'Описание',
     type: "Тип",
+    cakeType: "Тип",
+    address: "Адрес",
+     district: "Район",
+    phone: "Телефон",
+
+    portfolio:'Ссылка на портфолио',
+    link:"Ссылка",
+    averageCheck:'Средний чек',
+    cost: "Стоимость",
+    
+    
+
+
+
   };
 
   return (
@@ -3367,6 +3399,7 @@ const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetai
                       <Text style={styles.detailValue}>
                         {key === 'cost' || key === 'averageCost' || key === 'total_cost' ? `${data[key]} ₸` : data[key]}
                       </Text>
+
                     </View>
                   );
                 })}
