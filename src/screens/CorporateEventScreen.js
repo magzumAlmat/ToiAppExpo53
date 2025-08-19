@@ -119,17 +119,6 @@ const typeToCategoryMap = Object.fromEntries(
 
 // Replace the defaultCategories definition with the following:
 
-const defaultCategories = [
-  "Прокат авто",
-  "Ресторан",
-  "Алкоголь",
-  "Торты",
-  "Ведущий",
-  "Шоу программа",
-  "Аренда технического оборудования",
-  "Ювелирные изделия",
-  "Цветы",
-];
 
 
 
@@ -738,6 +727,12 @@ const SelectedItem = ({
     case "technical-equipment-rental":
       title = `${item.name} (${cost} ₸)`;
       break;
+      case "jewelry":
+    title = `${item.itemName || 'Без названия'} (${cost} ₸)`;
+    break;
+  case "flowers":
+    title = `${item.flowerName || 'Без названия'} (${cost} ₸)`;
+    break;  
     default:
       title = "Неизвестный элемент";
   }
@@ -1078,15 +1073,18 @@ const renderAvailableItem = useCallback(
 };
 
 const CorporateEventScreen = ({ navigation, route }) => {
-  const defaultCategories = [
-    "Прокат авто",
-    "Ресторан",
-    "Алкоголь",
-    "Торты",
-    "Ведущий",
-    "Шоу программа",
-    "Аренда технического оборудования"
-  ];
+ const defaultCategories = [
+  "Прокат авто",
+  "Ресторан",
+  "Алкоголь",
+  "Торты",
+  "Ведущий",
+  "Шоу программа",
+  "Аренда технического оборудования",
+  "Ювелирные изделия",
+  "Цветы",
+];
+
 
   console.log('route.params:', route?.params);
   const selectedCategories = route?.params?.selectedCategories || [];
@@ -1105,6 +1103,8 @@ const CorporateEventScreen = ({ navigation, route }) => {
     cakes: [],
     alcohol: [],
     "technical-equipment-rentals": [],
+    jewelry: [],
+    flowers: [],
   });
   const [filteredData, setFilteredData] = useState([]);
   const [quantities, setQuantities] = useState({});
@@ -2030,6 +2030,8 @@ const DetailsModal = ({ visible, onClose, item }) => {
                item.type === "technical-equipment-rental" ? item.name :
                item.type === "jewelry" ? item.name :
                item.type === "flowers" ? item.name :
+               item.type ==="program" ? item.name :
+
                "Детали"}
             </Text>
             <TouchableOpacity

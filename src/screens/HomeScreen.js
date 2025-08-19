@@ -2046,11 +2046,11 @@ const CreateEventScreen = ({ navigation, route }) => {
 
                                 case "tamada":itemTitle = `${item.name} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
                                 case "program":itemTitle = `${item.teamName}  - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
-                                case "traditionalGift":itemTitle = `${item.itemName} (${item.storeName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                                case "traditionalGift":itemTitle = `${item.itemName} (${item.salonName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
 
 
       
-                                case "alcohol":itemTitle = `${item.itemName} (${item.storeName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                                case "alcohol":itemTitle = `${item.alcoholName} (${item.salonName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
                                  
                                 case "transport":itemTitle = `${item.carName} (${item.brand}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
                                  

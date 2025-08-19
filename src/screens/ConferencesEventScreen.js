@@ -278,15 +278,16 @@ const AddItemModal = ({
         case "alcohol":
           title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
           break;
-        case "technical-equipment-rental":
-          title = `Техническое оборудование: ${item.name} (${cost} ₸)`;
+          case "technical-equipment-rental":
+          title = `${item.name} (${cost} ₸)`;
           break;
-        case "flowers":
-          title = `Цветы: ${item.name} (${cost} ₸)`;
-          break;
-        case "jewelry":
-          title = `Ювелирные изделия: ${item.name} (${cost} ₸)`;
-          break;
+          case "jewelry":
+        title = `${item.itemName || 'Без названия'} (${cost} ₸)`;
+        break;
+      case "flowers":
+        title = `${item.flowerName || 'Без названия'} (${cost} ₸)`;
+        break;  
+
         default:
           title = "Неизвестный элемент";
       }
@@ -706,12 +707,13 @@ const SelectedItem = ({
     case "technical-equipment-rental":
       title = `${item.name} (${cost} ₸)`;
       break;
-    case "flowers":
-      title = `${item.name} (${cost} ₸)`;
-      break;
-    case "jewelry":
-      title = `${item.name} (${cost} ₸)`;
-      break;
+ 
+      case "jewelry":
+    title = `${item.itemName || 'Без названия'} (${cost} ₸)`;
+    break;
+  case "flowers":
+    title = `${item.flowerName || 'Без названия'} (${cost} ₸)`;
+    break;  
     default:
       title = "Неизвестный элемент";
   }
@@ -896,12 +898,13 @@ const CategoryItemsModal = ({
         case "technical-equipment-rental":
           title = `${item.name} (${cost} ₸)`;
           break;
-        case "flowers":
-          title = `${item.name} (${cost} ₸)`;
-          break;
-        case "jewelry":
-          title = `${item.name} (${cost} ₸)`;
-          break;
+       
+      case "jewelry":
+    title = `${item.itemName || 'Без названия'} (${cost} ₸)`;
+    break;
+  case "flowers":
+    title = `${item.flowerName || 'Без названия'} (${cost} ₸)`;
+    break;  
         default:
           title = "Неизвестный элемент";
       }
