@@ -3037,51 +3037,96 @@ const openItemDetailsModal = async (weddingItem) => {
 
 
 
-// const renderServiceDetailsModal = ({ serviceDetailsModalVisible, setServiceDetailsModalVisible, selectedService, setSelectedService, loadingServiceDetails, selectedItem, setSelectedItem }) => {
+
+
+
+// const renderServiceDetailsModal = ({
+//   serviceDetailsModalVisible,
+//   setServiceDetailsModalVisible,
+//   selectedService,
+//   setSelectedService,
+//   loadingServiceDetails,
+//   selectedItem,
+//   setSelectedItem,
+// }) => {
 //   const isService = !!selectedService;
 //   const isItem = !!selectedItem;
-//   let data = isService ? selectedService : (isItem ? selectedItem : null);
+//   let data = isService ? selectedService : isItem ? selectedItem : null;
 
-//   // Debug input data
-//   console.log('Input data to modal:', JSON.stringify({ isService, isItem, selectedService, selectedItem }, null, 2));
-
-//   // Handle array or nested object case and extract the relevant data
-//   let parsedData = null;
+//   // Handle array or nested object case
 //   if (data && Array.isArray(data)) {
-//     parsedData = data.length > 0 ? data[0] : null;
-//     console.log('Extracted data from array:', JSON.stringify(parsedData, null, 2));
+//     data = data.length > 0 ? data[0] : null;
 //   } else if (data && typeof data === 'object' && data.hasOwnProperty('0')) {
-//     parsedData = data['0']; // Extract the nested object
-//     console.log('Extracted nested data from key "0":', JSON.stringify(parsedData, null, 2));
-//   } else {
-//     parsedData = data;
-//     console.log('Data is not an array or nested, using as is:', JSON.stringify(parsedData, null, 2));
+//     data = data['0'];
 //   }
 
-//   // Force category to "restaurant" for testing
-//   const category = "restaurant";
-//   console.log('Determined category:', category);
-
-//   // Define field labels for restaurant
-//   const fieldLabelsByCategory = {
-//     restaurant: {
-//       name: "Название ресторана",
-//       cuisine: "Кухня",
-//       averageCost: "Средний чек",
-//       capacity: "Вместимость",
-//       address: "Адрес",
-//       district: "Район",
-//       phone: "Телефон",
-//     },
-//   };
+//   // Determine category
+//   const category = isService
+//     ? selectedService?.originalServiceType || determineCategory(selectedService)
+//     : isItem
+//     ? selectedItem.item_type.toLowerCase().replace(/s$/, '')
+//     : 'unknown';
 
 //   const fieldLabels = fieldLabelsByCategory[category] || {
-//     name: "Название",
-//     address: "Адрес",
-//     cost: "Стоимость",
-//     district: "Район",
-//     phone: "Телефон",
-//     type: "Тип",
+//     name: 'Название',
+//     address: 'Адрес',
+//     cost: 'Стоимость',
+//     district: 'Район',
+//     phone: 'Телефон',
+//     type: 'Тип',
+//   };
+
+//   const handleScroll = (event) => {
+//     const contentOffsetX = event.nativeEvent.contentOffset.x;
+//     const carouselItemWidth = screenWidth - 32; // Adjust for padding
+//     const index = Math.round(contentOffsetX / carouselItemWidth);
+//     setActiveSlide(index);
+//   };
+
+//   const renderFileItem = ({ item: file }) => {
+//     const fileUrl = `${BASE_URL}/${file.path}`;
+
+//     if (file.mimetype.startsWith('image/')) {
+//       return (
+//         <TouchableOpacity
+//           style={styles.carouselItem}
+//           onPress={() => setSelectedImage(fileUrl)}
+//           activeOpacity={0.9}
+//         >
+//           <ImageProgress
+//             source={{ uri: fileUrl }}
+//             indicator={ProgressBar}
+//             indicatorProps={{
+//               color: COLORS.primary,
+//               borderWidth: 0,
+//               borderRadius: 0,
+//               unfilledColor: COLORS.muted,
+//               width: null,
+//             }}
+//             style={styles.media}
+//             resizeMode="cover"
+//           />
+//         </TouchableOpacity>
+//       );
+//     } else if (file.mimetype === 'video/mp4') {
+//       return (
+//         <View style={styles.carouselItem}>
+//           <Video
+//             source={{ uri: fileUrl }}
+//             style={styles.media}
+//             controls={true}
+//             resizeMode="cover"
+//           />
+//         </View>
+//       );
+//     } else {
+//       return (
+//         <View style={[styles.carouselItem, styles.unsupportedFile]}>
+//           <Icon name="broken-image" size={40} color={COLORS.muted} />
+//           <Text style={styles.caption}>Неподдерживаемый формат: {file.mimetype}</Text>
+//         </View>
+//       );
+//     }
 //   };
 
 //   return (
@@ -3089,79 +3134,178 @@ const openItemDetailsModal = async (weddingItem) => {
 //       <SafeAreaView style={styles.modalContainer}>
 //         <View style={styles.serviceDetailsModalContainer}>
 //           <View style={styles.modalHeader}>
-//             <Text style={styles.modalTitle}>Детали {isService ? "услуги" : "элемента"}</Text>
+//             <Text style={styles.modalTitle}>Детали {isService ? 'услуги' : 'элемента'}</Text>
 //             <TouchableOpacity
 //               style={styles.closeButton}
 //               onPress={() => {
 //                 setServiceDetailsModalVisible(false);
 //                 setSelectedService(null);
 //                 setSelectedItem(null);
+//                 setFiles([]);
+//                 setSelectedImage(null);
 //               }}
 //             >
 //               <Text style={styles.closeButtonText}>✕</Text>
 //             </TouchableOpacity>
 //           </View>
-//           {loadingServiceDetails ? (
-//             <ActivityIndicator
-//               size="large"
-//               color={COLORS.primary}
-//               style={styles.loader}
-//             />
-//           ) : parsedData ? (
-//             <ScrollView style={styles.detailScrollContainer}>
+//           <ScrollView style={styles.detailScrollContainer}>
+//             {/* Media Section */}
+//             <View style={styles.mediaSection}>
+//               {loadingFiles ? (
+//                 <ActivityIndicator
+//                   size="large"
+//                   color={COLORS.primary}
+//                   style={styles.loader}
+//                 />
+//               ) : errorFiles ? (
+//                 <Text style={styles.errorText}>{errorFiles}</Text>
+//               ) : files && files.length > 0 ? (
+//                 <View>
+//                   <FlatList
+//                     data={files}
+//                     renderItem={renderFileItem}
+//                     keyExtractor={(file) => file.id.toString()}
+//                     horizontal
+//                     showsHorizontalScrollIndicator={false}
+//                     snapToInterval={screenWidth - 32}
+//                     snapToAlignment="center"
+//                     decelerationRate="fast"
+//                     contentContainerStyle={styles.mediaListContainer}
+//                     onScroll={handleScroll}
+//                     scrollEventThrottle={16}
+//                     initialNumToRender={1}
+//                     maxToRenderPerBatch={1}
+//                     windowSize={3}
+//                   />
+//                   {files.length > 1 && (
+//                     <View style={styles.paginationContainer}>
+//                       {files.map((_, index) => (
+//                         <View
+//                           key={index}
+//                           style={[
+//                             styles.paginationDot,
+//                             activeSlide === index
+//                               ? styles.paginationActiveDot
+//                               : styles.paginationInactiveDot,
+//                           ]}
+//                         />
+//                       ))}
+//                     </View>
+//                   )}
+//                 </View>
+//               ) : (
+//                 <View style={styles.noFilesContainer}>
+//                   <Icon name="image-not-supported" size={50} color={COLORS.muted} />
+//                   <Text style={styles.noFilesText}>Изображения или видео отсутствуют</Text>
+//                 </View>
+//               )}
+//             </View>
+//             {/* Details Section */}
+//             {loadingServiceDetails ? (
+//               <ActivityIndicator
+//                 size="large"
+//                 color={COLORS.primary}
+//                 style={styles.loader}
+//               />
+//             ) : data ? (
 //               <View style={styles.detailContainer}>
 //                 {Object.entries(fieldLabels).map(([key, label]) => {
-//                   const value = parsedData[key];
-//                   console.log(`Rendering ${label}: ${value}`); // Debug each field
-//                   if (value === undefined || value === null) return null; // Skip only if truly undefined/null
-//                   const displayValue = (key === 'averageCost' || key === 'cost' || key === 'total_cost')
-//                     ? `${value} ₸`
-//                     : typeof value === "object" ? JSON.stringify(value) : value;
+//                   const value = data[key];
+//                   if (value === undefined || value === null) return null;
+//                   const displayValue =
+//                     key === 'cost' || key === 'averageCost' || key === 'total_cost'
+//                       ? `${value} ₸`
+//                       : typeof value === 'object'
+//                       ? JSON.stringify(value)
+//                       : value;
 //                   return (
-//                     <View key={key} style={styles.detailRow}>
-//                       <Text style={styles.detailLabel}>{label}:</Text>
+//                     <View key={key} style={styles.detail}>
+//                       <Text style={styles.detailLabel}>{label}</Text>
 //                       <Text style={styles.detailValue}>{displayValue}</Text>
 //                     </View>
 //                   );
 //                 })}
-//                 {/* Fallback for unmapped fields including metadata */}
-//                 {Object.keys(parsedData).map((key) => {
+//                 {Object.entries(data).map(([key, value]) => {
 //                   if (
 //                     fieldLabels[key] ||
-//                     typeof parsedData[key] === "function" ||
-//                     key.startsWith("_") ||
-//                     parsedData[key] === null ||
-//                     parsedData[key] === undefined ||
-//                     ["id", "serviceId", "item_id", "originalServiceType", "supplier_id", "wedding_id", "created_at", "updated_at"].includes(key.toLowerCase())
-//                   ) return null;
-//                   const displayValue = typeof parsedData[key] === "object" ? JSON.stringify(parsedData[key]) : parsedData[key];
+//                     typeof value === 'function' ||
+//                     key.startsWith('_') ||
+//                     value === null ||
+//                     value === undefined ||
+//                     ['id', 'serviceId', 'item_id', 'originalServiceType', 'supplier_id', 'wedding_id', 'created_at', 'updated_at'].includes(
+//                       key.toLowerCase()
+//                     )
+//                   )
+//                     return null;
+//                   const displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
 //                   return (
-//                     <View key={key} style={styles.detailRow}>
-//                       <Text style={styles.detailLabel}>{key}:</Text>
+//                     <View key={key} style={styles.detail}>
+//                       <Text style={styles.detailLabel}>{key}</Text>
 //                       <Text style={styles.detailValue}>{displayValue}</Text>
 //                     </View>
 //                   );
 //                 })}
 //               </View>
-//             </ScrollView>
-//           ) : (
-//             <Text style={styles.noItems}>Детали недоступны</Text>
-//           )}
+//             ) : (
+//               <Text style={styles.noItems}>Детали недоступны</Text>
+//             )}
+//           </ScrollView>
 //           <TouchableOpacity
 //             style={[styles.createButton, { backgroundColor: COLORS.error }]}
 //             onPress={() => {
 //               setServiceDetailsModalVisible(false);
 //               setSelectedService(null);
 //               setSelectedItem(null);
+//               setFiles([]);
+//               setSelectedImage(null);
 //             }}
 //           >
 //             <Text style={styles.createButtonText}>Закрыть</Text>
 //           </TouchableOpacity>
 //         </View>
+//         {/* Fullscreen Image Modal */}
+//         <Modal
+//           visible={!!selectedImage}
+//           transparent
+//           animationType="fade"
+//           onRequestClose={() => setSelectedImage(null)}
+//         >
+//           <View style={styles.modalOverlay}>
+//             <TouchableOpacity
+//               style={styles.modalCloseButton}
+//               onPress={() => setSelectedImage(null)}
+//               activeOpacity={0.8}
+//             >
+//               <Icon name="close" size={30} color={COLORS.white} />
+//             </TouchableOpacity>
+//             <ImageProgress
+//               source={{ uri: selectedImage }}
+//               indicator={ProgressBar}
+//               indicatorProps={{
+//                 color: COLORS.primary,
+//                 borderWidth: 0,
+//                 borderRadius: 0,
+//                 unfilledColor: COLORS.muted,
+//                 width: null,
+//               }}
+//               style={styles.fullscreenImage}
+//               resizeMode="contain"
+//             />
+//           </View>
+//         </Modal>
 //       </SafeAreaView>
 //     </Modal>
 //   );
 // };
+
+
+
+
+
+
+
+
+
 
 const renderServiceDetailsModal = ({
   serviceDetailsModalVisible,
@@ -3264,8 +3408,9 @@ const renderServiceDetailsModal = ({
                 setServiceDetailsModalVisible(false);
                 setSelectedService(null);
                 setSelectedItem(null);
-                setFiles([]);
-                setSelectedImage(null);
+                setFiles([]); // Clear files
+                setSelectedImage(null); // Clear selected image
+                setActiveSlide(0); // Reset active slide
               }}
             >
               <Text style={styles.closeButtonText}>✕</Text>
@@ -3324,7 +3469,7 @@ const renderServiceDetailsModal = ({
               )}
             </View>
             {/* Details Section */}
-            {loadingServiceDetails ? (
+            {loadingServiceDetails || loadingDetails ? (
               <ActivityIndicator
                 size="large"
                 color={COLORS.primary}
@@ -3381,6 +3526,7 @@ const renderServiceDetailsModal = ({
               setSelectedItem(null);
               setFiles([]);
               setSelectedImage(null);
+              setActiveSlide(0);
             }}
           >
             <Text style={styles.createButtonText}>Закрыть</Text>
@@ -3420,7 +3566,6 @@ const renderServiceDetailsModal = ({
     </Modal>
   );
 };
-
 
 
 
