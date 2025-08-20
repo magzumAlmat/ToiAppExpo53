@@ -1,3 +1,4 @@
+
 import React, {
   useState,
   useRef,
@@ -146,11 +147,23 @@ const AddItemModal = ({
   setSelectedItem,
   quantities,
   updateCategories,
+  navigation,
+  openDetailsModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTypeFilter, setSelectedTypeFilter] = useState("all");
   const [selectedDistrict, setSelectedDistrict] = useState("all");
   const [costRange, setCostRange] = useState("all");
+
+
+
+  useEffect(() => {
+    if (!openDetailsModal) {
+      console.warn("Prop 'openDetailsModal' is undefined or not passed to AddItemModal");
+    }
+  }, [openDetailsModal]);
+
+
 
   const uniqueTypes = useMemo(() => {
     const types = [
@@ -179,6 +192,18 @@ const AddItemModal = ({
     ],
     [filteredItems]
   );
+
+
+  const handleOpenDetails = (item) => {
+    if (openDetailsModal) {
+      openDetailsModal(item); // Безопасный вызов
+    } else {
+      console.warn("openDetailsModal is not defined, cannot open details modal");
+      // Альтернативная логика, если openDetailsModal не передан
+      setSelectedItem(item);
+      setDetailsModalVisible(true);
+    }
+  };
 
   const filteredDataMemo = useMemo(() => {
     let result = filteredItems;
@@ -240,105 +265,299 @@ const AddItemModal = ({
     costRange,
   ]);
 
-  const renderAddItem = useCallback(
-    ({ item }) => {
-      if (!item || !item.type || !item.id) {
-        console.warn("Некорректный элемент в renderAddItem:", item);
-        return null;
-      }
+  // const renderAddItem = useCallback(
+  //   ({ item }) => {
+  //     if (!item || !item.type || !item.id) {
+  //       console.warn("Некорректный элемент в renderAddItem:", item);
+  //       return null;
+  //     }
   
-      const count = filteredData.filter(
-        (selectedItem) =>
-          `${selectedItem.type}-${selectedItem.id}` ===
-          `${item.type}-${item.id}`
-      ).length;
-      if (item.type === "goods" && item.category === "Прочее") return null;
-      const cost = item.type === "restaurant" ? item.averageCost : item.cost;
-      let title;
-      switch (item.type) {
-        case "restaurant":
-          title = `Ресторан: ${item.name} (${cost} ₸)`;
-          break;
-        case "clothing":
-          title = `Одежда: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
-          break;
-        case "flowers":
-          title = `Цветы: ${item.salonName} - ${item.flowerName} (${cost} ₸)`;
-          break;
-        case "cake":
-          title = `Торты: ${item.name} (${cost} ₸)`;
-          break;
-        case "alcohol":
-          title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
-          break;
-        case "program":
-          title = `Программа: ${item.teamName} (${cost} ₸)`;
-          break;
-        case "tamada":
-          title = `Тамада: ${item.name} (${cost} ₸)`;
-          break;
-        case "traditionalGift":
-          title = `Традиц. подарки: ${item.salonName} - ${item.itemName} (${cost} ₸)`;
-          break;
-        case "transport":
-          title = `Транспорт: ${item.salonName} - ${item.carName} (${cost} ₸)`;
-          break;
-        case "goods":
-          title = `Товар: ${item.item_name} (${cost} ₸)`;
-          break;
-        case "jewelry":
-          title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
-          break;
-        default:
-          title = "Неизвестный элемент";
-      }
-      return (
-        <View style={styles.addModalItemCard}>
-          <TouchableOpacity
-            style={styles.addModalItemContent}
-            onPress={() => {
-              handleAddItem(item);
-              const category = typeToCategoryMap[item.type];
-              if (category) {
-                updateCategories(category);
-              }
-            }}
-          >
-            <Text style={styles.addModalItemText}>{title}</Text>
-            {count > 0 && (
-              <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.detailsIconButton}
-            onPress={() => {
-              setSelectedItem(item);
-              setDetailsModalVisible(true);
-              
-            }}
-          >
-            <Icon name="search" size={20} color={MODAL_COLORS.icon} />
-          </TouchableOpacity>
-        </View>
-      );
-    },
-    [
-      filteredData,
-      handleAddItem,
-      setDetailsModalVisible,
-      setSelectedItem,
-      updateCategories,
-    ]
-  );
+  //     const count = filteredData.filter(
+  //       (selectedItem) =>
+  //         `${selectedItem.type}-${selectedItem.id}` ===
+  //         `${item.type}-${item.id}`
+  //     ).length;
+  //     if (item.type === "goods" && item.category === "Прочее") return null;
+  //     const cost = item.type === "restaurant" ? item.averageCost : item.cost;
+  //     let title;
+  //     switch (item.type) {
+  //       case "restaurant":
+  //         title = `Ресторан: ${item.name} (${cost} ₸)`;
+  //         break;
+  //       case "clothing":
+  //         title = `Одежда: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
+  //         break;
+  //       case "flowers":
+  //         title = `Цветы: ${item.salonName} - ${item.flowerName} (${cost} ₸)`;
+  //         break;
+  //       case "cake":
+  //         title = `Торты: ${item.name} (${cost} ₸)`;
+  //         break;
+  //       case "alcohol":
+  //         title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
+  //         break;
+  //       case "program":
+  //         title = `Программа: ${item.teamName} (${cost} ₸)`;
+  //         break;
+  //       case "tamada":
+  //         title = `Тамада: ${item.name} (${cost} ₸)`;
+  //         break;
+  //       case "traditionalGift":
+  //         title = `Традиц. подарки: ${item.salonName} - ${item.itemName} (${cost} ₸)`;
+  //         break;
+  //       case "transport":
+  //         title = `Транспорт: ${item.salonName} - ${item.carName} (${cost} ₸)`;
+  //         break;
+  //       case "goods":
+  //         title = `Товар: ${item.item_name} (${cost} ₸)`;
+  //         break;
+  //       case "jewelry":
+  //         title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
+  //         break;
+  //       default:
+  //         title = "Неизвестный элемент";
+  //     }
+  //     return (
+  //       <View style={styles.addModalItemCard}>
+  //         <TouchableOpacity
+  //           style={styles.addModalItemContent}
+  //           onPress={() => {
+  //             handleAddItem(item);
+  //             const category = typeToCategoryMap[item.type];
+  //             if (category) {
+  //               updateCategories(category);
+  //             }
+  //           }}
+  //         >
+  //           <Text style={styles.addModalItemText}>{title}</Text>
+  //           {count > 0 && (
+  //             <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
+  //           )}
+  //         </TouchableOpacity>
+  //         <TouchableOpacity
+  //           style={styles.detailsIconButton}
+  //           onPress={() => {
+  //             setSelectedItem(item);
+  //             setDetailsModalVisible(true);
+  //           }}
+  //         >
+  //           <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+  //         </TouchableOpacity>
+  //       </View>
+  //     );
+  //   },
+  //   [
+  //     filteredData,
+  //     handleAddItem,
+  //     setDetailsModalVisible,
+  //     setSelectedItem,
+  //     updateCategories,
+  //   ]
+  // );
 
-  const closeModal = () => {
-    setSearchQuery("");
-    setSelectedTypeFilter("all");
-    setSelectedDistrict("all");
-    setCostRange("all");
-    onClose();
-  };
 
+//   const renderAddItem = useCallback(
+//   ({ item }) => {
+//     if (!item || !item.type || !item.id) {
+//       console.warn("Некорректный элемент в renderAddItem:", item);
+//       return null;
+//     }
+
+//     const count = filteredData.filter(
+//       (selectedItem) =>
+//         `${selectedItem.type}-${selectedItem.id}` ===
+//         `${item.type}-${item.id}`
+//     ).length;
+//     if (item.type === "goods" && item.category === "Прочее") return null;
+//     const cost = item.type === "restaurant" ? item.averageCost : item.cost;
+//     let title;
+//         switch (item.type) {
+//         case "restaurant":
+//           title = `Ресторан: ${item.name} (${cost} ₸)`;
+//           break;
+//         case "clothing":
+//           title = `Одежда: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
+//           break;
+//         case "flowers":
+//           title = `Цветы: ${item.salonName} - ${item.flowerName} (${cost} ₸)`;
+//           break;
+//         case "cake":
+//           title = `Торты: ${item.name} (${cost} ₸)`;
+//           break;
+//         case "alcohol":
+//           title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
+//           break;
+//         case "program":
+//           title = `Программа: ${item.teamName} (${cost} ₸)`;
+//           break;
+//         case "tamada":
+//           title = `Тамада: ${item.name} (${cost} ₸)`;
+//           break;
+//         case "traditionalGift":
+//           title = `Традиц. подарки: ${item.salonName} - ${item.itemName} (${cost} ₸)`;
+//           break;
+//         case "transport":
+//           title = `Транспорт: ${item.salonName} - ${item.carName} (${cost} ₸)`;
+//           break;
+//         case "goods":
+//           title = `Товар: ${item.item_name} (${cost} ₸)`;
+//           break;
+//         case "jewelry":
+//           title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
+//           break;
+//         default:
+//           title = "Неизвестный элемент";
+//       }
+//     return (
+//       <View style={styles.addModalItemCard}>
+//         {/* <TouchableOpacity
+//           style={styles.addModalItemContent}
+//           onPress={() => {
+//             handleAddItem(item);
+//             const category = typeToCategoryMap[item.type];
+//             if (category) {
+//               updateCategories(category);
+//             }
+//             closeModal();
+//           }}
+//         > */}
+//         <TouchableOpacity
+//             style={styles.addModalItemContent}
+//             onPress={() => {
+//               handleAddItem(item);
+//               const category = typeToCategoryMap[item.type];
+//               if (category) {
+//                 updateCategories(category);
+//               }
+//               onClose(); // Используем переданный onClose вместо setAddItemModalVisible
+//             }}
+//           >
+//           <Text style={styles.addModalItemText}>{title}</Text>
+//           {count > 0 && (
+//             <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
+//           )}
+//         </TouchableOpacity>
+
+
+//         <TouchableOpacity
+//           style={styles.detailsIconButton}
+//           onPress={() => {
+//             console.log("Magnify button pressed for item:", item);
+//             handleOpenDetails(item); // Вызываем openDetailsModal, который закроет текущее модальное и откроет DetailsModal
+//           }}
+//         >
+//           <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+//         </TouchableOpacity>
+//       </View>
+//     );
+//   },
+//   [filteredData, handleAddItem, setSelectedItem, updateCategories, onClose, setDetailsModalVisible, navigation]
+// );
+
+
+const renderAddItem = useCallback(
+  ({ item }) => {
+    if (!item || !item.type || !item.id) {
+      console.warn("Некорректный элемент в renderAddItem:", item);
+      return null;
+    }
+
+    const count = filteredData.filter(
+      (selectedItem) =>
+        `${selectedItem.type}-${selectedItem.id}` === `${item.type}-${item.id}`
+    ).length;
+    if (item.type === "goods" && item.category === "Прочее") return null;
+    const cost = item.type === "restaurant" ? item.averageCost : item.cost;
+    let title;
+    switch (item.type) {
+      case "restaurant":
+        title = `Ресторан: ${item.name} (${cost} ₸)`;
+        break;
+      case "clothing":
+        title = `Одежда: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
+        break;
+      case "flowers":
+        title = `Цветы: ${item.salonName} - ${item.flowerName} (${cost} ₸)`;
+        break;
+      case "cake":
+        title = `Торты: ${item.name} (${cost} ₸)`;
+        break;
+      case "alcohol":
+        title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
+        break;
+      case "program":
+        title = `Программа: ${item.teamName} (${cost} ₸)`;
+        break;
+      case "tamada":
+        title = `Тамада: ${item.name} (${cost} ₸)`;
+        break;
+      case "traditionalGift":
+        title = `Традиц. подарки: ${item.salonName} - ${item.itemName} (${cost} ₸)`;
+        break;
+      case "transport":
+        title = `Транспорт: ${item.salonName} - ${item.carName} (${cost} ₸)`;
+        break;
+      case "goods":
+        title = `Товар: ${item.item_name} (${cost} ₸)`;
+        break;
+      case "jewelry":
+        title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
+        break;
+      default:
+        title = "Неизвестный элемент";
+    }
+    return (
+      <View style={styles.addModalItemCard}>
+        <TouchableOpacity
+          style={styles.addModalItemContent}
+          onPress={() => {
+            handleAddItem(item);
+            const category = typeToCategoryMap[item.type];
+            if (category) {
+              updateCategories(category);
+            }
+            onClose();
+          }}
+        >
+          <Text style={styles.addModalItemText}>{title}</Text>
+          {count > 0 && (
+            <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.detailsIconButton}
+          onPress={() => {
+            console.log("Magnify button pressed for item:", item);
+            openDetailsModal(item); // Use openDetailsModal instead of handleOpenDetails
+          }}
+        >
+          <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+        </TouchableOpacity>
+      </View>
+    );
+  },
+  [
+    filteredData,
+    handleAddItem,
+    setSelectedItem,
+    updateCategories,
+    onClose,
+    openDetailsModal, // Update dependency
+    navigation,
+  ]
+);
+
+
+
+ const closeModal = () => {
+  console.log("Closing AddItemModal");
+  setSearchQuery("");
+  setSelectedTypeFilter("all");
+  setSelectedDistrict("all");
+  setCostRange("all");
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); // Добавляем haptic feedback
+  onClose(); // Вызываем переданную функцию onClose
+};
   return (
     <Modal
       visible={visible}
@@ -833,6 +1052,7 @@ const CategoryItemsModal = ({
   updateCategories, // To add category to main screen if not present
   guestCount, 
   setGuestCount, // To update guestCount for restaurants
+  openDetailsModal,
 }) => {
   // Items from `filteredData` that belong to the current category
   const selectedItemsForThisCategory = filteredData
@@ -925,16 +1145,20 @@ const CategoryItemsModal = ({
                 {title}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.detailsIconButton}
-              onPress={() => {
-                setSelectedItem(item);
-                setDetailsModalVisible(true);
-                // Убрали onClose(), чтобы CategoryItemsModal оставался открытым
-              }}
-            >
-              <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
-            </TouchableOpacity>
+
+
+
+
+              <TouchableOpacity
+                style={styles.detailsIconButton}
+                onPress={() => {
+                  console.log("Magnify button pressed for item:", item);
+                  openDetailsModal(item); // Вызываем openDetailsModal, который закроет текущее модальное и откроет DetailsModal
+                }}
+              >
+                <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+              </TouchableOpacity>
+
           </View>
         );
       },
@@ -1021,6 +1245,20 @@ const CategoryItemsModal = ({
 
 
 const CreateEventScreen = ({ navigation, route }) => {
+
+  useEffect(() => {
+  const unsubscribeBlur = navigation.addListener('blur', () => {
+    setDetailsModalVisible(false); // Автоматически закрывать DetailsModal при потере фокуса
+    setAddItemModalVisible(false);
+    setCategoryModalVisible(false);
+    console.log('Screen blurred, closing all modals');
+  });
+
+  return unsubscribeBlur;
+}, [navigation]);
+
+
+
   const selectedCategories = route?.params?.selectedCategories || [];
 
   const dispatch = useDispatch();
@@ -1679,13 +1917,33 @@ const CreateEventScreen = ({ navigation, route }) => {
     );
   };
 
-  const handleDetailsPress = () => {
+const handleDetailsPress = () => {
+  console.log("Navigation object:", navigation);
+  console.log("Selected item:", selectedItem);
+  if (selectedItem) {
     setDetailsModalVisible(false);
-    // setSelectedItem(null); // Keep selectedItem for navigation
-    if (selectedItem) {
-        navigation.navigate("Details", { item: selectedItem });
-    }
-  };
+    setTimeout(() => {
+      navigation.navigate("Details", { item: selectedItem });
+      setSelectedItem(null);
+    }, 100);
+  } else {
+    console.warn("No selected item for navigation");
+    alert("Ошибка: Не выбран элемент для просмотра деталей.");
+    setDetailsModalVisible(false);
+  }
+};
+
+const openDetailsModal = (item) => {
+  setAddItemModalVisible(false);
+  setCategoryModalVisible(false);
+  setSelectedItem(item);
+  setDetailsModalVisible(true);
+  console.log('Opening DetailsModal for item:', item);
+};
+
+
+
+
 
   return (
     <>
@@ -1753,7 +2011,7 @@ const CreateEventScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
 
-        <AddItemModal
+        {/* <AddItemModal
           visible={addItemModalVisible}
           onClose={() => setAddItemModalVisible(false)}
           filteredItems={combinedData} // All available items from API
@@ -1763,9 +2021,27 @@ const CreateEventScreen = ({ navigation, route }) => {
           setSelectedItem={setSelectedItem}
           quantities={quantities}
           updateCategories={updateCategories}
-        />
+        /> */}
 
-        <CategoryItemsModal
+      <AddItemModal
+  visible={addItemModalVisible}
+  onClose={() => {
+    console.log("AddItemModal onClose triggered");
+    setAddItemModalVisible(false);
+  }}
+  filteredItems={combinedData}
+  filteredData={filteredData}
+  handleAddItem={handleAddItem}
+  setDetailsModalVisible={openDetailsModal} // This should be openDetailsModal
+  setSelectedItem={setSelectedItem}
+  quantities={quantities}
+  updateCategories={updateCategories}
+  navigation={navigation}
+  openDetailsModal={openDetailsModal} // Correctly passed
+/>
+
+
+        {/* <CategoryItemsModal
           visible={categoryModalVisible}
           onClose={handleCloseCategoryModal}
           categoryItems={selectedCategoryItems} // Items of the specific category from combinedData
@@ -1784,18 +2060,67 @@ const CreateEventScreen = ({ navigation, route }) => {
           updateCategories={updateCategories}
           guestCount={guestCount}
           setGuestCount={setGuestCount} // Pass setter for guest count
+        /> */}
+
+        <CategoryItemsModal
+          visible={categoryModalVisible}
+          onClose={handleCloseCategoryModal}
+          categoryItems={selectedCategoryItems}
+          categoryLabel={selectedCategoryLabel}
+          categoryType={selectedCategoryType}
+          filteredData={filteredData}
+          handleAddItem={handleAddItem}
+          handleRemoveItem={handleRemoveItem}
+          setDetailsModalVisible={openDetailsModal} // Передайте openDetailsModal вместо setDetailsModalVisible
+          setSelectedItem={setSelectedItem}
+          quantities={quantities}
+          setQuantities={setQuantities}
+          budget={budget}
+          setFilteredData={setFilteredData}
+          setRemainingBudget={setRemainingBudget}
+          updateCategories={updateCategories}
+          guestCount={guestCount}
+          setGuestCount={setGuestCount}
+          openDetailsModal={openDetailsModal}
         />
 
+
+ 
+
+
+
         {/* Details Modal (shows brief info, navigates to full details screen) */}
-        <Modal
-  visible={detailsModalVisible}
-  transparent
-  animationType="fade"
-  onRequestClose={() => {
-    setDetailsModalVisible(false);
-    // Не сбрасываем selectedItem, чтобы сохранить его для навигации
-  }}
->
+       <Modal
+          visible={detailsModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => {
+            console.log("DetailsModal closing via onRequestClose");
+            setDetailsModalVisible(false);
+          }}
+          onDismiss={() => console.log("DetailsModal dismissed")} // Add for debugging
+        >
+
+        <View style={styles.modalOverlay}>
+          {/* <View style={styles.detailsModalContainer}>
+            <Text style={styles.modalTitle}>Просмотр деталей</Text>
+            <TouchableOpacity
+              style={styles.detailsModalButton}
+              onPress={handleDetailsPress}
+            >
+              <Text style={styles.detailsModalButtonText}>Перейти к деталям</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setDetailsModalVisible(false)}
+            >
+              <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
+            </TouchableOpacity>
+          </View> */}
+        </View>
+
+
+
   <SafeAreaView
     style={[styles.modalOverlay, { justifyContent: "center", alignItems: "center" }]}
   >
@@ -2101,6 +2426,7 @@ const CreateEventScreen = ({ navigation, route }) => {
     </>
   );
 };
+
 
 
 // const styles = StyleSheet.create({
