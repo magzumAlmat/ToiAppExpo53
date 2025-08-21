@@ -26,6 +26,7 @@ import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native";
 import ImageProgress from 'react-native-image-progress';
 import { ProgressBar } from 'react-native-progress';
+import { Appbar } from 'react-native-paper';
 
 import { Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -2825,31 +2826,26 @@ return (
               </View>
 
               {/* Details */}
-              <Text style={styles.detailLabel}>Название:</Text>
-              <Text style={styles.detailValue}>{selectedItem.name || selectedItem.item_name|| selectedItem.alcoholName 
-              ||selectedItem.itemName ||selectedItem.teamName || selectedItem[0].name}</Text>
-                <Text></Text>
-              <Text style={styles.detailLabel}>Тип:</Text>
-              <Text style={styles.detailValue}>{selectedItem.item_type }</Text>
- <Text></Text>
-              <Text style={styles.detailLabel}>Стоимость:</Text>
-              <Text style={styles.detailValue}>{selectedItem.total_cost}</Text>
-   <Text></Text>
-              <Text style={styles.detailLabel}>Адрес:</Text>
-              <Text style={styles.detailValue}>{selectedItem.address || selectedItem[0].address}</Text>
-   <Text></Text>
-              <Text style={styles.detailLabel}>Район:</Text>
-              <Text style={styles.detailValue}>{selectedItem.district|| selectedItem[0].district}</Text>
-   <Text></Text>
-              <Text style={styles.detailLabel}>Телефон:</Text>
-              <Text style={styles.detailValue}>{selectedItem.phone||selectedItem[0].phone}</Text>
-   <Text></Text>
-              {selectedItem.cakeType && (
-                <>
-                  <Text style={styles.detailLabel}>Тип торта:</Text>
-                  <Text style={styles.detailValue}>{selectedItem.cakeType}</Text>
-                </>
-              )}
+             {selectedItem.itemName && <><Text style={styles.detailLabel}>Название:</Text><Text style={styles.detailValue}>{selectedItem.itemName}</Text></>}
+                          
+            {selectedItem.name && <><Text style={styles.detailLabel}>Название:</Text><Text style={styles.detailValue}>{selectedItem.name}</Text></>}
+              
+              {selectedItem.name && <><Text style={styles.detailLabel}>Имя:</Text><Text style={styles.detailValue}>{selectedItem.name || selectedItem.item_name}</Text></>}
+              <Text></Text>
+              {selectedItem.teamName && <><Text style={styles.detailLabel}>Название коллектива:</Text><Text style={styles.detailValue}>{selectedItem.teamName}</Text></>}
+              
+              <Text></Text>
+             {selectedItem.item_type && <><Text style={styles.detailLabel}>Тип:</Text><Text style={styles.detailValue}>{selectedItem.item_type}</Text></>}
+              <Text></Text>
+              {selectedItem.total_cost && <><Text style={styles.detailLabel}>Стоимость:</Text><Text style={styles.detailValue}>{selectedItem.total_cost}</Text></>}
+              <Text></Text>
+              {selectedItem.address && <><Text style={styles.detailLabel}>Адрес:</Text><Text style={styles.detailValue}>{selectedItem.address}</Text></>}
+              <Text></Text>
+              {selectedItem.district && <><Text style={styles.detailLabel}>Район:</Text><Text style={styles.detailValue}>{selectedItem.district}</Text></>}
+              <Text></Text>
+              {selectedItem.phone && <><Text style={styles.detailLabel}>Телефон:</Text><Text style={styles.detailValue}>{selectedItem.phone}</Text></>}
+              <Text></Text>
+              {selectedItem.cakeType && <><Text style={styles.detailLabel}>Тип торта:</Text><Text style={styles.detailValue}>{selectedItem.cakeType}</Text></>}
             </View>
           )}
           <View style={styles.buttonRowModal}>
