@@ -504,6 +504,7 @@ const DetailsScreen = ({ route }) => {
       try {
         const response = await axios.get(`${BASE_URL}/api/${item.type}/${item.id}/files`);
         setFiles(response.data || []);
+        console.log('Вывод.  ',response)
       } catch (err) {
         console.error("File fetch error:", err);
         setError('Ошибка загрузки файлов: ' + (err.response?.data?.message || err.message));
@@ -524,6 +525,7 @@ const DetailsScreen = ({ route }) => {
   const renderFileItem = ({ item: file }) => {
     const fileUrl = `${BASE_URL}/${file.path}`;
 
+    console.log('url файла ',fileUrl)
     if (file.mimetype.startsWith('image/')) {
       return (
         <TouchableOpacity

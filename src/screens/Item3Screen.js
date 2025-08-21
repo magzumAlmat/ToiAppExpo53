@@ -1056,320 +1056,81 @@ export default function Item3Screen() {
 
 
 
-  // const fetchServiceDetails = async (serviceId, serviceType) => {
-  //   setLoadingServiceDetails(true);
-  //   try {
-  //     const normalizedServiceType = serviceType.toLowerCase().replace(/s$/, "");
-  //     const methodMap = {
-  //       restaurant: "getRestaurantById",
-  //       clothing: "getClothingById",
-  //       tamada: "getTamadaById",
-  //       program: "getProgramById",
-  //       traditionalgift: "getTraditionalGiftById",
-  //       flowers: "getFlowersById",
-  //       cake: "getCakeById",
-  //       alcohol: "getAlcoholById",
-  //       transport: "getTransportById",
-  //       jewelry: "getJewelryById",
-  //       wedding: "getWeddingById",
-  //       eventcategory: "getEventCategoryById",
-  //       wishlist: "getWishlistById",
-  //     };
-  //     const methodName = methodMap[normalizedServiceType];
-  //     if (!methodName || !api[methodName]) {
-  //       throw new Error(`Неизвестный тип сервиса: ${normalizedServiceType}`);
-  //     }
-  //     const response = await api[methodName](serviceId);
-  //     const data = response.data.data || response.data;
-  //     return {
-  //       serviceId,
-  //       serviceType: normalizedServiceType,
-  //       name: data.name,
-  //       description: data.description || null,
-  //       cost: data.cost || null,
-  //       created_at: data.createdAt || data.created_at || null,
-  //       updated_at: data.updatedAt || data.updated_at || null,
-  //       address: data.address || null,
-  //       cuisine: data.cuisine || null,
-  //     };
-  //   } catch (error) {
-  //     console.error(
-  //       `Error fetching service details for ${serviceType}/${serviceId}:`,
-  //       error
-  //     );
-  //     Alert.alert(
-  //       "Ошибка",
-  //       `Не удалось загрузить детали услуги: ${error.message}`
-  //     );
-  //     return null;
-  //   } finally {
-  //     setLoadingServiceDetails(false);
-  //   }
-  // };
 
 // const fetchServiceDetails = async (serviceId, serviceType) => {
 //   setLoadingServiceDetails(true);
+//   setLoadingFiles(true);
 //   try {
 //     let normalizedServiceType = serviceType.toLowerCase();
-//     // Map singular "flower" to plural "flowers"
-//     if (normalizedServiceType === "flower") {
-//       normalizedServiceType = "flowers";
+//     if (normalizedServiceType === 'flower') {
+//       normalizedServiceType = 'flowers';
 //     } else {
-//       normalizedServiceType = normalizedServiceType.replace(/s$/, "");
+//       normalizedServiceType = normalizedServiceType.replace(/s$/, '');
 //     }
 //     const methodMap = {
-//       restaurant: "getRestaurantById",
-//       clothing: "getClothingById",
-//       tamada: "getTamadaById",
-//       program: "getProgramById",
-//       traditionalgift: "getTraditionalGiftById",
-//       flowers: "getFlowersById",
-//       cake: "getCakeById",
-//       alcohol: "getAlcoholById",
-//       transport: "getTransportById",
-//       jewelry: "getJewelryById",
-//       wedding: "getWeddingById",
-//       eventcategory: "getEventCategoryById",
-//       wishlist: "getWishlistById",
+//       restaurant: 'getRestaurantById',
+//       clothing: 'getClothingById',
+//       tamada: 'getTamadaById',
+//       program: 'getProgramById',
+//       traditionalgift: 'getTraditionalGiftById',
+//       flowers: 'getFlowersById',
+//       cake: 'getCakeById',
+//       alcohol: 'getAlcoholById',
+//       transport: 'getTransportById',
+//       jewelry: 'getJewelryById',
+//       wedding: 'getWeddingById',
+//       eventcategory: 'getEventCategoryById',
+//       wishlist: 'getWishlistById',
 //     };
 //     const methodName = methodMap[normalizedServiceType];
 //     if (!methodName || !api[methodName]) {
 //       throw new Error(`Неизвестный тип сервиса: ${normalizedServiceType}`);
 //     }
 //     const response = await api[methodName](serviceId);
-//     const data = response.data.data || response.data;
-//     console.log('DATA= ', data);
-//     return {
-//       serviceId,
-//       serviceType: normalizedServiceType,
-//       ...data, // Spread all fields from the server response
-//     };
-//   } catch (error) {
-//     console.error(
-//       `Error fetching service details for ${serviceType}/${serviceId}:`,
-//       error
-//     );
-//     Alert.alert(
-//       "Ошибка",
-//       `Не удалось загрузить детали услуги: ${error.message}`
-//     );
-//     return null;
-//   } finally {
-//     setLoadingServiceDetails(false);
-//   }
-// };
+//     let data = response.data.data || response.data;
 
-
-// const fetchServiceDetails = async (serviceId, serviceType) => {
-//   setLoadingServiceDetails(true);
-//   try {
-//     let normalizedServiceType = serviceType.toLowerCase();
-//     if (normalizedServiceType === "flower") {
-//       normalizedServiceType = "flowers";
-//     } else {
-//       normalizedServiceType = normalizedServiceType.replace(/s$/, "");
+//     // Handle array case for restaurants
+//     if (normalizedServiceType === 'restaurant' && Array.isArray(data)) {
+//       data = data.length > 0 ? data[0] : { name: 'Ресторан не найден', cost: null };
 //     }
-//     const methodMap = {
-//       restaurant: "getRestaurantById",
-//       clothing: "getClothingById",
-//       tamada: "getTamadaById",
-//       program: "getProgramById",
-//       traditionalgift: "getTraditionalGiftById",
-//       flowers: "getFlowersById",
-//       cake: "getCakeById",
-//       alcohol: "getAlcoholById",
-//       transport: "getTransportById",
-//       jewelry: "getJewelryById",
-//       wedding: "getWeddingById",
-//       eventcategory: "getEventCategoryById",
-//       wishlist: "getWishlistById",
-//     };
-//     const methodName = methodMap[normalizedServiceType];
-//     if (!methodName || !api[methodName]) {
-//       throw new Error(`Неизвестный тип сервиса: ${normalizedServiceType}`);
-//     }
-//     const response = await api[methodName](serviceId);
-//     const data = response.data.data || response.data;
-//     console.log('DATA= ', data);
-//     return {
-//       serviceId,
-//       serviceType: normalizedServiceType,
-//       ...data, // Spread all fields from the server response
-//     };
-//   } catch (error) {
-//     console.error(
-//       `Error fetching service details for ${serviceType}/${serviceId}:`,
-//       error
-//     );
-//     Alert.alert(
-//       "Ошибка",
-//       `Не удалось загрузить детали услуги: ${error.message}`
-//     );
-//     // Return a fallback object to prevent undefined
-//     return {
-//       serviceId,
-//       serviceType,
-//       name: "Неизвестная услуга",
-//       cost: null,
-//     };
-//   } finally {
-//     setLoadingServiceDetails(false);
-//   }
-// };
 
+//     // Fetch media files
+//     try {
+//       const filesResponse = await axios.get(
+//         `${BASE_URL}/api/${normalizedServiceType}/${serviceId}/files`
+//       );
 
+//       console.log('FILE response= ',filesResponse)
+//       setFiles(filesResponse.data || []);
+//       setErrorFiles(null);
+//     } catch (fileError) {
+//       console.error(`Error fetching files for ${normalizedServiceType}/${serviceId}:`, fileError);
+//       setErrorFiles('Ошибка загрузки медиафайлов: ' + fileError.message);
+//       setFiles([]);
+//     }
 
-// const fetchServiceDetails = async (serviceId, serviceType) => {
-//   setLoadingServiceDetails(true);
-//   try {
-//     let normalizedServiceType = serviceType.toLowerCase();
-//     if (normalizedServiceType === "flower") {
-//       normalizedServiceType = "flowers";
-//     } else {
-//       normalizedServiceType = normalizedServiceType.replace(/s$/, "");
-//     }
-//     const methodMap = {
-//       restaurant: "getRestaurantById",
-//       clothing: "getClothingById",
-//       tamada: "getTamadaById",
-//       program: "getProgramById",
-//       traditionalgift: "getTraditionalGiftById",
-//       flowers: "getFlowersById",
-//       cake: "getCakeById",
-//       alcohol: "getAlcoholById",
-//       transport: "getTransportById",
-//       jewelry: "getJewelryById",
-//       wedding: "getWeddingById",
-//       eventcategory: "getEventCategoryById",
-//       wishlist: "getWishlistById",
-//     };
-//     const methodName = methodMap[normalizedServiceType];
-//     if (!methodName || !api[methodName]) {
-//       throw new Error(`Неизвестный тип сервиса: ${normalizedServiceType}`);
-//     }
-//     const response = await api[methodName](serviceId);
-//     const data = response.data.data || response.data;
 //     console.log(`Service Details for ${normalizedServiceType}/${serviceId}:`, JSON.stringify(data, null, 2));
-
-//     // Handle empty array for restaurant
-//     if (normalizedServiceType === "restaurant" && Array.isArray(data)) {
-//       if (data.length === 0) {
-//         return {
-//           serviceId,
-//           serviceType: normalizedServiceType,
-//           name: "Ресторан не найден",
-//           cost: null,
-//         };
-//       }
-//       // Return the first item of the array for restaurants
-//       return {
-//         serviceId,
-//         serviceType: normalizedServiceType,
-//         ...data[0], // Spread the first object
-//       };
-//     }
-
 //     return {
 //       serviceId,
 //       serviceType: normalizedServiceType,
 //       ...data,
 //     };
 //   } catch (error) {
-//     console.error(
-//       `Error fetching service details for ${serviceType}/${serviceId}:`,
-//       error
-//     );
-//     Alert.alert(
-//       "Ошибка",
-//       `Не удалось загрузить детали услуги: ${error.message}`
-//     );
+//     console.error(`Error fetching service details for ${serviceType}/${serviceId}:`, error);
+//     Alert.alert('Ошибка', `Не удалось загрузить детали услуги: ${error.message}`);
 //     return {
 //       serviceId,
 //       serviceType: normalizedServiceType,
-//       name: "Неизвестная услуга",
+//       name: 'Неизвестная услуга',
 //       cost: null,
 //     };
 //   } finally {
 //     setLoadingServiceDetails(false);
+//     setLoadingFiles(false);
 //   }
 // };
 
 
-// const fetchServiceDetails = async (serviceId, serviceType) => {
-//   setLoadingServiceDetails(true);
-//   try {
-//     let normalizedServiceType = serviceType.toLowerCase();
-//     if (normalizedServiceType === "flower") {
-//       normalizedServiceType = "flowers";
-//     } else {
-//       normalizedServiceType = normalizedServiceType.replace(/s$/, "");
-//     }
-//     const methodMap = {
-//       restaurant: "getRestaurantById",
-//       clothing: "getClothingById",
-//       tamada: "getTamadaById",
-//       program: "getProgramById",
-//       traditionalgift: "getTraditionalGiftById",
-//       flowers: "getFlowersById",
-//       cake: "getCakeById",
-//       alcohol: "getAlcoholById",
-//       transport: "getTransportById",
-//       jewelry: "getJewelryById",
-//       wedding: "getWeddingById",
-//       eventcategory: "getEventCategoryById",
-//       wishlist: "getWishlistById",
-//     };
-//     const methodName = methodMap[normalizedServiceType];
-//     if (!methodName || !api[methodName]) {
-//       throw new Error(`Неизвестный тип сервиса: ${normalizedServiceType}`);
-//     }
-//     const response = await api[methodName](serviceId);
-//     const data = response.data.data || response.data;
-//     console.log(`Service Details for ${normalizedServiceType}/${serviceId}:`, JSON.stringify(data, null, 2));
-
-//     // Handle empty array for restaurant
-//     if (normalizedServiceType === "restaurant" && Array.isArray(data)) {
-//       if (data.length === 0) {
-//         return {
-//           serviceId,
-//           serviceType: normalizedServiceType,
-//           name: "Ресторан не найден",
-//           cost: null,
-//         };
-//       }
-//       // Return the first item of the array for restaurants
-//       return {
-//         serviceId,
-//         serviceType: normalizedServiceType,
-//         ...data[0], // Spread the first object
-//       };
-//     }
-
-//     // Ensure consistent return structure for other types
-//     return {
-//       serviceId,
-//       serviceType: normalizedServiceType,
-//       ...data,
-//     };
-//   } catch (error) {
-//     console.error(
-//       `Error fetching service details for ${serviceType}/${serviceId}:`,
-//       error
-//     );
-//     Alert.alert(
-//       "Ошибка",
-//       `Не удалось загрузить детали услуги: ${error.message}`
-//     );
-//     return {
-//       serviceId,
-//       serviceType: normalizedServiceType,
-//       name: "Неизвестная услуга",
-//       cost: null,
-//     };
-//   } finally {
-//     setLoadingServiceDetails(false);
-//   }
-// };
 
 const fetchServiceDetails = async (serviceId, serviceType) => {
   setLoadingServiceDetails(true);
@@ -1408,13 +1169,12 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       data = data.length > 0 ? data[0] : { name: 'Ресторан не найден', cost: null };
     }
 
-    // Fetch media files
+    // Fetch media files using normalizedServiceType
     try {
       const filesResponse = await axios.get(
-        `${BASE_URL}/api/${normalizedServiceType}/${serviceId}/files`
+        `${BASE_URL}/api/${normalizedServiceType}/${serviceId}/files` // Use normalizedServiceType
       );
-
-      console.log('FILE response= ',filesResponse)
+      console.log('FILE response=', filesResponse);
       setFiles(filesResponse.data || []);
       setErrorFiles(null);
     } catch (fileError) {
@@ -1434,7 +1194,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     Alert.alert('Ошибка', `Не удалось загрузить детали услуги: ${error.message}`);
     return {
       serviceId,
-      serviceType: normalizedServiceType,
+      serviceType: normalizedServiceType || serviceType.toLowerCase().replace(/s$/, ''),
       name: 'Неизвестная услуга',
       cost: null,
     };
@@ -1443,10 +1203,6 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     setLoadingFiles(false);
   }
 };
-
-
-
-
 
 
 
