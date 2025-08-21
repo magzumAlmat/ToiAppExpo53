@@ -170,7 +170,7 @@ export default function SupplierScreen() {
           }));
           break;
         case 'cake':
-          await api.deleteCake(itemToDelete.id);
+          await api.deleteCakes(itemToDelete.id);
           setData((prev) => ({
             ...prev,
             cakes: prev.cakes.filter((item) => item.id !== itemToDelete.id),

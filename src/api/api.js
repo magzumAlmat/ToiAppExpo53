@@ -271,11 +271,7 @@
 //       throw new Error(`Ошибка обновления цветов: ${error.response?.data?.message || error.message}`);
 //     }),
 
-//   // Торты
-//   createCake: (data) =>
-//     api.post('/api/cakes', data).catch((error) => {
-//       throw new Error(`Ошибка создания торта: ${error.response?.data?.message || error.message}`);
-//     }),
+
 
 
 
@@ -1001,6 +997,12 @@ export default {
       throw new Error(`Ошибка обновления программы: ${error.response?.data?.message || error.message}`);
     }),
 
+
+      // Торты
+  createCake: (data) =>
+    api.post('/api/cakes', data).catch((error) => {
+      throw new Error(`Ошибка создания торта: ${error.response?.data?.message || error.message}`);
+    }),
 
   createHotel: (data) =>
     api.post('/api/hotel', data).catch((error) => {

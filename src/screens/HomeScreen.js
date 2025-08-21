@@ -205,254 +205,66 @@ const AddItemModal = ({
     }
   };
 
-  const filteredDataMemo = useMemo(() => {
-    let result = filteredItems;
-    if (searchQuery) {
-      result = result.filter((item) =>
-        [
-          item.name,
-          item.itemName,
-          item.flowerName,
-          item.alcoholName,
-          item.carName,
-          item.teamName,
-          item.salonName,
-          item.storeName,
-          item.address,
-          item.phone,
-          item.cuisine,
-          item.category,
-          item.brand,
-          item.gender,
-          item.portfolio,
-          item.cakeType,
-          item.flowerType,
-          item.material,
-          item.type,
-        ]
-          .filter(Boolean)
-          .some((field) =>
-            field.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-      );
-    }
-    if (selectedTypeFilter !== "all") {
-      result = result.filter((item) => item.type === selectedTypeFilter);
-    }
-    if (selectedDistrict !== "all") {
-      result = result.filter(
-        (item) => String(item.district) === selectedDistrict
-      );
-    }
-    if (costRange !== "all") {
-      result = result.filter((item) => {
-        const cost = item.averageCost || item.cost;
-        if (costRange === "0-10000") return cost <= 10000;
-        if (costRange === "10000-50000") return cost > 10000 && cost <= 50000;
-        if (costRange === "50000+") return cost > 50000;
-        return true;
-      });
-    }
-    console.log("filteredDataMemo:", result);
-    return result.sort(
-      (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
-    );
-  }, [
-    filteredItems,
-    searchQuery,
-    selectedTypeFilter,
-    selectedDistrict,
-    costRange,
-  ]);
-
-  // const renderAddItem = useCallback(
-  //   ({ item }) => {
-  //     if (!item || !item.type || !item.id) {
-  //       console.warn("Некорректный элемент в renderAddItem:", item);
-  //       return null;
-  //     }
-  
-  //     const count = filteredData.filter(
-  //       (selectedItem) =>
-  //         `${selectedItem.type}-${selectedItem.id}` ===
-  //         `${item.type}-${item.id}`
-  //     ).length;
-  //     if (item.type === "goods" && item.category === "Прочее") return null;
-  //     const cost = item.type === "restaurant" ? item.averageCost : item.cost;
-  //     let title;
-  //     switch (item.type) {
-  //       case "restaurant":
-  //         title = `Ресторан: ${item.name} (${cost} ₸)`;
-  //         break;
-  //       case "clothing":
-  //         title = `Одежда: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
-  //         break;
-  //       case "flowers":
-  //         title = `Цветы: ${item.salonName} - ${item.flowerName} (${cost} ₸)`;
-  //         break;
-  //       case "cake":
-  //         title = `Торты: ${item.name} (${cost} ₸)`;
-  //         break;
-  //       case "alcohol":
-  //         title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
-  //         break;
-  //       case "program":
-  //         title = `Программа: ${item.teamName} (${cost} ₸)`;
-  //         break;
-  //       case "tamada":
-  //         title = `Тамада: ${item.name} (${cost} ₸)`;
-  //         break;
-  //       case "traditionalGift":
-  //         title = `Традиц. подарки: ${item.salonName} - ${item.itemName} (${cost} ₸)`;
-  //         break;
-  //       case "transport":
-  //         title = `Транспорт: ${item.salonName} - ${item.carName} (${cost} ₸)`;
-  //         break;
-  //       case "goods":
-  //         title = `Товар: ${item.item_name} (${cost} ₸)`;
-  //         break;
-  //       case "jewelry":
-  //         title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
-  //         break;
-  //       default:
-  //         title = "Неизвестный элемент";
-  //     }
-  //     return (
-  //       <View style={styles.addModalItemCard}>
-  //         <TouchableOpacity
-  //           style={styles.addModalItemContent}
-  //           onPress={() => {
-  //             handleAddItem(item);
-  //             const category = typeToCategoryMap[item.type];
-  //             if (category) {
-  //               updateCategories(category);
-  //             }
-  //           }}
-  //         >
-  //           <Text style={styles.addModalItemText}>{title}</Text>
-  //           {count > 0 && (
-  //             <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
-  //           )}
-  //         </TouchableOpacity>
-  //         <TouchableOpacity
-  //           style={styles.detailsIconButton}
-  //           onPress={() => {
-  //             setSelectedItem(item);
-  //             setDetailsModalVisible(true);
-  //           }}
-  //         >
-  //           <Icon name="search" size={20} color={MODAL_COLORS.icon} />
-  //         </TouchableOpacity>
-  //       </View>
+  // const filteredDataMemo = useMemo(() => {
+  //   let result = filteredItems;
+  //   if (searchQuery) {
+  //     result = result.filter((item) =>
+  //       [
+  //         item.name,
+  //         item.itemName,
+  //         item.flowerName,
+  //         item.alcoholName,
+  //         item.carName,
+  //         item.teamName,
+  //         item.salonName,
+  //         item.storeName,
+  //         item.address,
+  //         item.phone,
+  //         item.cuisine,
+  //         item.category,
+  //         item.brand,
+  //         item.gender,
+  //         item.portfolio,
+  //         item.cakeType,
+  //         item.flowerType,
+  //         item.material,
+  //         item.type,
+  //       ]
+  //         .filter(Boolean)
+  //         .some((field) =>
+  //           field.toLowerCase().includes(searchQuery.toLowerCase())
+  //         )
   //     );
-  //   },
-  //   [
-  //     filteredData,
-  //     handleAddItem,
-  //     setDetailsModalVisible,
-  //     setSelectedItem,
-  //     updateCategories,
-  //   ]
-  // );
+  //   }
+  //   if (selectedTypeFilter !== "all") {
+  //     result = result.filter((item) => item.type === selectedTypeFilter);
+  //   }
+  //   if (selectedDistrict !== "all") {
+  //     result = result.filter(
+  //       (item) => String(item.district) === selectedDistrict
+  //     );
+  //   }
+  //   if (costRange !== "all") {
+  //     result = result.filter((item) => {
+  //       const cost = item.averageCost || item.cost;
+  //       if (costRange === "0-10000") return cost <= 10000;
+  //       if (costRange === "10000-50000") return cost > 10000 && cost <= 50000;
+  //       if (costRange === "50000+") return cost > 50000;
+  //       return true;
+  //     });
+  //   }
+  //   console.log("filteredDataMemo:", result);
+  //   return result.sort(
+  //     (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
+  //   );
+  // }, [
+  //   filteredItems,
+  //   searchQuery,
+  //   selectedTypeFilter,
+  //   selectedDistrict,
+  //   costRange,
+  // ]);
 
-
-//   const renderAddItem = useCallback(
-//   ({ item }) => {
-//     if (!item || !item.type || !item.id) {
-//       console.warn("Некорректный элемент в renderAddItem:", item);
-//       return null;
-//     }
-
-//     const count = filteredData.filter(
-//       (selectedItem) =>
-//         `${selectedItem.type}-${selectedItem.id}` ===
-//         `${item.type}-${item.id}`
-//     ).length;
-//     if (item.type === "goods" && item.category === "Прочее") return null;
-//     const cost = item.type === "restaurant" ? item.averageCost : item.cost;
-//     let title;
-//         switch (item.type) {
-//         case "restaurant":
-//           title = `Ресторан: ${item.name} (${cost} ₸)`;
-//           break;
-//         case "clothing":
-//           title = `Одежда: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
-//           break;
-//         case "flowers":
-//           title = `Цветы: ${item.salonName} - ${item.flowerName} (${cost} ₸)`;
-//           break;
-//         case "cake":
-//           title = `Торты: ${item.name} (${cost} ₸)`;
-//           break;
-//         case "alcohol":
-//           title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
-//           break;
-//         case "program":
-//           title = `Программа: ${item.teamName} (${cost} ₸)`;
-//           break;
-//         case "tamada":
-//           title = `Тамада: ${item.name} (${cost} ₸)`;
-//           break;
-//         case "traditionalGift":
-//           title = `Традиц. подарки: ${item.salonName} - ${item.itemName} (${cost} ₸)`;
-//           break;
-//         case "transport":
-//           title = `Транспорт: ${item.salonName} - ${item.carName} (${cost} ₸)`;
-//           break;
-//         case "goods":
-//           title = `Товар: ${item.item_name} (${cost} ₸)`;
-//           break;
-//         case "jewelry":
-//           title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
-//           break;
-//         default:
-//           title = "Неизвестный элемент";
-//       }
-//     return (
-//       <View style={styles.addModalItemCard}>
-//         {/* <TouchableOpacity
-//           style={styles.addModalItemContent}
-//           onPress={() => {
-//             handleAddItem(item);
-//             const category = typeToCategoryMap[item.type];
-//             if (category) {
-//               updateCategories(category);
-//             }
-//             closeModal();
-//           }}
-//         > */}
-//         <TouchableOpacity
-//             style={styles.addModalItemContent}
-//             onPress={() => {
-//               handleAddItem(item);
-//               const category = typeToCategoryMap[item.type];
-//               if (category) {
-//                 updateCategories(category);
-//               }
-//               onClose(); // Используем переданный onClose вместо setAddItemModalVisible
-//             }}
-//           >
-//           <Text style={styles.addModalItemText}>{title}</Text>
-//           {count > 0 && (
-//             <Text style={styles.addModalItemCount}>Добавлено: {count}</Text>
-//           )}
-//         </TouchableOpacity>
-
-
-//         <TouchableOpacity
-//           style={styles.detailsIconButton}
-//           onPress={() => {
-//             console.log("Magnify button pressed for item:", item);
-//             handleOpenDetails(item); // Вызываем openDetailsModal, который закроет текущее модальное и откроет DetailsModal
-//           }}
-//         >
-//           <Icon name="search" size={20} color={MODAL_COLORS.icon} />
-//         </TouchableOpacity>
-//       </View>
-//     );
-//   },
-//   [filteredData, handleAddItem, setSelectedItem, updateCategories, onClose, setDetailsModalVisible, navigation]
-// );
 
 
 // const renderAddItem = useCallback(
@@ -528,7 +340,7 @@ const AddItemModal = ({
 //           style={styles.detailsIconButton}
 //           onPress={() => {
 //             console.log("Magnify button pressed for item:", item);
-//             openDetailsModal(item); // Use openDetailsModal instead of handleOpenDetails
+//             openDetailsModal(item); // Use openDetailsModal
 //           }}
 //         >
 //           <Icon name="search" size={20} color={MODAL_COLORS.icon} />
@@ -539,13 +351,66 @@ const AddItemModal = ({
 //   [
 //     filteredData,
 //     handleAddItem,
-//     setSelectedItem,
 //     updateCategories,
 //     onClose,
-//     openDetailsModal, // Update dependency
-//     navigation,
+//     openDetailsModal, // Ensure dependency is correct
 //   ]
 // );
+
+const filteredDataMemo = useMemo(() => {
+  let result = filteredItems.filter(item => item && item.type && item.id);
+  if (searchQuery) {
+    result = result.filter((item) =>
+      [
+        item.name,
+        item.itemName,
+        item.flowerName,
+        item.alcoholName,
+        item.carName,
+        item.teamName,
+        item.salonName,
+        item.storeName,
+        item.address,
+        item.phone,
+        item.cuisine,
+        item.category,
+        item.brand,
+        item.gender,
+        item.portfolio,
+        item.cakeType,
+        item.flowerType,
+        item.material,
+        item.type,
+      ]
+        .filter(Boolean)
+        .some((field) =>
+          field.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    );
+  }
+  if (selectedTypeFilter !== "all") {
+    result = result.filter((item) => item.type === selectedTypeFilter);
+  }
+  if (selectedDistrict !== "all") {
+    result = result.filter(
+      (item) => String(item.district) === selectedDistrict
+    );
+  }
+  if (costRange !== "all") {
+    result = result.filter((item) => {
+      const cost = item.averageCost || item.cost;
+      if (costRange === "0-10000") return cost <= 10000;
+      if (costRange === "10000-50000") return cost > 10000 && cost <= 50000;
+      if (costRange === "50000+") return cost > 50000;
+      return true;
+    });
+  }
+  console.log("filteredDataMemo:", result);
+  return result.sort(
+    (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
+  );
+}, [filteredItems, searchQuery, selectedTypeFilter, selectedDistrict, costRange]);
+
 
 
 
@@ -556,46 +421,47 @@ const renderAddItem = useCallback(
       return null;
     }
 
+    if (item.type === "goods" && item.category === "Прочее") return null;
+
     const count = filteredData.filter(
       (selectedItem) =>
         `${selectedItem.type}-${selectedItem.id}` === `${item.type}-${item.id}`
     ).length;
-    if (item.type === "goods" && item.category === "Прочее") return null;
     const cost = item.type === "restaurant" ? item.averageCost : item.cost;
     let title;
     switch (item.type) {
       case "restaurant":
-        title = `Ресторан: ${item.name} (${cost} ₸)`;
+        title = `Ресторан: ${item.name || "Не указано"} (${cost} ₸)`;
         break;
       case "clothing":
-        title = `Одежда: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
+        title = `Одежда: ${item.storeName || "Не указано"} - ${item.itemName || "Не указано"} (${cost} ₸)`;
         break;
       case "flowers":
-        title = `Цветы: ${item.salonName} - ${item.flowerName} (${cost} ₸)`;
+        title = `Цветы: ${item.salonName || "Не указано"} - ${item.flowerName || "Не указано"} (${cost} ₸)`;
         break;
       case "cake":
-        title = `Торты: ${item.name} (${cost} ₸)`;
+        title = `Торты: ${item.name || "Не указано"} (${cost} ₸)`;
         break;
       case "alcohol":
-        title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
+        title = `Алкоголь: ${item.salonName || "Не указано"} - ${item.alcoholName || "Не указано"} (${cost} ₸)`;
         break;
       case "program":
-        title = `Программа: ${item.teamName} (${cost} ₸)`;
+        title = `Программа: ${item.teamName || "Не указано"} (${cost} ₸)`;
         break;
       case "tamada":
-        title = `Тамада: ${item.name} (${cost} ₸)`;
+        title = `Тамада: ${item.name || "Не указано"} (${cost} ₸)`;
         break;
       case "traditionalGift":
-        title = `Традиц. подарки: ${item.salonName} - ${item.itemName} (${cost} ₸)`;
+        title = `Традиц. подарки: ${item.salonName || "Не указано"} - ${item.itemName || "Не указано"} (${cost} ₸)`;
         break;
       case "transport":
-        title = `Транспорт: ${item.salonName} - ${item.carName} (${cost} ₸)`;
+        title = `Транспорт: ${item.salonName || "Не указано"} - ${item.carName || "Не указано"} (${cost} ₸)`;
         break;
       case "goods":
-        title = `Товар: ${item.item_name} (${cost} ₸)`;
+        title = `Товар: ${item.item_name || "Не указано"} (${cost} ₸)`;
         break;
       case "jewelry":
-        title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
+        title = `Ювелирные изделия: ${item.storeName || "Не указано"} - ${item.itemName || "Не указано"} (${cost} ₸)`;
         break;
       default:
         title = "Неизвестный элемент";
@@ -622,7 +488,7 @@ const renderAddItem = useCallback(
           style={styles.detailsIconButton}
           onPress={() => {
             console.log("Magnify button pressed for item:", item);
-            openDetailsModal(item); // Use openDetailsModal
+            openDetailsModal(item);
           }}
         >
           <Icon name="search" size={20} color={MODAL_COLORS.icon} />
@@ -630,16 +496,8 @@ const renderAddItem = useCallback(
       </View>
     );
   },
-  [
-    filteredData,
-    handleAddItem,
-    updateCategories,
-    onClose,
-    openDetailsModal, // Ensure dependency is correct
-  ]
+  [filteredData, handleAddItem, updateCategories, onClose, openDetailsModal]
 );
-
-
 
 
 
@@ -1036,16 +894,7 @@ const SelectedItem = ({
         </Text>
         <View style={styles.actions}>
        
-        {/* <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => {
-            console.log("Magnify button pressed for item:", item);
-            openDetailsModal(item); // Use openDetailsModal
-            if (onClose) onClose();
-          }}
->
-  <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
-</TouchableOpacity> */}
+  
 
   <TouchableOpacity
             style={styles.actionButton} 
@@ -1515,24 +1364,54 @@ const CreateEventScreen = ({ navigation, route }) => {
     });
   }, []);
 
-  const combinedData = useMemo(() => { // All available items from API
-    const dataArray = [
-      ...(data.restaurants || []).map((item) => ({ ...item, type: "restaurant" })),
-      ...(data.clothing || []).map((item) => ({ ...item, type: "clothing" })),
-      ...(data.tamada || []).map((item) => ({ ...item, type: "tamada" })),
-      ...(data.programs || []).map((item) => ({ ...item, type: "program" })),
-      ...(data.traditionalGifts || []).map((item) => ({ ...item, type: "traditionalGift" })),
-      ...(data.flowers || []).map((item) => ({ ...item, type: "flowers" })),
-      ...(data.cakes || []).map((item) => ({ ...item, type: "cake" })),
-      ...(data.alcohol || []).map((item) => ({ ...item, type: "alcohol" })),
-      ...(data.transport || []).map((item) => ({ ...item, type: "transport" })),
-      ...(data.goods || []).map((item) => ({ ...item, type: "goods" })),
-      ...(data.jewelry || []).map((item) => ({ ...item, type: "jewelry" })),
-    ].filter((item) => item.type !== "goods" || item.category !== "Прочее");
-    return dataArray.sort(
-      (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
-    );
-  }, [data]);
+  // const combinedData = useMemo(() => { // All available items from API
+  //   const dataArray = [
+  //     ...(data.restaurants || []).map((item) => ({ ...item, type: "restaurant" })),
+  //     ...(data.clothing || []).map((item) => ({ ...item, type: "clothing" })),
+  //     ...(data.tamada || []).map((item) => ({ ...item, type: "tamada" })),
+  //     ...(data.programs || []).map((item) => ({ ...item, type: "program" })),
+  //     ...(data.traditionalGifts || []).map((item) => ({ ...item, type: "traditionalGift" })),
+  //     ...(data.flowers || []).map((item) => ({ ...item, type: "flowers" })),
+  //     ...(data.cakes || []).map((item) => ({ ...item, type: "cake" })),
+  //     ...(data.alcohol || []).map((item) => ({ ...item, type: "alcohol" })),
+  //     ...(data.transport || []).map((item) => ({ ...item, type: "transport" })),
+  //     ...(data.goods || []).map((item) => ({ ...item, type: "goods" })),
+  //     ...(data.jewelry || []).map((item) => ({ ...item, type: "jewelry" })),
+  //   ].filter((item) => item.type !== "goods" || item.category !== "Прочее");
+  //   return dataArray.sort(
+  //     (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
+  //   );
+  // }, [data]);
+
+
+
+
+  const combinedData = useMemo(() => {
+  const dataArray = [
+    ...(data.restaurants || []).map((item) => ({ ...item, type: "restaurant" })),
+    ...(data.clothing || []).map((item) => ({ ...item, type: "clothing" })),
+    ...(data.tamada || []).map((item) => ({ ...item, type: "tamada" })),
+    ...(data.programs || []).map((item) => ({ ...item, type: "program" })),
+    ...(data.traditionalGifts || []).map((item) => ({ ...item, type: "traditionalGift" })),
+    ...(data.flowers || []).map((item) => ({ ...item, type: "flowers" })),
+    ...(data.cakes || []).map((item) => ({ ...item, type: "cake" })),
+    ...(data.alcohol || []).map((item) => ({ ...item, type: "alcohol" })),
+    ...(data.transport || []).map((item) => ({ ...item, type: "transport" })),
+    ...(data.goods || []).map((item) => ({ ...item, type: "goods" })),
+    ...(data.jewelry || []).map((item) => ({ ...item, type: "jewelry" })),
+  ].filter((item) => item && item.id && item.type && (item.type !== "goods" || item.category !== "Прочее"));
+  return dataArray.sort(
+    (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
+  );
+}, [data]);
+
+
+useEffect(() => {
+  setFilteredData((prev) =>
+    prev.filter((item) => item && item.id && item.type)
+  );
+}, []);
+
 
   //  const handleRemoveCategory = useCallback(
   //   (category) => {
@@ -2226,17 +2105,7 @@ const openDetailsModal = (item) => {
           </TouchableOpacity>
         </View>
 
-        {/* <AddItemModal
-          visible={addItemModalVisible}
-          onClose={() => setAddItemModalVisible(false)}
-          filteredItems={combinedData} // All available items from API
-          filteredData={filteredData} // Currently selected items
-          handleAddItem={handleAddItem}
-          setDetailsModalVisible={setDetailsModalVisible}
-          setSelectedItem={setSelectedItem}
-          quantities={quantities}
-          updateCategories={updateCategories}
-        /> */}
+   
 
    <AddItemModal
   visible={addItemModalVisible}
@@ -2640,608 +2509,6 @@ const openDetailsModal = (item) => {
   );
 };
 
-
-
-// const styles = StyleSheet.create({
-//   loaderOverlay: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     backgroundColor: MODAL_COLORS.overlayBackground, 
-//   },
-//   loaderContainer: {
-//     backgroundColor: MODAL_COLORS.cardBackground, 
-//     borderRadius: 15,
-//     padding: 25, 
-//     alignItems: "center",
-//     shadowColor: MODAL_COLORS.shadow,
-//     shadowOffset: { width: 0, height: 4 },
-//     shadowOpacity: 0.3,
-//     shadowRadius: 8,
-//     elevation: 5,
-//   },
-//   loaderText: {
-//     marginTop: 15, 
-//     fontSize: 17, 
-//     color: MODAL_COLORS.textPrimary,
-//     fontWeight: "500",
-//   },
-
-//   topPatternContainer: {
-//     position: "absolute",
-//     bottom: 0,
-//     width: "100%",
-//     height: "20%",
-//     zIndex: 1,
-//     resizeMode: "cover",
-//     opacity: 0.8,
-//     marginBottom: "10%", 
-//   },
-//   categoryButton: { // For main screen category items
-//     flex: 1, // Take available width in its row part
-//     height: 50,
-//     borderRadius: 10,
-//     overflow: "hidden",
-//     shadowColor: COLORS.shadow, 
-//     shadowOffset: { width: 0, height: 5 },
-//     shadowOpacity: 0.5,
-//     shadowRadius: 8,
-//     elevation: 5,
-//     marginVertical: 2,
-//   },
-//   categoryButtonAdd: { // Specifically for the "+" add button on main screen
-//     width: 60, // Fixed width for the "+" button
-//     height: 50,
-//     borderRadius: 10,
-//     overflow: 'hidden',
-//     shadowColor: COLORS.shadow,
-//     shadowOffset: { width: 0, height: 5 },
-//     shadowOpacity: 0.5,
-//     shadowRadius: 8,
-//     elevation: 5,
-//     marginVertical: 2,
-//   },
-//   categoryButtonGradient: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     borderWidth: 2,
-//     borderColor: "#5A4032", 
-//     borderRadius: 10,
-//   },
-//   categoryPlusText: {
-//     fontSize: 24,
-//     color: COLORS.white, 
-//     fontWeight: "bold",
-//   },
-//   categoryText: {
-//     fontSize: 16,
-//     color: COLORS.white, 
-//     fontWeight: "600",
-//     textAlign: "center",
-//     paddingHorizontal: 10,
-//   },
-//   disabledCategoryButton: {
-//     opacity: 0.5,
-//   },
-//   splashContainer: { flex: 1 },
-//   headerContainer: {
-//     paddingHorizontal: 20,
-//     marginTop: 20,
-//   },
-//   budgetContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     justifyContent: "space-between",
-//     marginBottom: 20,
-//   },
-//   categoryItemAdd: { // Wrapper for the "+" button
-//      width: "20%", // Adjusted width for the Add button container
-//     marginRight: 10,
-//   },
-//   budgetInput: {
-//     flex: 1,
-//     backgroundColor: "rgba(255, 255, 255, 0.2)",
-//     borderRadius: 10,
-//     padding: 10,
-//     marginRight: 10,
-//     color: COLORS.white, 
-//     fontSize: 16,
-//   },
-//   guestInput: {
-//     flex: 0.6, // Slightly less space than budget
-//     backgroundColor: "rgba(255, 255, 255, 0.2)",
-//     borderRadius: 10,
-//     padding: 10,
-//     color: COLORS.white, 
-//     fontSize: 16,
-//   },
-//   logoContainer: { alignItems: "center", marginVertical: 10, marginTop: "0%" }, // Reduced vertical margin
-//   potIcon: { width: 120, height: 120 }, // Slightly smaller
-//   potIcon2: { width: 50, height: 50 },
-//   potIcon3: { width: 70, height: 70, zIndex: 3 },
-//   listContainer: { flex: 1, paddingHorizontal: 20, marginTop: 10 }, // Added margin top
-//   scrollView: { flex: 1 },
-//   categoryGrid: {
-//     flexDirection: "column",
-//     alignItems: "stretch", // Stretch items to fill width
-//   },
-//   categoryItem: { // Wrapper for each category row on main screen
-//     width: "100%", // Full width
-//     // padding: 2, // Remove if categoryRow handles spacing
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-//   categoryRow: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     marginBottom: 10,
-//     width: '100%', // Ensure row takes full width
-//   },
-//   removeCategoryButton: { // Image toggle button for category enable/disable
-//     marginRight: 10,
-//     padding: 5, // Add some padding for touch area
-//   },
-//   bottomPadding: { height: 20 },
-//   bottomContainer: {
-//     paddingHorizontal: 20,
-//     paddingBottom: 20,
-//     backgroundColor: "transparent",
-//     zIndex: 5,
-//     marginBottom: "20%", 
-//   },
-//   nextButton: {
-//     borderRadius: 25,
-//     overflow: "hidden",
-//     marginVertical: 5,
-//     alignItems: "center",
-//     zIndex: 6,
-//   },
-  
-//   modalOverlay: {
-//     flex: 1,
-//     backgroundColor: MODAL_COLORS.overlayBackground,
-//     // justifyContent: "flex-end", // Default for bottom sheets, overridden for centered
-//   },
-//   addModalContainer: { // For AddItemModal & CategoryItemsModal (bottom sheet)
-//     backgroundColor: MODAL_COLORS.background,
-//     borderTopLeftRadius: 20,
-//     borderTopRightRadius: 20,
-//     width: "100%",
-//     maxHeight: SCREEN_HEIGHT * 0.9,
-//     paddingTop: 10, 
-//     paddingBottom: Dimensions.get('window').height > 700 ? 20 : 10,
-//     shadowColor: MODAL_COLORS.shadow,
-//     shadowOffset: { width: 0, height: -3 },
-//     shadowOpacity: 0.2,
-//     shadowRadius: 5,
-//     elevation: 10,
-//     flex: 1, // Ensure it takes up space correctly if SafeAreaView is parent
-//   },
-//   modalHeader: { 
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     paddingHorizontal: 20,
-//     paddingBottom: 16,
-//     marginBottom: 10, 
-//     borderBottomWidth: 1,
-//     borderBottomColor: MODAL_COLORS.separator,
-//   },
-//   modalTitle: { 
-//     fontSize: 20, 
-//     fontWeight: "600",
-//     color: MODAL_COLORS.textPrimary,
-//     flexShrink: 1, // Allow title to shrink if close button needs space
-//     marginRight: 10, // Space before close button if title is long
-//   },
-//   modalCloseButton: { 
-//     padding: 8,
-//     // position: 'absolute', // Only if needed for specific layout
-//     // right: 10,
-//     // top: -2, 
-//   },
-//   addModalSearchContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: MODAL_COLORS.inputBackground,
-//     borderRadius: 10,
-//     paddingHorizontal: 15,
-//     marginHorizontal: 20, 
-//     marginBottom: 15,
-//     borderWidth: 1,
-//     borderColor: MODAL_COLORS.inputBorder,
-//   },
-//   addModalSearchIcon: {
-//     marginRight: 10,
-//   },
-//   addModalSearchInput: {
-//     flex: 1,
-//     paddingVertical: 12,
-//     fontSize: 16,
-//     color: MODAL_COLORS.textPrimary,
-//   },
-//   addModalClearIcon: { 
-//     padding: 5, 
-//   },
-//   addModalFilterScroll: {
-//     maxHeight: SCREEN_HEIGHT * 0.25, // Allow a bit more space for filters
-//     paddingHorizontal: 20, 
-//     marginBottom: 10,
-//   },
-//   addModalFilterLabel: {
-//     fontSize: 16,
-//     fontWeight: "600",
-//     color: MODAL_COLORS.textPrimary,
-//     marginBottom: 10,
-//     marginTop: 10,
-//   },
-//   filterButtonBase: {
-//     paddingVertical: 10,
-//     paddingHorizontal: 18,
-//     borderRadius: 20,
-//     marginRight: 10,
-//     marginBottom: 10,
-//     borderWidth: 1.5, 
-//   },
-//   filterButtonTextBase: {
-//     fontSize: 14,
-//     fontWeight: '500',
-//   },
-//   addModalTypeButton: { 
-//     backgroundColor: MODAL_COLORS.inactiveFilter,
-//     borderColor: MODAL_COLORS.inputBorder, 
-//   },
-//   addModalTypeButtonActive: { 
-//     backgroundColor: MODAL_COLORS.activeFilter,
-//     borderColor: MODAL_COLORS.activeFilter, 
-//   },
-//   addModalTypeButtonText: { 
-//     color: MODAL_COLORS.inactiveFilterText,
-//   },
-//   addModalTypeButtonTextActive: { 
-//     color: MODAL_COLORS.activeFilterText,
-//   },
-//   addModalDistrictButton: {
-//     backgroundColor: MODAL_COLORS.inactiveFilter,
-//     borderColor: MODAL_COLORS.inputBorder,
-//   },
-//   addModalDistrictButtonActive: {
-//     backgroundColor: MODAL_COLORS.activeFilter,
-//     borderColor: MODAL_COLORS.activeFilter,
-//   },
-//   addModalDistrictButtonText: {
-//     color: MODAL_COLORS.inactiveFilterText,
-//   },
-//   addModalDistrictButtonTextActive: {
-//     color: MODAL_COLORS.activeFilterText,
-//   },
-//   addModalPriceButton: {
-//     backgroundColor: MODAL_COLORS.inactiveFilter,
-//     borderColor: MODAL_COLORS.inputBorder,
-//   },
-//   addModalPriceButtonActive: {
-//     backgroundColor: MODAL_COLORS.activeFilter,
-//     borderColor: MODAL_COLORS.activeFilter,
-//   },
-//   addModalPriceButtonText: {
-//     color: MODAL_COLORS.inactiveFilterText,
-//   },
-//   addModalPriceButtonTextActive: {
-//     color: MODAL_COLORS.activeFilterText,
-//   },
-//   addModalScrollView: { 
-//     flex: 1,
-//   },
-//   addModalItemList: { 
-//     paddingHorizontal: 16, 
-//     paddingBottom: 20,
-//     flexGrow: 1,
-//   },
-//   addModalItemCard: { 
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: MODAL_COLORS.cardBackground,
-//     borderRadius: 12,
-//     padding: 15, 
-//     marginVertical: 8,
-//     shadowColor: MODAL_COLORS.shadow,
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.8,
-//     shadowRadius: 4,
-//     elevation: 3,
-//   },
-//   addModalItemContent: { 
-//     flex: 1,
-//     flexDirection: 'row', // To align icon and text
-//     alignItems: 'center',
-//     marginRight: 10, 
-//   },
-//   disabledItemContent: { 
-//     opacity: 0.6,
-//   },
-//   addModalItemText: { 
-//     fontSize: 16,
-//     fontWeight: '500',
-//     color: MODAL_COLORS.textPrimary,
-//     flexShrink: 1, // Allow text to shrink if icon takes space
-//     // marginBottom: 4, 
-//   },
-//   addModalItemCount: { 
-//     fontSize: 13,
-//     fontWeight: "600",
-//     color: MODAL_COLORS.activeFilter, 
-//     marginLeft: 'auto', // Push to the right if in same row as title
-//   },
-//   detailsIconButton: { 
-//     padding: 10,
-//     borderRadius: 8, 
-//     backgroundColor: MODAL_COLORS.inactiveFilter, 
-//   },
-//   addModalEmptyText: {
-//     fontSize: 16,
-//     color: MODAL_COLORS.textSecondary,
-//     textAlign: "center",
-//     marginTop: 40, 
-//     paddingHorizontal: 20,
-//   },
-//   card: { 
-//     backgroundColor: MODAL_COLORS.cardBackground, 
-//     borderRadius: 12, 
-//     padding: 18, 
-//     marginVertical: 10, 
-//     marginHorizontal: 16, 
-//     shadowColor: MODAL_COLORS.shadow,
-//     shadowOffset: { width: 0, height: 3 },
-//     shadowOpacity: 0.1, 
-//     shadowRadius: 6,
-//     elevation: 4,
-//   },
-//   header: { 
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "flex-start", 
-//     marginBottom: 12,
-//   },
-//   titleText: { 
-//     fontSize: 16, 
-//     fontWeight: "600",
-//     color: MODAL_COLORS.textPrimary,
-//     flex: 1, 
-//     marginRight: 8, 
-//   },
-//   actions: { 
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   actionButton: { 
-//     padding: 8, 
-//     borderRadius: 8,
-//     backgroundColor: MODAL_COLORS.inactiveFilter, 
-//     marginLeft: 6, 
-//   },
-//   controlRow: { 
-//     flexDirection: "row",
-//     alignItems: "center",
-//     justifyContent: "space-between",
-//     marginBottom: 12, 
-//   },
-//   label: { 
-//     fontSize: 15,
-//     fontWeight: "500",
-//     color: MODAL_COLORS.textSecondary, 
-//     marginRight: 10,
-//   },
-//   quantityContainer: { 
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: MODAL_COLORS.inputBackground, 
-//     borderRadius: 8,
-//     borderWidth: 1,
-//     borderColor: MODAL_COLORS.inputBorder,
-//     paddingHorizontal: 4, 
-//   },
-//   quantityButton: { 
-//     padding: 10,
-//   },
-//   input: { 
-//     width: 56, 
-//     height: 38, 
-//     fontSize: 15,
-//     fontWeight: "500",
-//     color: MODAL_COLORS.textPrimary,
-//     textAlign: "center",
-//     backgroundColor: MODAL_COLORS.cardBackground, 
-//     borderRadius: 6,
-//     marginHorizontal: 6, 
-//   },
-//   totalCost: { 
-//     fontSize: 15, 
-//     fontWeight: "600",
-//     color: MODAL_COLORS.activeFilter, 
-//     marginLeft: 'auto', 
-//   },
-//   selectedItemContainer: { 
-//     // No specific style, relies on item margins
-//   },
-//   categoryHeader: { 
-//     fontSize: 18,
-//     fontWeight: '600',
-//     color: MODAL_COLORS.textPrimary,
-//     marginBottom: 10,
-//     marginTop: 15, 
-//     paddingHorizontal: 20, 
-//   },
-//   categoryHeaderSummary: { // For summary modal
-//     fontSize: 16,
-//     fontWeight: '600',
-//     color: MODAL_COLORS.textPrimary,
-//     marginBottom: 8,
-//     // paddingHorizontal: 20, // Not needed if items have padding
-//   },
-//   detailsModalContainer: { 
-//     backgroundColor: MODAL_COLORS.cardBackground,
-//     borderRadius: 15,
-//     width: "90%", 
-//     padding: 20,
-//     alignSelf: 'center', 
-//     shadowColor: MODAL_COLORS.shadow,
-//     shadowOffset: { width: 0, height: 5 },
-//     shadowOpacity: 0.3,
-//     shadowRadius: 10,
-//     elevation: 5,
-//     maxHeight: SCREEN_HEIGHT * 0.8, 
-//   },
-//   detailsModalContent: {
-//     marginBottom: 20, 
-//   },
-//   detailsModalText: {
-//     fontSize: 16,
-//     color: MODAL_COLORS.textPrimary, 
-//     marginBottom: 10,
-//     lineHeight: 22, 
-//   },
-//   modalContent: { // For CreateEvent (save) Modal
-//     backgroundColor: MODAL_COLORS.cardBackground,
-//     borderRadius: 15,
-//     width: "90%",
-//     maxHeight: SCREEN_HEIGHT * 0.85,
-//     padding: 20,
-//     alignSelf: 'center',
-//     shadowColor: MODAL_COLORS.shadow,
-//     shadowOffset: { width: 0, height: 5 },
-//     shadowOpacity: 0.3,
-//     shadowRadius: 10,
-//     elevation: 5,
-//   },
-//   scrollViewContent: { 
-//     paddingBottom: 20, 
-//   },
-//   inputContainer: { 
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: MODAL_COLORS.inputBackground, 
-//     borderRadius: 10,
-//     paddingHorizontal: 15,
-//     marginBottom: 15,
-//     borderWidth: 1,
-//     borderColor: MODAL_COLORS.inputBorder,
-//   },
-//   inputIcon: { 
-//     marginRight: 10,
-//   },
-//   dateButton: { 
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: MODAL_COLORS.inputBackground, 
-//     borderRadius: 10,
-//     padding: 15, 
-//     marginBottom: 15,
-//     borderWidth: 1,
-//     borderColor: MODAL_COLORS.inputBorder,
-//   },
-//   buttonIcon: { 
-//     marginRight: 10,
-//   },
-//   dateButtonText: {
-//     fontSize: 16,
-//     color: MODAL_COLORS.textPrimary,
-//   },
-//   calendar: { 
-//     borderRadius: 10,
-//     marginBottom: 15,
-//   },
-//   subtitle: { 
-//     fontSize: 18,
-//     fontWeight: "600",
-//     color: MODAL_COLORS.textPrimary,
-//     marginBottom: 10,
-//     marginTop: 5, 
-//   },
-//   itemsContainer: { 
-//     marginBottom: 20,
-//   },
-//   itemContainer: { 
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: MODAL_COLORS.inactiveFilter, 
-//     borderRadius: 8,
-//     padding: 12, 
-//     marginBottom: 8, 
-//   },
-//   itemIcon: { 
-//     marginRight: 10,
-//   },
-//   itemText: { 
-//     fontSize: 14, 
-//     color: MODAL_COLORS.textPrimary,
-//     flex: 1, 
-//     lineHeight: 18,
-//   },
-//   noItems: { 
-//     fontSize: 16,
-//     color: MODAL_COLORS.textSecondary,
-//     textAlign: "center",
-//     paddingVertical: 20, 
-//   },
-//   totalContainer: { 
-//     marginBottom: 10,
-//     paddingTop: 10, 
-//     borderTopWidth: 1, 
-//     borderTopColor: MODAL_COLORS.separator,
-//   },
-//   totalText: { 
-//     fontSize: 17, 
-//     fontWeight: "600",
-//     color: MODAL_COLORS.textPrimary,
-//     marginBottom: 5,
-//   },
-//   budgetInfo: { 
-//     fontSize: 16,
-//     color: MODAL_COLORS.textPrimary, 
-//   },
-//   budgetError: { 
-//     color: COLORS.error, 
-//     fontWeight: 'bold',
-//   },
-//   modalButtonContainer: { 
-//     flexDirection: "row", 
-//     justifyContent: "center", 
-//     marginTop: 20,
-//   },
-//   modalButton: { 
-//     flexDirection: "row",
-//     alignItems: "center",
-//     justifyContent: 'center', 
-//     paddingVertical: 14, 
-//     paddingHorizontal: 25, 
-//     borderRadius: 10, 
-//     marginHorizontal: 10, 
-//   },
-//   modalButton2: { // For "Подробнее" in DetailsModal
-//     flexDirection: "row",
-//     alignItems: "center",
-//     justifyContent: 'center',
-//     paddingVertical: 14,
-//     paddingHorizontal: 20, 
-//     borderRadius: 10,
-//     backgroundColor: MODAL_COLORS.primaryActionEnd, 
-//   },
-//   confirmButton: { 
-//     backgroundColor: MODAL_COLORS.primaryActionEnd, 
-//     shadowColor: 'rgba(0,0,0,0.2)',
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.8,
-//     shadowRadius: 3,
-//     elevation: 2,
-//   },
-//   modalButtonText: { 
-//     fontSize: 16,
-//     color: MODAL_COLORS.activeFilterText, 
-//     fontWeight: "600",
-//     marginLeft: 8, 
-//   },
-// });
 
 const styles = StyleSheet.create({
   loaderOverlay: {
@@ -3664,7 +2931,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
   },
   input: {
-    width: 40,
+    width: 30,
     height: 38,
     fontSize: 13,
     fontWeight: "500",

@@ -209,7 +209,7 @@ export default function ItemEditScreen() {
         case 'program': await api.deleteProgram(itemId); break;
         case 'traditionalGift': await api.deleteTraditionalGift(itemId); break;
         case 'flowers': await api.deleteFlowers(itemId); break;
-        case 'cake': await api.deleteCake(itemId); break;
+        case 'cake': await api.deleteCakes(itemId); break;
         case 'alcohol': await api.deleteAlcohol(itemId); break;
         case 'goods': await api.deleteGoodsById(itemId); break;
         default: throw new Error('Неизвестный тип объекта');

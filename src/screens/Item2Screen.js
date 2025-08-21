@@ -1308,7 +1308,7 @@ export default function Item2Screen({ navigation }) {
           if (!formData.name) {
             throw new Error('Заполните обязательное поле: Наименование салона');
           }
-          response = await api.createCake({
+          response = await api.createCakes({
             name: formData.name,
             address: formData.address || '',
             phone: formData.phone || '',
@@ -1341,7 +1341,7 @@ export default function Item2Screen({ navigation }) {
           if (!formData.category || !formData.item_name) {
             throw new Error('Заполните обязательные поля: Категория и Название товара');
           }
-          response = await api.createGood({
+          response = await api.createGoods({
             category: formData.category,
             item_name: formData.item_name,
             description: formData.description || '',

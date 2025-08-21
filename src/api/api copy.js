@@ -886,7 +886,7 @@ export default {
     }),
 
   // Торты
-  createCake: (data) =>
+  createCakes: (data) =>
     api.post('/api/cakes', data).catch((error) => {
       throw new Error(`Ошибка создания торта: ${error.response?.data?.message || error.message}`);
     }),
