@@ -1558,9 +1558,8 @@ const openDetailsModal = async (item) => {
     const details = await fetchItemDetails(item.item_type, item.item_id);
     setSelectedItem(details ? { ...item, ...details } : item);
 
-    const normalizedItemType = item.item_type.toLowerCase().replace(/s$/, '');
     const filesResponse = await axios.get(
-      `${BASE_URL}/api/${normalizedItemType}/${item.item_id}/files`
+      `${BASE_URL}/api/${item.item_type}/${item.item_id}/files`
     );
     setFiles(filesResponse.data || []);
     setErrorFiles(null);
@@ -2827,23 +2826,24 @@ return (
 
               {/* Details */}
               <Text style={styles.detailLabel}>Название:</Text>
-              <Text style={styles.detailValue}>{selectedItem.name || selectedItem.item_name}</Text>
-
+              <Text style={styles.detailValue}>{selectedItem.name || selectedItem.item_name|| selectedItem.alcoholName 
+              ||selectedItem.itemName ||selectedItem.teamName || selectedItem[0].name}</Text>
+                <Text></Text>
               <Text style={styles.detailLabel}>Тип:</Text>
-              <Text style={styles.detailValue}>{selectedItem.item_type}</Text>
-
+              <Text style={styles.detailValue}>{selectedItem.item_type }</Text>
+ <Text></Text>
               <Text style={styles.detailLabel}>Стоимость:</Text>
               <Text style={styles.detailValue}>{selectedItem.total_cost}</Text>
-
+   <Text></Text>
               <Text style={styles.detailLabel}>Адрес:</Text>
-              <Text style={styles.detailValue}>{selectedItem.address}</Text>
-
+              <Text style={styles.detailValue}>{selectedItem.address || selectedItem[0].address}</Text>
+   <Text></Text>
               <Text style={styles.detailLabel}>Район:</Text>
-              <Text style={styles.detailValue}>{selectedItem.district}</Text>
-
+              <Text style={styles.detailValue}>{selectedItem.district|| selectedItem[0].district}</Text>
+   <Text></Text>
               <Text style={styles.detailLabel}>Телефон:</Text>
-              <Text style={styles.detailValue}>{selectedItem.phone}</Text>
-
+              <Text style={styles.detailValue}>{selectedItem.phone||selectedItem[0].phone}</Text>
+   <Text></Text>
               {selectedItem.cakeType && (
                 <>
                   <Text style={styles.detailLabel}>Тип торта:</Text>
@@ -2853,7 +2853,7 @@ return (
             </View>
           )}
           <View style={styles.buttonRowModal}>
-            <Button title="Перейти к деталям" onPress={handleDetailsPress} color={COLORS.primary} />
+            {/* <Button title="Перейти к деталям" onPress={handleDetailsPress} color={COLORS.primary} /> */}
             <Button title="Закрыть" onPress={() => setDetailsModalVisible(false)} color={COLORS.error} />
           </View>
         </ScrollView>
