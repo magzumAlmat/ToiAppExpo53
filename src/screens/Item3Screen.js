@@ -1552,11 +1552,27 @@ const openServiceDetailsModal = async (service) => {
 const openDetailsModal = async (item) => {
   setAddItemModalVisible(false);
   setCategoryModalVisible(false);
-  const details = await fetchItemDetails(item.item_type, item.item_id);
-  setSelectedItem(details ? { ...item, ...details } : item);
-  console.log('selected item is - ',selectedItem)
-  setDetailsModalVisible(true);
-  console.log('Opening DetailsModal for item:', item);
+  setLoadingDetails(true);
+  setLoadingFiles(true);
+  try {
+    const details = await fetchItemDetails(item.item_type, item.item_id);
+    setSelectedItem(details ? { ...item, ...details } : item);
+
+    const normalizedItemType = item.item_type.toLowerCase().replace(/s$/, '');
+    const filesResponse = await axios.get(
+      `${BASE_URL}/api/${normalizedItemType}/${item.item_id}/files`
+    );
+    setFiles(filesResponse.data || []);
+    setErrorFiles(null);
+  } catch (error) {
+    console.error("Error in openDetailsModal:", error);
+    setErrorFiles('Ошибка загрузки данных: ' + error.message);
+    setFiles([]);
+  } finally {
+    setLoadingDetails(false);
+    setLoadingFiles(false);
+    setDetailsModalVisible(true);
+  }
 };
 
 const handleDetailsPress = () => {
@@ -2843,6 +2859,38 @@ return (
         </ScrollView>
       </SafeAreaView>
     </Modal>
+
+    {/* Fullscreen Image Modal */}
+    <Modal
+      visible={!!selectedImage}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setSelectedImage(null)}
+    >
+      <View style={styles.modalOverlay}>
+        <TouchableOpacity
+          style={styles.modalCloseButton}
+          onPress={() => setSelectedImage(null)}
+          activeOpacity={0.8}
+        >
+          <Icon name="close" size={30} color={COLORS.white} />
+        </TouchableOpacity>
+        <ImageProgress
+          source={{ uri: selectedImage }}
+          indicator={ProgressBar}
+          indicatorProps={{
+            color: COLORS.primary,
+            borderWidth: 0,
+            borderRadius: 0,
+            unfilledColor: COLORS.muted,
+            width: null,
+          }}
+          style={styles.fullscreenImage}
+          resizeMode="contain"
+        />
+      </View>
+    </Modal>
+
   </SafeAreaView>
 );
 }
