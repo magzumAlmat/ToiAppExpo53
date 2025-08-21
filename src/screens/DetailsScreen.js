@@ -484,7 +484,9 @@ import { COLORS, SIZES, FONTS } from '../constants/theme';
 const { width: screenWidth } = Dimensions.get('window');
 
 const DetailsScreen = ({ route }) => {
+
   const { item } = route.params;
+  console.log('Item= ',item)
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

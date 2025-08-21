@@ -44,9 +44,9 @@ const COLORS = {
   shadow: "#0000001A",
 };
 
+const { width: screenWidth } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-
-
   mediaSection: {
     marginBottom: 16,
   },
@@ -145,10 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-
-
-
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -214,7 +210,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     textAlign: "center",
-    height:'3rem',
   },
   actionButtonPrimary: {
     backgroundColor: COLORS.primary,
@@ -254,7 +249,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: 16,
-    height:'60%',
   },
   input: {
     borderWidth: 1,
@@ -342,12 +336,6 @@ const styles = StyleSheet.create({
   loader: {
     marginVertical: 16,
   },
-  errorText: {
-    color: COLORS.error,
-    fontSize: 14,
-    textAlign: "center",
-    marginVertical: 8,
-  },
   listContainer: {
     paddingBottom: 16,
   },
@@ -406,56 +394,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.muted,
     marginVertical: 4,
-  },
-  mediaSection: {
-    marginTop: 8,
-  },
-  mediaList: {
-    paddingVertical: 8,
-  },
-  card: {
-    marginRight: 8,
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  media: {
-    width: 100,
-    height: 100,
-  },
-  video: {
-    width: 100,
-    height: 100,
-  },
-  noFilesText: {
-    fontSize: 14,
-    color: COLORS.muted,
-  },
-  switchContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 8,
-  },
-  switchLabel: {
-    fontSize: 16,
-    color: COLORS.text,
-  },
-  switch: {
-    backgroundColor: COLORS.muted,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-  },
-  switchActive: {
-    backgroundColor: COLORS.primary,
-  },
-  switchText: {
-    color: COLORS.white,
-    fontSize: 14,
-  },
-  calendar: {
-    marginVertical: 8,
-    borderRadius: 8,
   },
   weddingItemsContainer: {
     marginTop: 8,
@@ -557,28 +495,8 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     fontWeight: "600",
   },
-  // detailContainer: {
-  //   backgroundColor: COLORS.background,
-  //   padding: 16,
-  //   borderRadius: 8,
-  //   marginBottom: 16,
-  // },
-  // detailLabel: {
-  //   fontSize: 16,
-  //   fontWeight: "600",
-  //   color: COLORS.text,
-  //   marginBottom: 4,
-  // },
-  // detailValue: {
-  //   fontSize: 16,
-  //   color: COLORS.muted,
-  //   marginBottom: 12,
-  // },
   detailContainer: {
     paddingBottom: 20, // Ensure space for the button
-  },
-  detail: {
-    marginVertical: 4,
   },
   detailLabel: {
     fontSize: 16,
@@ -588,88 +506,12 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 16,
     color: COLORS.muted,
-  },
-
-
-
-
-  serviceDetailsModalContainer: {
-    width: "90%",
-    maxHeight: "80%", // Ограничиваем максимальную высоту
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: COLORS.primary,
-  },
-  closeButton: {
-    padding: 10,
-  },
-  closeButtonText: {
-    fontSize: 18,
-    color: COLORS.error,
   },
   detailScrollContainer: {
     maxHeight: "90%", // Ограничиваем высоту области прокрутки
     marginBottom: 20,
   },
-  detailContainer: {
-    paddingBottom: 10,
-  },
-  detail: {
-    marginVertical: 4,
-  },
-  detailLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  detailValue: {
-    fontSize: 16,
-    color: COLORS.muted,
-    marginBottom: 5,
-  },
-  noItems: {
-    fontSize: 16,
-    color: COLORS.muted,
-    textAlign: "center",
-    marginVertical: 20,
-  },
-  createButton: {
-    paddingVertical: 10,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  createButtonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  loader: {
-    marginVertical: 20,
-  },
-
-
-
 });
-
-
-
-
 
 const determineCategory = (data) => {
   if (!data) return 'unknown';
@@ -720,14 +562,6 @@ const fieldLabelsByCategory = {
     district: 'Район',
     phone: 'Телефон',
   },
-  cake: {
-    name: "Название кондитерской",
-    cakeType: "Тип торта",
-    cost: "Стоимость",
-    address: "Адрес",
-    district: "Район",
-    phone: "Телефон",
-  },
   car: {
     salonName: 'Название салона',
     carName: 'Модель автомобиля',
@@ -757,27 +591,18 @@ const fieldLabelsByCategory = {
     district: 'Район',
     phone: 'Телефон',
   },
-
-// {"address": "ул. Масанчи 22", "alcoholName": "Ликер Baileys", "category": "Ликеры", "cost": 9000, "district": "Алмалинский", "id": 4, "phone": "+7 (703) 456-78-90", "salonName": "Ликерная", "supplier_id": 6}
   alcohol: {
     alcoholName: 'Название напитка',
     cost: 'Стоимость',
     category: 'Категория',
-    // supplier_id: 'ID поставщика',
      salonName: 'Название салона',
       district: 'Район',
     address:'Адрес',
-     
        phone: 'Телефон',
 
-    // Add other relevant fields based on API response
   },
 
 };
-
-
-const { width: screenWidth } = Dimensions.get('window');
-
 
 export default function Item3Screen() {
 
@@ -802,6 +627,7 @@ export default function Item3Screen() {
   const [loadingWeddings, setLoadingWeddings] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [addItemModalVisible, setAddItemModalVisible] = useState(false);
   const [weddingModalVisible, setWeddingModalVisible] = useState(false);
   const [editWeddingModalVisible, setEditWeddingModalVisible] = useState(false);
   const [wishlistModalVisible, setWishlistModalVisible] = useState(false);
@@ -1012,27 +838,6 @@ export default function Item3Screen() {
   }
 };
 
-  // const fetchEventCategoryDetails = async (id) => {
-  //   setLoadingDetails(true);
-  //   try {
-  //     const response = await api.getEventCategoryWithServices(id);
-  //     const details = response.data.data || response.data;
-  //     setCategoryDetails(details);
-  //     setCategoryServicesCache((prev) => ({
-  //       ...prev,
-  //       [id]: details.services || [],
-  //     }));
-  //     return details;
-  //   } catch (error) {
-  //     console.error("Error fetching category details:", error);
-  //     Alert.alert("Ошибка", "Не удалось загрузить детали категории");
-  //     setCategoryDetails(null);
-  //     return null;
-  //   } finally {
-  //     setLoadingDetails(false);
-  //   }
-  // };
-
   const fetchEventCategoryDetails = async (id) => {
   setLoadingDetails(true);
   try {
@@ -1053,84 +858,6 @@ export default function Item3Screen() {
     setLoadingDetails(false);
   }
 };
-
-
-
-
-// const fetchServiceDetails = async (serviceId, serviceType) => {
-//   setLoadingServiceDetails(true);
-//   setLoadingFiles(true);
-//   try {
-//     let normalizedServiceType = serviceType.toLowerCase();
-//     if (normalizedServiceType === 'flower') {
-//       normalizedServiceType = 'flowers';
-//     } else {
-//       normalizedServiceType = normalizedServiceType.replace(/s$/, '');
-//     }
-//     const methodMap = {
-//       restaurant: 'getRestaurantById',
-//       clothing: 'getClothingById',
-//       tamada: 'getTamadaById',
-//       program: 'getProgramById',
-//       traditionalgift: 'getTraditionalGiftById',
-//       flowers: 'getFlowersById',
-//       cake: 'getCakeById',
-//       alcohol: 'getAlcoholById',
-//       transport: 'getTransportById',
-//       jewelry: 'getJewelryById',
-//       wedding: 'getWeddingById',
-//       eventcategory: 'getEventCategoryById',
-//       wishlist: 'getWishlistById',
-//     };
-//     const methodName = methodMap[normalizedServiceType];
-//     if (!methodName || !api[methodName]) {
-//       throw new Error(`Неизвестный тип сервиса: ${normalizedServiceType}`);
-//     }
-//     const response = await api[methodName](serviceId);
-//     let data = response.data.data || response.data;
-
-//     // Handle array case for restaurants
-//     if (normalizedServiceType === 'restaurant' && Array.isArray(data)) {
-//       data = data.length > 0 ? data[0] : { name: 'Ресторан не найден', cost: null };
-//     }
-
-//     // Fetch media files
-//     try {
-//       const filesResponse = await axios.get(
-//         `${BASE_URL}/api/${normalizedServiceType}/${serviceId}/files`
-//       );
-
-//       console.log('FILE response= ',filesResponse)
-//       setFiles(filesResponse.data || []);
-//       setErrorFiles(null);
-//     } catch (fileError) {
-//       console.error(`Error fetching files for ${normalizedServiceType}/${serviceId}:`, fileError);
-//       setErrorFiles('Ошибка загрузки медиафайлов: ' + fileError.message);
-//       setFiles([]);
-//     }
-
-//     console.log(`Service Details for ${normalizedServiceType}/${serviceId}:`, JSON.stringify(data, null, 2));
-//     return {
-//       serviceId,
-//       serviceType: normalizedServiceType,
-//       ...data,
-//     };
-//   } catch (error) {
-//     console.error(`Error fetching service details for ${serviceType}/${serviceId}:`, error);
-//     Alert.alert('Ошибка', `Не удалось загрузить детали услуги: ${error.message}`);
-//     return {
-//       serviceId,
-//       serviceType: normalizedServiceType,
-//       name: 'Неизвестная услуга',
-//       cost: null,
-//     };
-//   } finally {
-//     setLoadingServiceDetails(false);
-//     setLoadingFiles(false);
-//   }
-// };
-
-
 
 const fetchServiceDetails = async (serviceId, serviceType) => {
   setLoadingServiceDetails(true);
@@ -1164,15 +891,13 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     const response = await api[methodName](serviceId);
     let data = response.data.data || response.data;
 
-    // Handle array case for restaurants
     if (normalizedServiceType === 'restaurant' && Array.isArray(data)) {
       data = data.length > 0 ? data[0] : { name: 'Ресторан не найден', cost: null };
     }
 
-    // Fetch media files using normalizedServiceType
     try {
       const filesResponse = await axios.get(
-        `${BASE_URL}/api/${normalizedServiceType}/${serviceId}/files` // Use normalizedServiceType
+        `${BASE_URL}/api/${normalizedServiceType}/${serviceId}/files`
       );
       console.log('FILE response=', filesResponse);
       setFiles(filesResponse.data || []);
@@ -1203,9 +928,6 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     setLoadingFiles(false);
   }
 };
-
-
-
 
   const fetchItemDetails = async (itemType, itemId) => {
     setLoadingDetails(true);
@@ -1241,9 +963,6 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       setLoadingDetails(false);
     }
   };
-
-
-
 
   const fetchFiles = async (goodId) => {
     setLoadingFiles(true);
@@ -1682,9 +1401,6 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     }
   };
 
-
-
-  
   const handleAddCustomGift = async () => {
     if (!formData.item_name) {
       Alert.alert("Ошибка", "Введите название подарка");
@@ -1801,124 +1517,6 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     setCategoryDetailsModalVisible(true);
   };
 
-  // const openServiceDetailsModal = async (service) => {
-  //   setServiceDetailsModalVisible(true);
-  //   setLoadingServiceDetails(true);
-  //   const normalizedServiceType = service.serviceType
-  //     .toLowerCase()
-  //     .replace(/s$/, "");
-  //   const details = await fetchServiceDetails(
-  //     service.serviceId,
-  //     normalizedServiceType
-  //   );
-  //   if (details) {
-  //     setSelectedService(details);
-  //   } else {
-  //     setSelectedService(service);
-  //     Alert.alert(
-  //       "Ошибка",
-  //       `Не удалось загрузить полные детали для услуги ${service.name}`
-  //     );
-  //   }
-  //   setLoadingServiceDetails(false);
-  // };
-
-
-//  const openServiceDetailsModal = async (service) => {
-//   if (!service.serviceId || !service.serviceType) {
-//     Alert.alert("Ошибка", "Некорректные данные услуги");
-//     return;
-//   }
-//   setServiceDetailsModalVisible(true);
-//   setLoadingServiceDetails(true);
-//   const normalizedServiceType = service.serviceType
-//     .toLowerCase()
-//     .replace(/s$/, "");
-//   const details = await fetchServiceDetails(service.serviceId, normalizedServiceType);
-//   setSelectedService(details || {
-//     serviceId: service.serviceId,
-//     serviceType: normalizedServiceType,
-//     name: service.name || "Неизвестная услуга",
-//     cost: service.cost || null,
-//   });
-//   setLoadingServiceDetails(false);
-// };
-
-
-
-
-// const openServiceDetailsModal = async (service) => {
-//   if (!service.serviceId || !service.serviceType) {
-//     Alert.alert("Ошибка", "Некорректные данные услуги");
-//     return;
-//   }
-//   setServiceDetailsModalVisible(true);
-//   setLoadingServiceDetails(true);
-//   const normalizedServiceType = service.serviceType
-//     .toLowerCase()
-//     .replace(/s$/, "");
-//   const details = await fetchServiceDetails(service.serviceId, normalizedServiceType);
-//   console.log('Setting selectedService:', JSON.stringify(details, null, 2));
-//   setSelectedService(details || {
-//     serviceId: service.serviceId,
-//     serviceType: normalizedServiceType,
-//     name: service.name || "Неизвестная услуга",
-//     cost: service.cost || null,
-//   });
-//   setLoadingServiceDetails(false);
-// };
-
-
-
-// const openServiceDetailsModal = async (service) => {
-//   if (!service.serviceId || !service.serviceType) {
-//     Alert.alert("Ошибка", "Некорректные данные услуги");
-//     return;
-//   }
-//   setServiceDetailsModalVisible(true);
-//   setLoadingServiceDetails(true);
-//   const normalizedServiceType = service.serviceType.toLowerCase().replace(/s$/, "");
-//   const details = await fetchServiceDetails(service.serviceId, normalizedServiceType);
-//   console.log('Setting selectedService:', JSON.stringify(details, null, 2));
-//   setSelectedService({
-//     ...details,
-//     originalServiceType: normalizedServiceType, // Store the original type
-//   } || {
-//     serviceId: service.serviceId,
-//     serviceType: normalizedServiceType,
-//     name: service.name || "Неизвестная услуга",
-//     cost: service.cost || null,
-//     originalServiceType: normalizedServiceType,
-//   });
-//   setLoadingServiceDetails(false);
-// };
-
-
-// const openServiceDetailsModal = async (service) => {
-//   if (!service.serviceId || !service.serviceType) {
-//     Alert.alert("Ошибка", "Некорректные данные услуги");
-//     return;
-//   }
-//   setServiceDetailsModalVisible(true);
-//   setLoadingServiceDetails(true);
-//   const normalizedServiceType = service.serviceType.toLowerCase().replace(/s$/, "");
-//   console.log(`Opening details for service: ${service.serviceId}, type: ${normalizedServiceType}`);
-//   const details = await fetchServiceDetails(service.serviceId, normalizedServiceType);
-//   console.log('Fetched service details:', JSON.stringify(details, null, 2));
-//   setSelectedService({
-//     ...details,
-//     originalServiceType: normalizedServiceType,
-//   } || {
-//     serviceId: service.serviceId,
-//     serviceType: normalizedServiceType,
-//     name: service.name || "Неизвестная услуга",
-//     cost: service.cost || null,
-//     originalServiceType: normalizedServiceType,
-//   });
-//   setLoadingServiceDetails(false);
-// };
-
-
 const openServiceDetailsModal = async (service) => {
   if (!service.serviceId || !service.serviceType) {
     Alert.alert("Ошибка", "Некорректные данные услуги");
@@ -1951,71 +1549,31 @@ const openServiceDetailsModal = async (service) => {
     // setEditWeddingModalVisible(true);
   };
 
-  // const openItemDetailsModal = async (weddingItem) => {
-  //   const normalizedItemType = weddingItem.item_type
-  //     .toLowerCase()
-  //     .replace(/s$/, "");
-  //   const details = await fetchItemDetails(
-  //     normalizedItemType,
-  //     weddingItem.item_id
-  //   );
-  //   setSelectedItem(details ? { ...weddingItem, ...details } : weddingItem);
-  //   setDetailsModalVisible(true);
-  // };
-
-
-
-
-
-
-
-// const openItemDetailsModal = async (weddingItem) => {
-//   const normalizedItemType = weddingItem.item_type
-//     .toLowerCase()
-//     .replace(/s$/, "");
-//   console.log(`Opening details for item: ${weddingItem.item_id}, type: ${normalizedItemType}`);
-//   const details = await fetchItemDetails(normalizedItemType, weddingItem.item_id);
-//   console.log('Fetched item details:', JSON.stringify(details, null, 2));
-//   setSelectedItem(details ? { ...weddingItem, ...details } : weddingItem);
-//   setServiceDetailsModalVisible(true);
-// };
-
-
-
-
-const openItemDetailsModal = async (weddingItem) => {
-  const normalizedItemType = weddingItem.item_type.toLowerCase().replace(/s$/, '');
-  console.log(`Opening details for item: ${weddingItem.item_id}, type: ${normalizedItemType}`);
-  setLoadingDetails(true);
-  setLoadingFiles(true);
-  try {
-    const details = await fetchItemDetails(normalizedItemType, weddingItem.item_id);
-    setSelectedItem(details ? { ...weddingItem, ...details } : weddingItem);
-
-    // Fetch media files
-    try {
-      const filesResponse = await axios.get(
-        `${BASE_URL}/api/${normalizedItemType}/${weddingItem.item_id}/files`
-      );
-      setFiles(filesResponse.data || []);
-      setErrorFiles(null);
-    } catch (fileError) {
-      console.error(`Error fetching files for ${normalizedItemType}/${weddingItem.item_id}:`, fileError);
-      setErrorFiles('Ошибка загрузки медиафайлов: ' + fileError.message);
-      setFiles([]);
-    }
-
-    setServiceDetailsModalVisible(true);
-  } catch (error) {
-    console.error(`Error opening item details:`, error);
-    Alert.alert('Ошибка', 'Не удалось загрузить детали элемента');
-  } finally {
-    setLoadingDetails(false);
-    setLoadingFiles(false);
-  }
+const openDetailsModal = async (item) => {
+  setAddItemModalVisible(false);
+  setCategoryModalVisible(false);
+  const details = await fetchItemDetails(item.item_type, item.item_id);
+  setSelectedItem(details ? { ...item, ...details } : item);
+  console.log('selected item is - ',selectedItem)
+  setDetailsModalVisible(true);
+  console.log('Opening DetailsModal for item:', item);
 };
 
-
+const handleDetailsPress = () => {
+  console.log("Navigation object:", navigation);
+  console.log("Selected item:", selectedItem);
+  if (selectedItem) {
+    setDetailsModalVisible(false);
+    setTimeout(() => {
+      navigation.navigate("Details", { item: selectedItem });
+      setSelectedItem(null);
+    }, 100);
+  } else {
+    console.warn("No selected item for navigation");
+    alert("Ошибка: Не выбран элемент для просмотра деталей.");
+    setDetailsModalVisible(false);
+  }
+};
 
   const onDateChange = (day) => {
     setWeddingDate(day.dateString);
@@ -2046,10 +1604,9 @@ const openItemDetailsModal = async (weddingItem) => {
         let categories = Array.isArray(categoriesResponse.data)
           ? categoriesResponse.data
           : categoriesResponse.data.data || [];
-        // console.log('Fetched категории мероприятий', JSON.stringify(categories, null, 2));
 
         if (route.params?.selectedCategories) {
-          // console.log('Полученные категории:', route.params.selectedCategories);
+
           setSelectedItems(route.params.selectedCategories);
 
           const existingCategoryNames = categories.map((cat) => cat.name);
@@ -2309,8 +1866,6 @@ const openItemDetailsModal = async (weddingItem) => {
   const renderEventCategoryItem = ({ item }) => {
     const filteredServices = categoryServicesCache[item.id] || [];
     const eventServices = item.EventServices || [];
-    // console.log(`Services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(filteredServices, null, 2));
-    // console.log(`EventServices for category ${item.name} (ID: ${item.id}):`, JSON.stringify(eventServices, null, 2));
 
     const allServices = [
       ...filteredServices,
@@ -2328,16 +1883,13 @@ const openItemDetailsModal = async (weddingItem) => {
     ];
 
     const groupedServices = groupItemsByCategory(allServices);
-    // console.log(`Grouped services for category ${item.name} (ID: ${item.id}):`, JSON.stringify(groupedServices, null, 2));
 
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.itemText}>
           {item.name} 
-          {/* ({item.status === "active" ? "Активно" : "Неактивно"}) */}
         </Text>
         <Text style={styles.itemSubText}>
-          {/* Описание: {item.description || "Нет описания"} */}
         </Text>
         {groupedServices.length > 0 ? (
           <View style={styles.weddingItemsContainer}>
@@ -2354,8 +1906,6 @@ const openItemDetailsModal = async (weddingItem) => {
                     >
                       <Text style={styles.subItemText}>
                         {group.name}
-                        {/* {service.name} */}
-                         {/* {service.cost ? `- ${service.cost} тг` : ""} */}
                       </Text>
                       <View style={styles.itemActions}>
                         <TouchableOpacity
@@ -2364,18 +1914,6 @@ const openItemDetailsModal = async (weddingItem) => {
                         >
                           <Text style={styles.detailsButtonText}>Подробнее</Text>
                         </TouchableOpacity>
-                        {/* <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() =>
-                            handleDeleteCategoryService(
-                              item.id,
-                              service.serviceId,
-                              service.serviceType
-                            )
-                          }
-                        >
-                          <Text style={styles.deleteButtonText}>Удалить</Text>
-                        </TouchableOpacity> */}
                       </View>
                     </View>
                   )}
@@ -2401,12 +1939,6 @@ const openItemDetailsModal = async (weddingItem) => {
           </View>
         )}
         <View style={styles.buttonRow}>
-          {/* <TouchableOpacity
-            style={styles.actionButtonPrimary}
-            onPress={() => openEditCategoryModal(item)}
-          >
-            <Text style={styles.actionButtonText}>Редактировать</Text>
-          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.actionButtonError}
             onPress={() => handleDeleteEventCategory(item.id)}
@@ -2425,13 +1957,7 @@ const openItemDetailsModal = async (weddingItem) => {
       <View style={styles.itemContainer}>
         <Text style={styles.itemText}>
           {item.name}
-           {/* ({item.date}) */}
         </Text>
-        {/* <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
-          <Text style={styles.itemSubText}>Общая сумма: {item.total_cost || 0} тг</Text>
-          <Text style={styles.itemSubText}>Потрачено: {item.paid_amount || 0} тг</Text>
-          <Text style={styles.itemSubText}>Остаток: {item.remaining_balance || 0} тг</Text>
-        </View> */}
         {groupedItems.length > 0 ? (
           <View style={styles.weddingItemsContainer}>
             {groupedItems.map((category) => (
@@ -2505,7 +2031,7 @@ const openItemDetailsModal = async (weddingItem) => {
                     <View style={styles.itemActions}>
                       <TouchableOpacity
                         style={styles.detailsButton}
-                        onPress={() => openItemDetailsModal(weddingItem)}
+                        onPress={() => openDetailsModal(weddingItem)}
                       >
                         <Text style={styles.detailsButtonText}>Подробнее</Text>
                       </TouchableOpacity>
@@ -2537,12 +2063,6 @@ const openItemDetailsModal = async (weddingItem) => {
           </View>
         )}
         <View style={styles.buttonRow}>
-          {/* <TouchableOpacity
-            style={styles.actionButtonPrimary}
-            onPress={() => openEditWeddingModal(item)}
-          >
-            <Text style={styles.actionButtonText}>Редактировать</Text>
-          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.actionButtonSecondary}
             onPress={() => {
@@ -2697,34 +2217,6 @@ const openItemDetailsModal = async (weddingItem) => {
     </TouchableOpacity>
   );
 
-  // const renderCategoryDetailsHeader = () => (
-  //   <View>
-  //     <Text style={styles.subtitle}>Детали категории</Text>
-  //     {loadingDetails ? (
-  //       <ActivityIndicator
-  //         size="large"
-  //         color={COLORS.primary}
-  //         style={styles.loader}
-  //       />
-  //     ) : categoryDetails ? (
-  //       <>
-  //         <Text style={styles.detail}>Название: {categoryDetails.name}</Text>
-  //         <Text style={styles.detail}>
-  //           Описание: {categoryDetails.description || "Нет описания"}
-  //         </Text>
-  //         <Text style={styles.detail}>
-  //           Статус:{" "}
-  //           {categoryDetails.status === "active" ? "Активно" : "Неактивно"}
-  //         </Text>
-  //         <Text style={styles.sectionTitle}>Услуги</Text>
-  //       </>
-  //     ) : (
-  //       <Text style={styles.noItems}>Детали недоступны</Text>
-  //     )}
-  //   </View>
-  // );
-
-
   const renderCategoryDetailsHeader = () => (
   <View>
     <Text style={styles.subtitle}>Детали категории</Text>
@@ -2737,9 +2229,7 @@ const openItemDetailsModal = async (weddingItem) => {
     ) : categoryDetails ? (
       <View>
         {Object.entries(categoryDetails).map(([key, value]) => {
-          // Skip rendering services array as it’s handled separately
           if (key === "services") return null;
-          // Handle nested objects or arrays by showing a summary
           const displayValue =
             typeof value === "object" && value !== null
               ? JSON.stringify(value)
@@ -2760,8 +2250,6 @@ const openItemDetailsModal = async (weddingItem) => {
 );
 
 
-
-
   const combinedData = [
     ...eventCategories.map((cat) => ({ type: "category", data: cat })),
     ...weddings.map((wed) => ({ type: "wedding", data: wed })),
@@ -2776,293 +2264,6 @@ const openItemDetailsModal = async (weddingItem) => {
     return null;
   };
 
-
-
-
-
-
-// Функция для определения категории на основе структуры данных
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const renderServiceDetailsModal = ({
-//   serviceDetailsModalVisible,
-//   setServiceDetailsModalVisible,
-//   selectedService,
-//   setSelectedService,
-//   loadingServiceDetails,
-//   selectedItem,
-//   setSelectedItem,
-// }) => {
-//   const isService = !!selectedService;
-//   const isItem = !!selectedItem;
-//   let data = isService ? selectedService : isItem ? selectedItem : null;
-
-//   // Handle array or nested object case
-//   if (data && Array.isArray(data)) {
-//     data = data.length > 0 ? data[0] : null;
-//   } else if (data && typeof data === 'object' && data.hasOwnProperty('0')) {
-//     data = data['0'];
-//   }
-
-//   // Determine category
-//   const category = isService
-//     ? selectedService?.originalServiceType || determineCategory(selectedService)
-//     : isItem
-//     ? selectedItem.item_type.toLowerCase().replace(/s$/, '')
-//     : 'unknown';
-
-//   const fieldLabels = fieldLabelsByCategory[category] || {
-//     name: 'Название',
-//     address: 'Адрес',
-//     cost: 'Стоимость',
-//     district: 'Район',
-//     phone: 'Телефон',
-//     type: 'Тип',
-//   };
-
-//   const handleScroll = (event) => {
-//     const contentOffsetX = event.nativeEvent.contentOffset.x;
-//     const carouselItemWidth = screenWidth - 32; // Adjust for padding
-//     const index = Math.round(contentOffsetX / carouselItemWidth);
-//     setActiveSlide(index);
-//   };
-
-//   const renderFileItem = ({ item: file }) => {
-//     const fileUrl = `${BASE_URL}/${file.path}`;
-
-//     if (file.mimetype.startsWith('image/')) {
-//       return (
-//         <TouchableOpacity
-//           style={styles.carouselItem}
-//           onPress={() => setSelectedImage(fileUrl)}
-//           activeOpacity={0.9}
-//         >
-//           <ImageProgress
-//             source={{ uri: fileUrl }}
-//             indicator={ProgressBar}
-//             indicatorProps={{
-//               color: COLORS.primary,
-//               borderWidth: 0,
-//               borderRadius: 0,
-//               unfilledColor: COLORS.muted,
-//               width: null,
-//             }}
-//             style={styles.media}
-//             resizeMode="cover"
-//           />
-//         </TouchableOpacity>
-//       );
-//     } else if (file.mimetype === 'video/mp4') {
-//       return (
-//         <View style={styles.carouselItem}>
-//           <Video
-//             source={{ uri: fileUrl }}
-//             style={styles.media}
-//             controls={true}
-//             resizeMode="cover"
-//           />
-//         </View>
-//       );
-//     } else {
-//       return (
-//         <View style={[styles.carouselItem, styles.unsupportedFile]}>
-//           <Icon name="broken-image" size={40} color={COLORS.muted} />
-//           <Text style={styles.caption}>Неподдерживаемый формат: {file.mimetype}</Text>
-//         </View>
-//       );
-//     }
-//   };
-
-//   return (
-//     <Modal visible={serviceDetailsModalVisible} animationType="fade" transparent={true}>
-//       <SafeAreaView style={styles.modalContainer}>
-//         <View style={styles.serviceDetailsModalContainer}>
-//           <View style={styles.modalHeader}>
-//             <Text style={styles.modalTitle}>Детали {isService ? 'услуги' : 'элемента'}</Text>
-//             <TouchableOpacity
-//               style={styles.closeButton}
-//               onPress={() => {
-//                 setServiceDetailsModalVisible(false);
-//                 setSelectedService(null);
-//                 setSelectedItem(null);
-//                 setFiles([]);
-//                 setSelectedImage(null);
-//               }}
-//             >
-//               <Text style={styles.closeButtonText}>✕</Text>
-//             </TouchableOpacity>
-//           </View>
-//           <ScrollView style={styles.detailScrollContainer}>
-//             {/* Media Section */}
-//             <View style={styles.mediaSection}>
-//               {loadingFiles ? (
-//                 <ActivityIndicator
-//                   size="large"
-//                   color={COLORS.primary}
-//                   style={styles.loader}
-//                 />
-//               ) : errorFiles ? (
-//                 <Text style={styles.errorText}>{errorFiles}</Text>
-//               ) : files && files.length > 0 ? (
-//                 <View>
-//                   <FlatList
-//                     data={files}
-//                     renderItem={renderFileItem}
-//                     keyExtractor={(file) => file.id.toString()}
-//                     horizontal
-//                     showsHorizontalScrollIndicator={false}
-//                     snapToInterval={screenWidth - 32}
-//                     snapToAlignment="center"
-//                     decelerationRate="fast"
-//                     contentContainerStyle={styles.mediaListContainer}
-//                     onScroll={handleScroll}
-//                     scrollEventThrottle={16}
-//                     initialNumToRender={1}
-//                     maxToRenderPerBatch={1}
-//                     windowSize={3}
-//                   />
-//                   {files.length > 1 && (
-//                     <View style={styles.paginationContainer}>
-//                       {files.map((_, index) => (
-//                         <View
-//                           key={index}
-//                           style={[
-//                             styles.paginationDot,
-//                             activeSlide === index
-//                               ? styles.paginationActiveDot
-//                               : styles.paginationInactiveDot,
-//                           ]}
-//                         />
-//                       ))}
-//                     </View>
-//                   )}
-//                 </View>
-//               ) : (
-//                 <View style={styles.noFilesContainer}>
-//                   <Icon name="image-not-supported" size={50} color={COLORS.muted} />
-//                   <Text style={styles.noFilesText}>Изображения или видео отсутствуют</Text>
-//                 </View>
-//               )}
-//             </View>
-//             {/* Details Section */}
-//             {loadingServiceDetails ? (
-//               <ActivityIndicator
-//                 size="large"
-//                 color={COLORS.primary}
-//                 style={styles.loader}
-//               />
-//             ) : data ? (
-//               <View style={styles.detailContainer}>
-//                 {Object.entries(fieldLabels).map(([key, label]) => {
-//                   const value = data[key];
-//                   if (value === undefined || value === null) return null;
-//                   const displayValue =
-//                     key === 'cost' || key === 'averageCost' || key === 'total_cost'
-//                       ? `${value} ₸`
-//                       : typeof value === 'object'
-//                       ? JSON.stringify(value)
-//                       : value;
-//                   return (
-//                     <View key={key} style={styles.detail}>
-//                       <Text style={styles.detailLabel}>{label}</Text>
-//                       <Text style={styles.detailValue}>{displayValue}</Text>
-//                     </View>
-//                   );
-//                 })}
-//                 {Object.entries(data).map(([key, value]) => {
-//                   if (
-//                     fieldLabels[key] ||
-//                     typeof value === 'function' ||
-//                     key.startsWith('_') ||
-//                     value === null ||
-//                     value === undefined ||
-//                     ['id', 'serviceId', 'item_id', 'originalServiceType', 'supplier_id', 'wedding_id', 'created_at', 'updated_at'].includes(
-//                       key.toLowerCase()
-//                     )
-//                   )
-//                     return null;
-//                   const displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
-//                   return (
-//                     <View key={key} style={styles.detail}>
-//                       <Text style={styles.detailLabel}>{key}</Text>
-//                       <Text style={styles.detailValue}>{displayValue}</Text>
-//                     </View>
-//                   );
-//                 })}
-//               </View>
-//             ) : (
-//               <Text style={styles.noItems}>Детали недоступны</Text>
-//             )}
-//           </ScrollView>
-//           <TouchableOpacity
-//             style={[styles.createButton, { backgroundColor: COLORS.error }]}
-//             onPress={() => {
-//               setServiceDetailsModalVisible(false);
-//               setSelectedService(null);
-//               setSelectedItem(null);
-//               setFiles([]);
-//               setSelectedImage(null);
-//             }}
-//           >
-//             <Text style={styles.createButtonText}>Закрыть</Text>
-//           </TouchableOpacity>
-//         </View>
-//         {/* Fullscreen Image Modal */}
-//         <Modal
-//           visible={!!selectedImage}
-//           transparent
-//           animationType="fade"
-//           onRequestClose={() => setSelectedImage(null)}
-//         >
-//           <View style={styles.modalOverlay}>
-//             <TouchableOpacity
-//               style={styles.modalCloseButton}
-//               onPress={() => setSelectedImage(null)}
-//               activeOpacity={0.8}
-//             >
-//               <Icon name="close" size={30} color={COLORS.white} />
-//             </TouchableOpacity>
-//             <ImageProgress
-//               source={{ uri: selectedImage }}
-//               indicator={ProgressBar}
-//               indicatorProps={{
-//                 color: COLORS.primary,
-//                 borderWidth: 0,
-//                 borderRadius: 0,
-//                 unfilledColor: COLORS.muted,
-//                 width: null,
-//               }}
-//               style={styles.fullscreenImage}
-//               resizeMode="contain"
-//             />
-//           </View>
-//         </Modal>
-//       </SafeAreaView>
-//     </Modal>
-//   );
-// };
-
-
-
-
-
-
-
-
-
-
 const renderServiceDetailsModal = ({
   serviceDetailsModalVisible,
   setServiceDetailsModalVisible,
@@ -3076,14 +2277,12 @@ const renderServiceDetailsModal = ({
   const isItem = !!selectedItem;
   let data = isService ? selectedService : isItem ? selectedItem : null;
 
-  // Handle array or nested object case
   if (data && Array.isArray(data)) {
     data = data.length > 0 ? data[0] : null;
   } else if (data && typeof data === 'object' && data.hasOwnProperty('0')) {
     data = data['0'];
   }
 
-  // Determine category
   const category = isService
     ? selectedService?.originalServiceType || determineCategory(selectedService)
     : isItem
@@ -3173,7 +2372,6 @@ const renderServiceDetailsModal = ({
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.detailScrollContainer}>
-            {/* Media Section */}
             <View style={styles.mediaSection}>
               {loadingFiles ? (
                 <ActivityIndicator
@@ -3224,7 +2422,6 @@ const renderServiceDetailsModal = ({
                 </View>
               )}
             </View>
-            {/* Details Section */}
             {loadingServiceDetails || loadingDetails ? (
               <ActivityIndicator
                 size="large"
@@ -3288,7 +2485,6 @@ const renderServiceDetailsModal = ({
             <Text style={styles.createButtonText}>Закрыть</Text>
           </TouchableOpacity>
         </View>
-        {/* Fullscreen Image Modal */}
         <Modal
           visible={!!selectedImage}
           transparent
@@ -3323,14 +2519,10 @@ const renderServiceDetailsModal = ({
   );
 };
 
-
-
-
 return (
   <SafeAreaView style={styles.container}>
     <Text style={styles.title}>Мои мероприятия</Text>
     <View style={styles.buttonRow}>
-      {/* Existing buttons */}
     </View>
     {loadingCategories || loadingWeddings ? (
       <ActivityIndicator
@@ -3361,7 +2553,6 @@ return (
       />
     )}
 
-    {/* Unified Service and Item Details Modal */}
     {renderServiceDetailsModal({
       serviceDetailsModalVisible,
       setServiceDetailsModalVisible,
@@ -3372,7 +2563,6 @@ return (
       setSelectedItem,
     })}
 
-    {/* Add Gift Modal */}
     <Modal
       visible={wishlistModalVisible}
       animationType="slide"
@@ -3391,7 +2581,6 @@ return (
       </SafeAreaView>
     </Modal>
 
-    {/* View Wishlist Modal */}
     <Modal
       visible={wishlistViewModalVisible}
       animationType="slide"
@@ -3410,7 +2599,6 @@ return (
       </SafeAreaView>
     </Modal>
 
-    {/* Create/Edit Category Modal */}
     <Modal
       visible={categoryModalVisible}
       animationType="slide"
@@ -3436,7 +2624,6 @@ return (
       </SafeAreaView>
     </Modal>
 
-    {/* Category Details Modal */}
     <Modal
       visible={categoryDetailsModalVisible}
       animationType="slide"
@@ -3454,7 +2641,6 @@ return (
       </SafeAreaView>
     </Modal>
 
-    {/* Create Wedding Modal */}
     <Modal
       visible={weddingModalVisible}
       animationType="slide"
@@ -3484,7 +2670,6 @@ return (
       </SafeAreaView>
     </Modal>
 
-    {/* Edit Wedding Modal */}
     <Modal
       visible={editWeddingModalVisible}
       animationType="slide"
@@ -3511,6 +2696,151 @@ return (
           <Button title="Обновить" onPress={handleUpdateWedding} color={COLORS.primary} />
           <Button title="Отмена" onPress={() => setEditWeddingModalVisible(false)} color={COLORS.error} />
         </View>
+      </SafeAreaView>
+    </Modal>
+
+    <Modal
+      visible={detailsModalVisible}
+      animationType="slide"
+      onRequestClose={() => setDetailsModalVisible(false)}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        <ScrollView>
+          <Text style={styles.subtitle}>Детали</Text>
+          {selectedItem && (
+            <View>
+              {/* Image Slider */}
+              <View style={styles.mediaSection}>
+                {loadingFiles ? (
+                  <ActivityIndicator
+                    size="large"
+                    color={COLORS.primary}
+                    style={styles.loader}
+                  />
+                ) : errorFiles ? (
+                  <Text style={styles.errorText}>{errorFiles}</Text>
+                ) : files && files.length > 0 ? (
+                  <View>
+                    <FlatList
+                      data={files}
+                      renderItem={({ item: file }) => {
+                        const fileUrl = `${BASE_URL}/${file.path}`;
+                        if (file.mimetype.startsWith('image/')) {
+                          return (
+                            <TouchableOpacity
+                              style={styles.carouselItem}
+                              onPress={() => setSelectedImage(fileUrl)}
+                              activeOpacity={0.9}
+                            >
+                              <ImageProgress
+                                source={{ uri: fileUrl }}
+                                indicator={ProgressBar}
+                                indicatorProps={{
+                                  color: COLORS.primary,
+                                  borderWidth: 0,
+                                  borderRadius: 0,
+                                  unfilledColor: COLORS.muted,
+                                  width: null,
+                                }}
+                                style={styles.media}
+                                resizeMode="cover"
+                              />
+                            </TouchableOpacity>
+                          );
+                        } else if (file.mimetype === 'video/mp4') {
+                          return (
+                            <View style={styles.carouselItem}>
+                              <Video
+                                source={{ uri: fileUrl }}
+                                style={styles.media}
+                                controls={true}
+                                resizeMode="cover"
+                              />
+                            </View>
+                          );
+                        } else {
+                          return (
+                            <View style={[styles.carouselItem, styles.unsupportedFile]}>
+                              <Icon name="broken-image" size={40} color={COLORS.muted} />
+                              <Text style={styles.caption}>Неподдерживаемый формат: {file.mimetype}</Text>
+                            </View>
+                          );
+                        }
+                      }}
+                      keyExtractor={(file) => file.id.toString()}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      snapToInterval={screenWidth - 32}
+                      snapToAlignment="center"
+                      decelerationRate="fast"
+                      contentContainerStyle={styles.mediaListContainer}
+                      onScroll={(event) => {
+                        const contentOffsetX = event.nativeEvent.contentOffset.x;
+                        const carouselItemWidth = screenWidth - 32;
+                        const index = Math.round(contentOffsetX / carouselItemWidth);
+                        setActiveSlide(index);
+                      }}
+                      scrollEventThrottle={16}
+                      initialNumToRender={1}
+                      maxToRenderPerBatch={1}
+                      windowSize={3}
+                    />
+                    {files.length > 1 && (
+                      <View style={styles.paginationContainer}>
+                        {files.map((_, index) => (
+                          <View
+                            key={index}
+                            style={[
+                              styles.paginationDot,
+                              activeSlide === index
+                                ? styles.paginationActiveDot
+                                : styles.paginationInactiveDot,
+                            ]}
+                          />
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                ) : (
+                  <View style={styles.noFilesContainer}>
+                    <Icon name="image-not-supported" size={50} color={COLORS.muted} />
+                    <Text style={styles.noFilesText}>Изображения или видео отсутствуют</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Details */}
+              <Text style={styles.detailLabel}>Название:</Text>
+              <Text style={styles.detailValue}>{selectedItem.name || selectedItem.item_name}</Text>
+
+              <Text style={styles.detailLabel}>Тип:</Text>
+              <Text style={styles.detailValue}>{selectedItem.item_type}</Text>
+
+              <Text style={styles.detailLabel}>Стоимость:</Text>
+              <Text style={styles.detailValue}>{selectedItem.total_cost}</Text>
+
+              <Text style={styles.detailLabel}>Адрес:</Text>
+              <Text style={styles.detailValue}>{selectedItem.address}</Text>
+
+              <Text style={styles.detailLabel}>Район:</Text>
+              <Text style={styles.detailValue}>{selectedItem.district}</Text>
+
+              <Text style={styles.detailLabel}>Телефон:</Text>
+              <Text style={styles.detailValue}>{selectedItem.phone}</Text>
+
+              {selectedItem.cakeType && (
+                <>
+                  <Text style={styles.detailLabel}>Тип торта:</Text>
+                  <Text style={styles.detailValue}>{selectedItem.cakeType}</Text>
+                </>
+              )}
+            </View>
+          )}
+          <View style={styles.buttonRowModal}>
+            <Button title="Перейти к деталям" onPress={handleDetailsPress} color={COLORS.primary} />
+            <Button title="Закрыть" onPress={() => setDetailsModalVisible(false)} color={COLORS.error} />
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </Modal>
   </SafeAreaView>
