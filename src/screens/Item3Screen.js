@@ -26,7 +26,6 @@ import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native";
 import ImageProgress from 'react-native-image-progress';
 import { ProgressBar } from 'react-native-progress';
-import { Appbar } from 'react-native-paper';
 
 import { Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -2538,8 +2537,7 @@ const renderServiceDetailsModal = ({
 return (
   <SafeAreaView style={styles.container}>
     <Text style={styles.title}>Мои мероприятия</Text>
-    <View style={styles.buttonRow}>
-    </View>
+    <View style={styles.buttonRow}></View>
     {loadingCategories || loadingWeddings ? (
       <ActivityIndicator
         size="large"
@@ -2591,7 +2589,9 @@ return (
           renderItem={renderGoodCard}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={<Text style={styles.noItems}>Нет доступных подарков</Text>}
+          ListEmptyComponent={
+            <Text style={styles.noItems}>Нет доступных подарков</Text>
+          }
         />
         {renderWishlistModalFooter()}
       </SafeAreaView>
@@ -2609,9 +2609,15 @@ return (
           renderItem={renderWishlistItem}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={<Text style={styles.noItems}>Список желаний пуст</Text>}
+          ListEmptyComponent={
+            <Text style={styles.noItems}>Список желаний пуст</Text>
+          }
         />
-        <Button title="Закрыть" onPress={() => setWishlistViewModalVisible(false)} color={COLORS.error} />
+        <Button
+          title="Закрыть"
+          onPress={() => setWishlistViewModalVisible(false)}
+          color={COLORS.error}
+        />
       </SafeAreaView>
     </Modal>
 
@@ -2627,15 +2633,25 @@ return (
           renderItem={renderServiceItem}
           keyExtractor={(item) => `${item.id}-${item.serviceType}`}
           contentContainerStyle={styles.serviceList}
-          ListEmptyComponent={<Text style={styles.noItems}>Нет доступных услуг</Text>}
+          ListEmptyComponent={
+            <Text style={styles.noItems}>Нет доступных услуг</Text>
+          }
         />
         <View style={styles.buttonRowModal}>
           <Button
             title={selectedCategory ? "Обновить" : "Создать"}
-            onPress={selectedCategory ? handleUpdateEventCategory : handleCreateEventCategory}
+            onPress={
+              selectedCategory
+                ? handleUpdateEventCategory
+                : handleCreateEventCategory
+            }
             color={COLORS.primary}
           />
-          <Button title="Отмена" onPress={() => setCategoryModalVisible(false)} color={COLORS.error} />
+          <Button
+            title="Отмена"
+            onPress={() => setCategoryModalVisible(false)}
+            color={COLORS.error}
+          />
         </View>
       </SafeAreaView>
     </Modal>
@@ -2651,9 +2667,15 @@ return (
           data={categoryDetails?.services || []}
           renderItem={renderServiceInCategory}
           keyExtractor={(item) => `${item.serviceId}-${item.serviceType}`}
-          ListEmptyComponent={<Text style={styles.noItems}>Для этой категории нет услуг</Text>}
+          ListEmptyComponent={
+            <Text style={styles.noItems}>Для этой категории нет услуг</Text>
+          }
         />
-        <Button title="Закрыть" onPress={() => setCategoryDetailsModalVisible(false)} color={COLORS.error} />
+        <Button
+          title="Закрыть"
+          onPress={() => setCategoryDetailsModalVisible(false)}
+          color={COLORS.error}
+        />
       </SafeAreaView>
     </Modal>
 
@@ -2676,12 +2698,22 @@ return (
         {showCalendar && (
           <Calendar
             onDayPress={onDateChange}
-            markedDates={{ [weddingDate]: { selected: true, selectedColor: COLORS.primary } }}
+            markedDates={{
+              [weddingDate]: { selected: true, selectedColor: COLORS.primary },
+            }}
           />
         )}
         <View style={styles.buttonRowModal}>
-          <Button title="Создать" onPress={handleCreateWedding} color={COLORS.primary} />
-          <Button title="Отмена" onPress={() => setWeddingModalVisible(false)} color={COLORS.error} />
+          <Button
+            title="Создать"
+            onPress={handleCreateWedding}
+            color={COLORS.primary}
+          />
+          <Button
+            title="Отмена"
+            onPress={() => setWeddingModalVisible(false)}
+            color={COLORS.error}
+          />
         </View>
       </SafeAreaView>
     </Modal>
@@ -2705,12 +2737,22 @@ return (
         {showCalendar && (
           <Calendar
             onDayPress={onDateChange}
-            markedDates={{ [weddingDate]: { selected: true, selectedColor: COLORS.primary } }}
+            markedDates={{
+              [weddingDate]: { selected: true, selectedColor: COLORS.primary },
+            }}
           />
         )}
         <View style={styles.buttonRowModal}>
-          <Button title="Обновить" onPress={handleUpdateWedding} color={COLORS.primary} />
-          <Button title="Отмена" onPress={() => setEditWeddingModalVisible(false)} color={COLORS.error} />
+          <Button
+            title="Обновить"
+            onPress={handleUpdateWedding}
+            color={COLORS.primary}
+          />
+          <Button
+            title="Отмена"
+            onPress={() => setEditWeddingModalVisible(false)}
+            color={COLORS.error}
+          />
         </View>
       </SafeAreaView>
     </Modal>
@@ -2741,7 +2783,7 @@ return (
                       data={files}
                       renderItem={({ item: file }) => {
                         const fileUrl = `${BASE_URL}/${file.path}`;
-                        if (file.mimetype.startsWith('image/')) {
+                        if (file.mimetype.startsWith("image/")) {
                           return (
                             <TouchableOpacity
                               style={styles.carouselItem}
@@ -2763,7 +2805,7 @@ return (
                               />
                             </TouchableOpacity>
                           );
-                        } else if (file.mimetype === 'video/mp4') {
+                        } else if (file.mimetype === "video/mp4") {
                           return (
                             <View style={styles.carouselItem}>
                               <Video
@@ -2776,9 +2818,20 @@ return (
                           );
                         } else {
                           return (
-                            <View style={[styles.carouselItem, styles.unsupportedFile]}>
-                              <Icon name="broken-image" size={40} color={COLORS.muted} />
-                              <Text style={styles.caption}>Неподдерживаемый формат: {file.mimetype}</Text>
+                            <View
+                              style={[
+                                styles.carouselItem,
+                                styles.unsupportedFile,
+                              ]}
+                            >
+                              <Icon
+                                name="broken-image"
+                                size={40}
+                                color={COLORS.muted}
+                              />
+                              <Text style={styles.caption}>
+                                Неподдерживаемый формат: {file.mimetype}
+                              </Text>
                             </View>
                           );
                         }
@@ -2791,9 +2844,12 @@ return (
                       decelerationRate="fast"
                       contentContainerStyle={styles.mediaListContainer}
                       onScroll={(event) => {
-                        const contentOffsetX = event.nativeEvent.contentOffset.x;
+                        const contentOffsetX =
+                          event.nativeEvent.contentOffset.x;
                         const carouselItemWidth = screenWidth - 32;
-                        const index = Math.round(contentOffsetX / carouselItemWidth);
+                        const index = Math.round(
+                          contentOffsetX / carouselItemWidth
+                        );
                         setActiveSlide(index);
                       }}
                       scrollEventThrottle={16}
@@ -2819,38 +2875,218 @@ return (
                   </View>
                 ) : (
                   <View style={styles.noFilesContainer}>
-                    <Icon name="image-not-supported" size={50} color={COLORS.muted} />
-                    <Text style={styles.noFilesText}>Изображения или видео отсутствуют</Text>
+                    <Icon
+                      name="image-not-supported"
+                      size={50}
+                      color={COLORS.muted}
+                    />
+                    <Text style={styles.noFilesText}>
+                      Изображения или видео отсутствуют
+                    </Text>
                   </View>
                 )}
               </View>
 
               {/* Details */}
-             {selectedItem.itemName && <><Text style={styles.detailLabel}>Название:</Text><Text style={styles.detailValue}>{selectedItem.itemName}</Text></>}
+              <Text style={styles.detailLabel}>Название:</Text>
+              <Text style={styles.detailValue}>
+                {selectedItem.name ||
+                  selectedItem.item_name ||
+                  selectedItem.alcoholName ||
+                  selectedItem.itemName ||
+                  selectedItem.teamName ||
+                  selectedItem[0].name}
+              </Text>
+              <Text></Text>
+              {/* <Text style={styles.detailLabel}>Тип:</Text>
+              <Text style={styles.detailValue}>{selectedItem.item_type }</Text>
+ <Text></Text>
+              <Text style={styles.detailLabel}>Стоимость:</Text>
+              <Text style={styles.detailValue}>{selectedItem.total_cost}</Text>
+   <Text></Text> */}
+              {/* <Text style={styles.detailLabel}>Адрес:</Text> */}
+              {/* <Text style={styles.detailValue}>{selectedItem.address || selectedItem.address}</Text> */}
+            
+            
+              {/* {selectedItem[0].address && (
+                <>
+                  <Text style={styles.detailLabel}>Адрес:</Text>
+                  <Text style={styles.detailValue}>
+                    { selectedItem[0].address}
+                  </Text>
+                </>
+              )}
+
+
+
+              {selectedItem.address && (
+                <>
+                  <Text style={styles.detailLabel}>Адрес:</Text>
+                  <Text style={styles.detailValue}>
+                    { selectedItem.address}
+                  </Text>
+                </>
+              )} */}
+
+
+              {/* {
+                  selectedItem && (
+                    <>
+                      {Array.isArray(selectedItem) ? (
+                        selectedItem[0]?.address && (
+                          <>
+                            <Text style={styles.detailLabel}>Адрес:</Text>
+                            <Text style={styles.detailValue}>{selectedItem[0].address}</Text>
+                          </>
+                        )
+                      ) : (
+                        selectedItem.address && (
+                          <>
+                            <Text style={styles.detailLabel}>Адрес:</Text>
+                            <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                          </>
+                        )
+                      )}
+                    </>
+                  )
+                } */}
+
+
+
+              {/* <Text></Text>
+              <Text style={styles.detailLabel}>Район:</Text>
+              <Text style={styles.detailValue}>{selectedItem.district||selectedItem[0].district}</Text> */}
+              <Text></Text>
+
+            
+              <Text></Text>
+
+              {/* {selectedItem.itemName && <><Text style={styles.detailLabel}>Название:</Text><Text style={styles.detailValue}>{selectedItem.itemName}</Text></>}
                           
             {selectedItem.name && <><Text style={styles.detailLabel}>Название:</Text><Text style={styles.detailValue}>{selectedItem.name}</Text></>}
               
               {selectedItem.name && <><Text style={styles.detailLabel}>Имя:</Text><Text style={styles.detailValue}>{selectedItem.name || selectedItem.item_name}</Text></>}
               <Text></Text>
-              {selectedItem.teamName && <><Text style={styles.detailLabel}>Название коллектива:</Text><Text style={styles.detailValue}>{selectedItem.teamName}</Text></>}
-              
+              {selectedItem.teamName && <><Text style={styles.detailLabel}>Название коллектива:</Text><Text style={styles.detailValue}>{selectedItem.teamName}</Text></>} */}
+
+              {selectedItem.item_type && (
+                <>
+                  <Text style={styles.detailLabel}>Тип:</Text>
+                  <Text style={styles.detailValue}>
+                    {selectedItem.item_type}
+                  </Text>
+                </>
+              )}
               <Text></Text>
-             {selectedItem.item_type && <><Text style={styles.detailLabel}>Тип:</Text><Text style={styles.detailValue}>{selectedItem.item_type}</Text></>}
+              {selectedItem.total_cost && (
+                <>
+                  <Text style={styles.detailLabel}>Стоимость:</Text>
+                  <Text style={styles.detailValue}>
+                    {selectedItem.total_cost}
+                  </Text>
+                </>
+              )}
               <Text></Text>
-              {selectedItem.total_cost && <><Text style={styles.detailLabel}>Стоимость:</Text><Text style={styles.detailValue}>{selectedItem.total_cost}</Text></>}
+              {/* {selectedItem.address && <><Text style={styles.detailLabel}>Адрес:</Text><Text style={styles.detailValue}>{selectedItem.address}</Text></>} */}
+              {selectedItem ? (
+              <>
+                {Array.isArray(selectedItem) && selectedItem.length > 0 ? (
+                  <>
+                    {selectedItem[0]?.address && (
+                      <>
+                        <Text style={styles.detailLabel}>Адрес:</Text>
+                        <Text style={styles.detailValue}>{selectedItem[0].address}</Text>
+                      </>
+                    )}
+                    {selectedItem[0]?.capacity && (
+                      <>
+                        <Text style={styles.detailLabel}>Вместимость:</Text>
+                        <Text style={styles.detailValue}>{selectedItem[0].capacity}</Text>
+                      </>
+                    )}
+                    {selectedItem[0]?.cuisine && (
+                      <>
+                        <Text style={styles.detailLabel}>Кухня:</Text>
+                        <Text style={styles.detailValue}>{selectedItem[0].cuisine}</Text>
+                      </>
+                    )}
+                    {selectedItem[0]?.phone && (
+                      <>
+                        <Text style={styles.detailLabel}>Телефон:</Text>
+                        <Text style={styles.detailValue}>{selectedItem[0].phone}</Text>
+                      </>
+                    )}
+                    {/* Добавьте другие поля по аналогии */}
+                  </>
+                ) : (
+                  <>
+                    {selectedItem.address && (
+                      <>
+                        <Text style={styles.detailLabel}>Адрес:</Text>
+                        <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                      </>
+                    )}
+                    {selectedItem.capacity && (
+                      <>
+                        <Text style={styles.detailLabel}>Вместимость:</Text>
+                        <Text style={styles.detailValue}>{selectedItem.capacity}</Text>
+                      </>
+                    )}
+                    {selectedItem.cuisine && (
+                      <>
+                        <Text style={styles.detailLabel}>Кухня:</Text>
+                        <Text style={styles.detailValue}>{selectedItem.cuisine}</Text>
+                      </>
+                    )}
+                    <Text></Text>
+                    {selectedItem.phone && (
+                      <>
+                        <Text style={styles.detailLabel}>Телефон:</Text>
+                        <Text style={styles.detailValue}>{selectedItem.phone}</Text>
+                      </>
+                    )}
+                    {/* Добавьте другие поля по аналогии */}
+                  </>
+                )}
+              </>
+            ) : (
+              <Text style={styles.detailValue}>Данные отсутствуют</Text>
+            )}
+
+
+
               <Text></Text>
-              {selectedItem.address && <><Text style={styles.detailLabel}>Адрес:</Text><Text style={styles.detailValue}>{selectedItem.address}</Text></>}
-              <Text></Text>
-              {selectedItem.district && <><Text style={styles.detailLabel}>Район:</Text><Text style={styles.detailValue}>{selectedItem.district}</Text></>}
+              {/* {selectedItem[0].phone && (
+                <>
+                  <Text style={styles.detailLabel}>Телефон:</Text>
+                  <Text style={styles.detailValue}>
+                    {selectedItem[0].phone}
+                  </Text>
+                </>
+              )} */}
+              {/* {selectedItem.district && <><Text style={styles.detailLabel}>Район:</Text><Text style={styles.detailValue}>{selectedItem.district}</Text></>}
               <Text></Text>
               {selectedItem.phone && <><Text style={styles.detailLabel}>Телефон:</Text><Text style={styles.detailValue}>{selectedItem.phone}</Text></>}
               <Text></Text>
-              {selectedItem.cakeType && <><Text style={styles.detailLabel}>Тип торта:</Text><Text style={styles.detailValue}>{selectedItem.cakeType}</Text></>}
+              {selectedItem.cakeType && <><Text style={styles.detailLabel}>Тип торта:</Text><Text style={styles.detailValue}>{selectedItem.cakeType}</Text></>} */}
+
+              {selectedItem.cakeType && (
+                <>
+                  <Text style={styles.detailLabel}>Тип торта:</Text>
+                  <Text style={styles.detailValue}>
+                    {selectedItem.cakeType}
+                  </Text>
+                </>
+              )}
             </View>
           )}
           <View style={styles.buttonRowModal}>
             {/* <Button title="Перейти к деталям" onPress={handleDetailsPress} color={COLORS.primary} /> */}
-            <Button title="Закрыть" onPress={() => setDetailsModalVisible(false)} color={COLORS.error} />
+            <Button
+              title="Закрыть"
+              onPress={() => setDetailsModalVisible(false)}
+              color={COLORS.error}
+            />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -2886,7 +3122,6 @@ return (
         />
       </View>
     </Modal>
-
   </SafeAreaView>
 );
 }
