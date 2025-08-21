@@ -2320,6 +2320,18 @@ const renderServiceDetailsModal = ({
     setActiveSlide(index);
   };
 
+  const getItemName = (item) => {
+    return (
+      item?.name ||
+      item?.item_name ||
+      item?.alcoholName ||
+      item?.itemName ||
+      item?.teamName ||
+      "Не указано"
+    );
+  };
+
+
   const renderFileItem = ({ item: file }) => {
     const fileUrl = `${BASE_URL}/${file.path}`;
 
@@ -2887,6 +2899,7 @@ return (
                 )}
               </View>
 
+
               {/* Details */}
               <Text style={styles.detailLabel}>Название:</Text>
               <Text style={styles.detailValue}>
@@ -2978,52 +2991,102 @@ return (
                 </>
               )}
               <Text></Text>
-              {selectedItem.total_cost && (
+              {/* {selectedItem.total_cost && (
                 <>
                   <Text style={styles.detailLabel}>Стоимость:</Text>
                   <Text style={styles.detailValue}>
                     {selectedItem.total_cost}
                   </Text>
                 </>
-              )}
+              )} */}
               <Text></Text>
-              {/* {selectedItem.address && <><Text style={styles.detailLabel}>Адрес:</Text><Text style={styles.detailValue}>{selectedItem.address}</Text></>} */}
-              {selectedItem ? (
+            
+    
+            {selectedItem ? (
               <>
                 {Array.isArray(selectedItem) && selectedItem.length > 0 ? (
                   <>
+ 
+{
+                  selectedItem.itemName ||
+                  selectedItem.teamName ||
+                  selectedItem[0].name}
+
+
+                    {selectedItem[0]?.item_type && (
+                      <>
+                        <Text style={styles.detailLabel}>Тип:</Text>
+                        <Text style={styles.detailValue}>{selectedItem[0].item_type}</Text>
+                      </>
+                    )}
+                    {/* {selectedItem[0]?.total_cost && (
+                      <>
+                        <Text style={styles.detailLabel}>Стоимость:</Text>
+                        <Text style={styles.detailValue}>{selectedItem[0].total_cost}</Text>
+                      </>
+                    )} */}
                     {selectedItem[0]?.address && (
                       <>
                         <Text style={styles.detailLabel}>Адрес:</Text>
                         <Text style={styles.detailValue}>{selectedItem[0].address}</Text>
                       </>
                     )}
-                    {selectedItem[0]?.capacity && (
+                    {selectedItem[0]?.district && (
+                      <>
+                        <Text style={styles.detailLabel}>Район:</Text>
+                        <Text style={styles.detailValue}>{selectedItem[0].district}</Text>
+                      </>
+                    )}
+                    {selectedItem[0].capacity && (
                       <>
                         <Text style={styles.detailLabel}>Вместимость:</Text>
                         <Text style={styles.detailValue}>{selectedItem[0].capacity}</Text>
                       </>
                     )}
-                    {selectedItem[0]?.cuisine && (
+                    {selectedItem[0].cuisine && (
                       <>
                         <Text style={styles.detailLabel}>Кухня:</Text>
                         <Text style={styles.detailValue}>{selectedItem[0].cuisine}</Text>
                       </>
                     )}
-                    {selectedItem[0]?.phone && (
+                    {selectedItem[0].phone && (
                       <>
                         <Text style={styles.detailLabel}>Телефон:</Text>
                         <Text style={styles.detailValue}>{selectedItem[0].phone}</Text>
                       </>
                     )}
-                    {/* Добавьте другие поля по аналогии */}
                   </>
                 ) : (
                   <>
+
+                    {/* <Text style={styles.detailValue}>
+                      {selectedItem.name ||
+                  selectedItem.item_name ||
+                  selectedItem.alcoholName 
+                }
+                    </Text> */}
+                    {/* {selectedItem.item_type && (
+                      <>
+                        <Text style={styles.detailLabel}>Тип:</Text>
+                        <Text style={styles.detailValue}>{selectedItem.item_type}</Text>
+                      </>
+                    )} */}
+                    {selectedItem.total_cost && (
+                      <>
+                        <Text style={styles.detailLabel}>Стоимость:</Text>
+                        <Text style={styles.detailValue}>{selectedItem.total_cost}</Text>
+                      </>
+                    )}
                     {selectedItem.address && (
                       <>
                         <Text style={styles.detailLabel}>Адрес:</Text>
                         <Text style={styles.detailValue}>{selectedItem.address}</Text>
+                      </>
+                    )}
+                    {selectedItem.district && (
+                      <>
+                        <Text style={styles.detailLabel}>Район:</Text>
+                        <Text style={styles.detailValue}>{selectedItem.district}</Text>
                       </>
                     )}
                     {selectedItem.capacity && (
@@ -3038,37 +3101,21 @@ return (
                         <Text style={styles.detailValue}>{selectedItem.cuisine}</Text>
                       </>
                     )}
-                    <Text></Text>
                     {selectedItem.phone && (
                       <>
                         <Text style={styles.detailLabel}>Телефон:</Text>
                         <Text style={styles.detailValue}>{selectedItem.phone}</Text>
                       </>
                     )}
-                    {/* Добавьте другие поля по аналогии */}
                   </>
                 )}
               </>
             ) : (
               <Text style={styles.detailValue}>Данные отсутствуют</Text>
             )}
+         
 
 
-
-              <Text></Text>
-              {/* {selectedItem[0].phone && (
-                <>
-                  <Text style={styles.detailLabel}>Телефон:</Text>
-                  <Text style={styles.detailValue}>
-                    {selectedItem[0].phone}
-                  </Text>
-                </>
-              )} */}
-              {/* {selectedItem.district && <><Text style={styles.detailLabel}>Район:</Text><Text style={styles.detailValue}>{selectedItem.district}</Text></>}
-              <Text></Text>
-              {selectedItem.phone && <><Text style={styles.detailLabel}>Телефон:</Text><Text style={styles.detailValue}>{selectedItem.phone}</Text></>}
-              <Text></Text>
-              {selectedItem.cakeType && <><Text style={styles.detailLabel}>Тип торта:</Text><Text style={styles.detailValue}>{selectedItem.cakeType}</Text></>} */}
 
               {selectedItem.cakeType && (
                 <>
