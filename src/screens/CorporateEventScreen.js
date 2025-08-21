@@ -299,14 +299,14 @@ const renderAddItem = useCallback(
       case "alcohol":
         title = `Алкоголь: ${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
         break;
-      case "technical-equipment-rental":
-        title = `Техническое оборудование: ${item.name} (${cost} ₸)`;
-        break;
-      case "jewelry":
-        title = `Ювелирные изделия: ${item.name} (${cost} ₸)`;
-        break;
+      // case "technical-equipment-rental":
+      //   title = `Техническое оборудование: ${item.name} (${cost} ₸)`;
+      //   break;
+      // case "jewelry":
+      //   title = `Ювелирные изделия: ${item.name} (${cost} ₸)`;
+      //   break;
       case "flowers":
-        title = `Цветы: ${item.name} (${cost} ₸)`;
+        title = `Цветы: ${item.flowerName} (${cost} ₸)`;
         break;
       default:
         title = "Неизвестный элемент";
@@ -921,7 +921,7 @@ const renderAvailableItem = useCallback(
         title = `${item.name} (${cost} ₸)`;
         break;
       case "flowers":
-        title = `${item.name} (${cost} ₸)`;
+        title = `${item.flowerName} (${cost} ₸)`;
         break;
       default:
         title = "Неизвестный элемент";
@@ -969,6 +969,7 @@ const renderAvailableItem = useCallback(
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setSelectedItem(item);
+              onClose();
             setDetailsModalVisible(true);
           }}
           accessible
@@ -2021,16 +2022,31 @@ const DetailsModal = ({ visible, onClose, item }) => {
         <View style={styles.detailsModalContainer}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
-              {item.type === "restaurant" ? item.name :
-               item.type === "tamada" ? item.name :
-               item.type === "program" ? item.teamName :
-               item.type === "transport" ? `${item.salonName} - ${item.carName}` :
-               item.type === "cake" ? item.name :
-               item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
-               item.type === "technical-equipment-rental" ? item.name :
-               item.type === "jewelry" ? item.name :
-               item.type === "flowers" ? item.name :
-               item.type ==="program" ? item.name :
+              {
+              
+              
+              
+              
+              
+              
+              //  item.type === "technical-equipment-rental" ? item.name :
+              //  item.type === "jewelry" ? item.name :
+               
+               
+
+
+               item.type === "restaurant" ? item.name :
+                 item.type === "hotels" ? item.name :
+                 item.type === "tamada" ? item.name :
+                 item.type === "program" ? item.teamName :
+                 item.type === "flowers" ? `${item.salonName} - ${item.flowerName}` :
+                 item.type === "transport" ? `${item.salonName} - ${item.carName}` :
+                 item.type === "cake" ? item.name :
+                 item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
+                //  item.type === "jewelry" ? `${item.storeName} - ${item.itemName}` :
+                //  item.type === "traditional-gifts" ? `${item.salonName} - ${item.itemName}` :
+
+                 
 
                "Детали"}
             </Text>
@@ -2121,7 +2137,7 @@ const DetailsModal = ({ visible, onClose, item }) => {
             case 'selectedItemsHeader':
               return (
                 <View style={styles.selectedItemsContainer}>
-                  <Text style={styles.sectionTitle}>Выбранные элементы</Text>
+                  {/* <Text style={styles.sectionTitle}>Выбранные элементы</Text> */}
                   {isLoading && <ActivityIndicator size="large" color={COLORS.primary} />}
                   {!isLoading && filteredData.length === 0 && (
                     <Text style={styles.emptyText}>Нет выбранных элементов</Text>
@@ -2129,7 +2145,8 @@ const DetailsModal = ({ visible, onClose, item }) => {
                 </View>
               );
             case 'selectedItem':
-              return renderSelectedItems({ item: item.data });
+              return 
+              // renderSelectedItems({ item: item.data });
             case 'submitButton':
               return (
                 <TouchableOpacity
@@ -2415,24 +2432,24 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: MODAL_COLORS.overlayBackground,
-    justifyContent: 'flex-end',
-  },
-  addModalContainer: {
-    backgroundColor: MODAL_COLORS.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    width: '100%',
-    maxHeight: SCREEN_HEIGHT * 0.9,
-    padding: 18,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 18,
-  },
+      flex: 1,
+      backgroundColor: MODAL_COLORS.overlayBackground,
+      justifyContent: 'center',
+    },
+    addModalContainer: {
+      backgroundColor: MODAL_COLORS.background,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      width: '100%',
+      maxHeight: SCREEN_HEIGHT * 0.9,
+      padding: 18,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 2,
+    },
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',

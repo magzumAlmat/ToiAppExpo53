@@ -1042,12 +1042,13 @@ const CategoryItemsModal = ({
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setSelectedItem(item);
+               onClose();
               setDetailsModalVisible(true);
             }}
             accessible
             accessibilityLabel="Посмотреть детали"
           >
-            <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
+            <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} padding='l-1' />
           </TouchableOpacity>
         </View>
       );
@@ -2354,6 +2355,7 @@ const [categories, setCategories] = useState(selectedCategories);
           <View style={styles.detailsModalContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
+
                 {item.type === "restaurant" ? item.name :
                  item.type === "hotels" ? item.name :
                  item.type === "tamada" ? item.name :
@@ -2461,7 +2463,7 @@ const [categories, setCategories] = useState(selectedCategories);
             case 'selectedItemsHeader':
               return (
                 <View style={styles.selectedItemsContainer}>
-                  <Text style={styles.sectionTitle}>Выбранные элементы</Text>
+                  {/* <Text style={styles.sectionTitle}>Выбранные элементы</Text> */}
                   {isLoading && <ActivityIndicator size="large" color={COLORS.primary} />}
                   {!isLoading && filteredData.length === 0 && (
                     <Text style={styles.emptyText}>Нет выбранных элементов</Text>
@@ -2469,7 +2471,8 @@ const [categories, setCategories] = useState(selectedCategories);
                 </View>
               );
             case 'selectedItem':
-              return renderSelectedItems({ item: item.data });
+              return 
+              // renderSelectedItems({ item: item.data });
             case 'submitButton':
               return (
                 <TouchableOpacity
@@ -2777,7 +2780,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: MODAL_COLORS.overlayBackground,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
   addModalContainer: {
     backgroundColor: MODAL_COLORS.background,
@@ -2791,7 +2794,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 2,
   },
   modalTitle: {
     fontSize: 20,
@@ -2933,10 +2936,10 @@ const styles = StyleSheet.create({
   },
   detailsModalContainer: {
     backgroundColor: MODAL_COLORS.background,
-    borderRadius: 16,
-    width: '90%',
-    padding: 18,
-    maxHeight: SCREEN_HEIGHT * 0.7,
+    borderRadius: 20,
+    padding: 20,
+    margin: 20,
+    maxHeight: SCREEN_HEIGHT * 0.8,
   },
   detailsModalContent: {
     paddingBottom: 18,
