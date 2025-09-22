@@ -156,7 +156,7 @@ const typesMapping = [
 
 const categoryToTypeMap = {
   "Ресторан": "restaurant",
-  "Гостиницы": "hotels",
+  "Отели": "hotels",
   "Ведущий": "tamada",
   "Шоу программа": "program",
   "Цветы": "flowers",
@@ -165,7 +165,7 @@ const categoryToTypeMap = {
   "Алкоголь": "alcohol",
   "Ювелирные изделия": "jewelry",
   "Типографии": "typography",
-  "Аренда технического оснащения": "technical-equipment-rental",
+  "Аренда технического оборудования": "technical-equipment-rental",
   "Традиционные подарки": "traditional-gifts",
   "Национальные костюмы": "national-costumes",
   "Музыканты": "musicians",
@@ -2344,6 +2344,9 @@ const [categories, setCategories] = useState(selectedCategories);
       }
     };
 
+    const cost = item.type === 'restaurant' ? item.averageCost : item.cost;
+    const displayCost = (cost !== null && cost !== undefined) ? `${cost.toLocaleString()} ₸` : 'Не указана';
+
     return (
       <Modal
         visible={visible}
@@ -2394,7 +2397,7 @@ const [categories, setCategories] = useState(selectedCategories);
                 { label: 'Район', value: item.district },
                 { 
                   label: 'Стоимость',
-                  value: `${(item.type === 'restaurant' ? item.averageCost : item.cost).toLocaleString()} ₸`
+                  value: displayCost
                 }
               ].filter(d => d.value)}
               renderItem={({ item }) => renderDetailRow(item.label, item.value)}
@@ -2402,6 +2405,7 @@ const [categories, setCategories] = useState(selectedCategories);
               contentContainerStyle={styles.detailsModalContent}
               showsVerticalScrollIndicator={false}
             />
+
             {item.portfolio && (
               <TouchableOpacity
                 style={styles.portfolioButton}
@@ -2980,6 +2984,25 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.white,
   },
+  detailsButton: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginTop: 10,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  detailsButtonGradient: {
+    padding: 14,
+    alignItems: 'center',
+  },
+  detailsButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.white,
+  },
 
   calendarContainer: {
     backgroundColor: MODAL_COLORS.background,
@@ -3015,3 +3038,26 @@ const styles = StyleSheet.create({
 
 
 export default CreateTraditionalFamilyEventScreen;
+// ;e: 16,
+//     fontWeight: '600',
+//     color: COLORS.primary,
+//   },
+//   errorContainer: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     padding: 18,
+//   },
+//   errorText: {
+//     fontSize: 16,
+//     color: COLORS.error,
+//     textAlign: 'center',
+//   },
+// });
+
+
+// export default CreateTraditionalFamilyEventScreen;,
+// });
+
+
+// export default CreateTraditionalFamilyEventScreen;

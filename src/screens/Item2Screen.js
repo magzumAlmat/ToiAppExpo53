@@ -1061,7 +1061,7 @@ export default function Item2Screen({ navigation }) {
 
   const items = [
     'Ресторан', 'Одежда', 'Транспорт', 'Тамада', 'Программа',
-    'Традиционные подарки', 'Цветы', 'Торты', 'Алкоголь', 'Товары',
+    'Традиционные подарки', 'Цветы', 'Торты', 'Алкоголь', 'Товары', 'Аренда технического оборудования',
   ];
 
   const entityTypeMap = {
@@ -1090,6 +1090,7 @@ export default function Item2Screen({ navigation }) {
     'Сертификаты и подписки',
     'Алкоголь и гастрономия',
     'Традиционные подарки',
+    
   ];
   const cuisineOptions = ['Русская', 'Итальянская', 'Азиатская', 'Французская', 'Американская'];
   const districtOptions = ['Медеуский', 'Бостандыкский', 'Алмалинский', 'Ауэзовский', 'Наурызбайский', 'Алатауский', 'Жетысуйский', 'За пределами Алматы'];
@@ -1131,7 +1132,7 @@ export default function Item2Screen({ navigation }) {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaType.All,
       allowsMultipleSelection: true,
       quality: 1,
     });
@@ -1351,6 +1352,20 @@ export default function Item2Screen({ navigation }) {
           });
           entityId = response.data.data.id;
           setFormDataId(response.data.data.id);
+          break;
+
+        case 'Аренда технического оборудования':
+          if (!formData.companyName) {
+            throw new Error('Заполните обязательное поле: Название компании');
+          }
+          const trimmedLink = formData.link ? formData.link.trim() : '';
+          response = await api.createTechnicalEquipmentRental({
+            companyName: formData.companyName,
+            phone: formData.phone || '',
+            link: trimmedLink,
+            supplier_id: user.id,
+          });
+          entityId = response.data.id;
           break;
 
         default:
@@ -2268,7 +2283,7 @@ export default function Item2Screen({ navigation }) {
               />
             </View>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Стоимость в тенге:</Text>
+              <Text style={styles.inputLabel}>Стоимость:</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Стоимость в тенге"
@@ -2285,7 +2300,9 @@ export default function Item2Screen({ navigation }) {
                 style={styles.input}
                 placeholder="Адрес магазина"
                 value={formData.specs?.address || ''}
-                onChangeText={(value) => handleInputChange('specs', { ...formData.specs, address: value })}
+                onChangeText={(value) =>
+                  handleInputChange('specs', { ...formData.specs, address: value })
+                }
                 returnKeyType="done"
                 onSubmitEditing={handleSubmitEditing}
               />
@@ -2296,7 +2313,9 @@ export default function Item2Screen({ navigation }) {
                 style={styles.input}
                 placeholder="Телефон (например, +7 (777) 123-45-67)"
                 value={formData.specs?.phone || ''}
-                onChangeText={(value) => handleInputChange('specs', { ...formData.specs, phone: value })}
+                onChangeText={(value) =>
+                  handleInputChange('specs', { ...formData.specs, phone: value })
+                }
                 keyboardType="phone-pad"
                 returnKeyType="done"
                 onSubmitEditing={handleSubmitEditing}
@@ -2308,27 +2327,126 @@ export default function Item2Screen({ navigation }) {
                 style={styles.input}
                 placeholder="Название магазина"
                 value={formData.specs?.storeName || ''}
-                onChangeText={(value) => handleInputChange('specs', { ...formData.specs, storeName: value })}
+                onChangeText={(value) =>
+                  handleInputChange('specs', { ...formData.specs, storeName: value })
+                }
                 returnKeyType="done"
                 onSubmitEditing={handleSubmitEditing}
               />
             </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Ссылка на товар:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ссылка на товар"
-                value={formData.specs?.goodLink || ''}
-                onChangeText={(value) => handleInputChange('specs', { ...formData.specs, goodLink: value })}
-                returnKeyType="done"
-                onSubmitEditing={handleSubmitEditing}
-              />
-            </View>
-
-            
           </>
         );
+
+      case 'Аренда технического оборудования':
+        return (
+          <>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Название:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Название оборудования"
+                value={formData.name || ''}
+                onChangeText={(value) => handleInputChange('name', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+             <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Название компании:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Название компании"
+                value={formData.companyName || ''}
+                onChangeText={(value) => handleInputChange('companyName', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Стоимость аренды:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Стоимость"
+                value={formData.cost || ''}
+                onChangeText={(value) => handleInputChange('cost', value)}
+                keyboardType="numeric"
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Адрес:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Адрес"
+                value={formData.address || ''}
+                onChangeText={(value) => handleInputChange('address', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Телефон:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="+7 (XXX) XXX-XX-XX"
+                value={formData.phone || ''}
+                onChangeText={handlePhoneChange}
+                keyboardType="phone-pad"
+                maxLength={18}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+
+             <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Ссылка:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ссылка"
+                value={formData.link || ''}
+                onChangeText={(value) => handleInputChange('link', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+
+
+
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Район:</Text>
+              <TouchableOpacity style={styles.selectButton} onPress={() => setDistrictModalVisible(true)}>
+                <Text style={styles.selectText}>{formData.district || 'Выберите район'}</Text>
+                <Icon name="arrow-drop-down" size={24} color={COLORS.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            <Modal visible={districtModalVisible} transparent={true} animationType="fade" onRequestClose={() => setDistrictModalVisible(false)}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Выберите район</Text>
+                  <ScrollView style={styles.optionList}>
+                    {districtOptions.map((option) => (
+                      <View key={option}>
+                        {renderOption(option, 'district', setDistrictModalVisible)}
+                      </View>
+                    ))}
+                  </ScrollView>
+
+
+
+
+            
+
+                  <TouchableOpacity style={styles.closeButton} onPress={() => setDistrictModalVisible(false)}>
+                    <Text style={styles.closeButtonText}>Закрыть</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          </>
+        );
+
       default:
         return <Text style={styles.label}>Выберите тип объекта для создания</Text>;
     }

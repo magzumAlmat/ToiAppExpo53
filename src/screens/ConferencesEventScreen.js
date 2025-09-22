@@ -1077,6 +1077,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
   const [disabledCategories, setDisabledCategories] = useState([]);
   const [data, setData] = useState({
     restaurants: [],
+    hotels: [],
     tamada: [],
     programs: [],
     transport: [],

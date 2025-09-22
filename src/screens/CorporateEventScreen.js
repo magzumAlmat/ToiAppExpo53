@@ -102,6 +102,7 @@ const typesMapping = [
 ];
 
 const categoryToTypeMap = {
+  "Отели": "hotels",
   "Прокат авто": "transport",
   "Ресторан": "restaurant",
   "Алкоголь": "alcohol",
@@ -2664,3 +2665,4 @@ const styles = StyleSheet.create({
 });
 
 export default CorporateEventScreen;
+  
