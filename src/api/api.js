@@ -481,30 +481,7 @@
 //     }),
 
 //   // Товары
-//   createGood: (data) =>
-//     api.post('/api/goods', data).catch((error) => {
-//       throw new Error(`Ошибка создания товара: ${error.response?.data?.message || error.message}`);
-//     }),
 
-//   getGoods: () =>
-//     api.get('/api/goods').catch((error) => {
-//       throw new Error(`Ошибка получения списка товаров: ${error.response?.data?.message || error.message}`);
-//     }),
-
-//   getGoodById: (id) =>
-//     api.get(`/api/goodbyid/${id}`).catch((error) => {
-//       throw new Error(`Ошибка получения товара: ${error.response?.data?.message || error.message}`);
-//     }),
-
-//   updateGood: (id, data) =>
-//     api.put(`/api/updategoodbyid/${id}`, data).catch((error) => {
-//       throw new Error(`Ошибка обновления товара: ${error.response?.data?.message || error.message}`);
-//     }),
-
-//   deleteGood: (id) =>
-//     api.delete(`/api/removegoodbyid/${id}`).catch((error) => {
-//       throw new Error(`Ошибка удаления товара: ${error.response?.data?.message || error.message}`);
-//     }),
 
 //   // Свадьбы
 //   createWedding: (data) =>
@@ -1099,6 +1076,37 @@ export default {
 
   removeServiceFromCategory: (categoryId, serviceId, data) =>
     api.delete(`/api/event-category/${categoryId}/service/${serviceId}`, { data }).catch((error) => handleError(error, 'удаления услуги из категории')),
+
+
+
+
+
+    createGood: (data) =>
+    api.post('/api/goods', data).catch((error) => {
+      throw new Error(`Ошибка создания товара: ${error.response?.data?.message || error.message}`);
+    }),
+
+  getGoods: () =>
+    api.get('/api/goods').catch((error) => {
+      throw new Error(`Ошибка получения списка товаров: ${error.response?.data?.message || error.message}`);
+    }),
+
+  getGoodById: (id) =>
+    api.get(`/api/goodbyid/${id}`).catch((error) => {
+      throw new Error(`Ошибка получения товара: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateGoodById: (id, data) =>
+    api.put(`/api/updategoodbyid/${id}`, data).catch((error) => {
+      throw new Error(`Ошибка обновления товара: ${error.response?.data?.message || error.message}`);
+    }),
+
+  deleteGood: (id) =>
+    api.delete(`/api/removegoodbyid/${id}`).catch((error) => {
+      throw new Error(`Ошибка удаления товара: ${error.response?.data?.message || error.message}`);
+    }),
+
+
 
 
 
