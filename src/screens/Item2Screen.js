@@ -1061,7 +1061,7 @@ export default function Item2Screen({ navigation }) {
 
   const items = [
     'Ресторан', 'Одежда', 'Транспорт', 'Тамада', 'Программа',
-    'Традиционные подарки', 'Цветы', 'Торты', 'Алкоголь', 'Товары', 'Аренда технического оборудования',
+    'Традиционные подарки', 'Цветы', 'Торты', 'Алкоголь', 'Товары', 'Аренда технического оборудования', 'Типография',
   ];
 
   const entityTypeMap = {
@@ -1075,6 +1075,8 @@ export default function Item2Screen({ navigation }) {
     'Торты': 'cake',
     'Алкоголь': 'alcohol',
     'Товары': 'goods',
+    'Аренда технического оборудования': 'technical-equipment-rental',
+    'Типография': 'typography',
   };
 
   const categoryOptions = [
@@ -1363,6 +1365,20 @@ export default function Item2Screen({ navigation }) {
             companyName: formData.companyName,
             phone: formData.phone || '',
             link: trimmedLink,
+            supplier_id: user.id,
+          });
+          entityId = response.data.id;
+          break;
+
+        case 'Типография':
+          if (!formData.companyName) {
+            throw new Error('Заполните обязательное поле: Название компании');
+          }
+          const trimmedTypographyLink = formData.link ? formData.link.trim() : '';
+          response = await api.createTypography({
+            companyName: formData.companyName,
+            phone: formData.phone || '',
+            link: trimmedTypographyLink,
             supplier_id: user.id,
           });
           entityId = response.data.id;
@@ -2341,46 +2357,12 @@ export default function Item2Screen({ navigation }) {
         return (
           <>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Название:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Название оборудования"
-                value={formData.name || ''}
-                onChangeText={(value) => handleInputChange('name', value)}
-                returnKeyType="done"
-                onSubmitEditing={handleSubmitEditing}
-              />
-            </View>
-             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Название компании:</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Название компании"
                 value={formData.companyName || ''}
                 onChangeText={(value) => handleInputChange('companyName', value)}
-                returnKeyType="done"
-                onSubmitEditing={handleSubmitEditing}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Стоимость аренды:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Стоимость"
-                value={formData.cost || ''}
-                onChangeText={(value) => handleInputChange('cost', value)}
-                keyboardType="numeric"
-                returnKeyType="done"
-                onSubmitEditing={handleSubmitEditing}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Адрес:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Адрес"
-                value={formData.address || ''}
-                onChangeText={(value) => handleInputChange('address', value)}
                 returnKeyType="done"
                 onSubmitEditing={handleSubmitEditing}
               />
@@ -2398,52 +2380,60 @@ export default function Item2Screen({ navigation }) {
                 onSubmitEditing={handleSubmitEditing}
               />
             </View>
-
-             <View style={styles.inputContainer}>
+            <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Ссылка:</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ссылка"
+                placeholder="https://example.com"
                 value={formData.link || ''}
                 onChangeText={(value) => handleInputChange('link', value)}
+                keyboardType="url"
                 returnKeyType="done"
                 onSubmitEditing={handleSubmitEditing}
               />
             </View>
+          </>
+        );
 
-
-
-
+      case 'Типография':
+        return (
+          <>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Район:</Text>
-              <TouchableOpacity style={styles.selectButton} onPress={() => setDistrictModalVisible(true)}>
-                <Text style={styles.selectText}>{formData.district || 'Выберите район'}</Text>
-                <Icon name="arrow-drop-down" size={24} color={COLORS.textSecondary} />
-              </TouchableOpacity>
+              <Text style={styles.inputLabel}>Название компании:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Название компании"
+                value={formData.companyName || ''}
+                onChangeText={(value) => handleInputChange('companyName', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
             </View>
-            <Modal visible={districtModalVisible} transparent={true} animationType="fade" onRequestClose={() => setDistrictModalVisible(false)}>
-              <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>Выберите район</Text>
-                  <ScrollView style={styles.optionList}>
-                    {districtOptions.map((option) => (
-                      <View key={option}>
-                        {renderOption(option, 'district', setDistrictModalVisible)}
-                      </View>
-                    ))}
-                  </ScrollView>
-
-
-
-
-            
-
-                  <TouchableOpacity style={styles.closeButton} onPress={() => setDistrictModalVisible(false)}>
-                    <Text style={styles.closeButtonText}>Закрыть</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </Modal>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Телефон:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="+7 (XXX) XXX-XX-XX"
+                value={formData.phone || ''}
+                onChangeText={handlePhoneChange}
+                keyboardType="phone-pad"
+                maxLength={18}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Ссылка:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="https://example.com"
+                value={formData.link || ''}
+                onChangeText={(value) => handleInputChange('link', value)}
+                keyboardType="url"
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
           </>
         );
 
@@ -2452,14 +2442,19 @@ export default function Item2Screen({ navigation }) {
     }
   };
 
+  console.log('Items for picker:', items);
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color={COLORS.textPrimary} />
+        </TouchableOpacity>
         <Text style={styles.title}>Создать объект</Text>
         <View style={styles.pickerContainer}>
           <Text style={styles.label}>Выберите тип объекта:</Text>
-          <TouchableOpacity style={styles.roleButton} onPress={() => setItemModalVisible(true)}>
-            <Text style={styles.roleText}>{selectedItem || 'Выберите тип'}</Text>
+          <TouchableOpacity style={styles.selectButton} onPress={() => setItemModalVisible(true)}>
+            <Text style={styles.selectText}>{selectedItem || 'Выберите'}</Text>
             <Icon name="arrow-drop-down" size={24} color={COLORS.textSecondary} />
           </TouchableOpacity>
           <Modal visible={isItemModalVisible} transparent={true} animationType="fade" onRequestClose={() => setItemModalVisible(false)}>
@@ -2470,8 +2465,6 @@ export default function Item2Screen({ navigation }) {
                   data={items}
                   renderItem={renderItemType}
                   keyExtractor={(item) => item}
-                  style={styles.itemList}
-                  showsVerticalScrollIndicator={false}
                 />
                 <TouchableOpacity style={styles.closeButton} onPress={() => setItemModalVisible(false)}>
                   <Text style={styles.closeButtonText}>Закрыть</Text>
@@ -2484,7 +2477,6 @@ export default function Item2Screen({ navigation }) {
         {selectedItem && (
           <>
             <TouchableOpacity style={styles.uploadButton} onPress={pickFile}>
-              <Icon name="add-photo-alternate" size={20} color={COLORS.background} style={styles.uploadIcon} />
               <Text style={styles.uploadButtonText}>Добавить фото/видео</Text>
             </TouchableOpacity>
             {selectedFiles.length > 0 && (
@@ -2494,23 +2486,21 @@ export default function Item2Screen({ navigation }) {
                 keyExtractor={(item) => item.uri}
                 horizontal
                 style={styles.fileList}
-                showsHorizontalScrollIndicator={false}
               />
             )}
             <TouchableOpacity
-              style={[styles.submitButton, isLoading || !selectedItem ? styles.submitButtonDisabled : {}]}
+              style={[styles.submitButton, isLoading && styles.disabledButton]}
               onPress={handleSubmit}
-              disabled={isLoading || !selectedItem}
+              disabled={isLoading}
             >
               <Text style={styles.submitButtonText}>{isLoading ? 'Создание...' : 'Создать'}</Text>
             </TouchableOpacity>
-            <Text></Text>
-            <Text></Text>
           </>
         )}
       </ScrollView>
     </SafeAreaView>
   );
+
 }
 
 const styles = StyleSheet.create({
