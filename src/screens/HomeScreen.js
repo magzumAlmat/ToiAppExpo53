@@ -893,25 +893,18 @@ const SelectedItem = ({
           {title}
         </Text>
         <View style={styles.actions}>
-       
-  
-
-  <TouchableOpacity
-            style={styles.actionButton} 
+          <TouchableOpacity
+            style={styles.actionButton}
             onPress={() => handleRemoveItem(item)}
           >
             <Icon2 name="trash-can-outline" size={22} color={MODAL_COLORS.icon} />
           </TouchableOpacity>
-
-
-
-
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
               setSelectedItem(item);
               setDetailsModalVisible(true);
-              if (onClose) onClose(); 
+              if (onClose) onClose();
             }}
           >
             <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
