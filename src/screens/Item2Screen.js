@@ -38,7 +38,7 @@ export default function Item2Screen({ navigation }) {
 
   const items = [
     'Ресторан', 'Одежда', 'Транспорт', 'Тамада', 'Программа',
-    'Традиционные подарки', 'Цветы', 'Торты', 'Алкоголь', 'Товары',
+    'Традиционные подарки', 'Цветы', 'Торты', 'Алкоголь', 'Товары', 'Ювелирные изделия',
     // 'Аренда технического оборудования', 'Типография',
   ];
 
@@ -53,6 +53,7 @@ export default function Item2Screen({ navigation }) {
     'Торты': 'cake',
     'Алкоголь': 'alcohol',
     'Товары': 'goods',
+    'Ювелирные изделия': 'jewelry',
     'Аренда технического оборудования': 'technical-equipment-rental',
     'Типография': 'typography',
   };
@@ -70,6 +71,7 @@ export default function Item2Screen({ navigation }) {
     'Сертификаты и подписки',
     'Алкоголь и гастрономия',
     'Традиционные подарки',
+    'Ювелирные изделия',
     'Аренда технического оборудования',
      'Типография'
 
@@ -148,6 +150,7 @@ export default function Item2Screen({ navigation }) {
           }
         );
       } catch (error) {
+        console.error('File upload error:', error.response?.data || error.response || error);
         throw new Error('Ошибка загрузки файла');
       }
     }
@@ -359,6 +362,26 @@ export default function Item2Screen({ navigation }) {
           setFormDataId(entityId);
           break;
 
+        case 'Ювелирные изделия':
+          if (!formData.storeName || !formData.itemName) {
+            throw new Error('Заполните обязательные поля: Наименование магазина и Наименование товара');
+          }
+          response = await api.createJewelry({
+            storeName: formData.storeName,
+            address: formData.address || '',
+            phone: formData.phone || '',
+            district: formData.district || '',
+            itemName: formData.itemName,
+            material: formData.material || '',
+            type: formData.type || '',
+            cost: formData.cost || '',
+            supplier_id: user.id,
+          });
+          console.log('API response for Jewelry:', response.data);
+          entityId = getEntityId(response);
+          if (!entityId) throw new Error('Не удалось получить ID объекта');
+          break;
+
         // case 'Аренда технического оборудования':
         //   if (!formData.companyName) {
         //     throw new Error('Заполните обязательное поле: Название компании');
@@ -461,6 +484,7 @@ export default function Item2Screen({ navigation }) {
       case 'Торты': return 'cake';
       case 'Алкоголь': return 'local-bar';
       case 'Товары': return 'shopping-bag';
+      case 'Ювелирные изделия': return 'diamond';
       case 'Аренда технического оборудования': return 'settings';
       case 'Типография': return 'print';
       default: return 'category';
@@ -1365,6 +1389,117 @@ export default function Item2Screen({ navigation }) {
             </View>
           </>
         );
+
+      case 'Ювелирные изделия':
+        return (
+          <>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Наименование магазина:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Наименование магазина"
+                value={formData.storeName || ''}
+                onChangeText={(value) => handleInputChange('storeName', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Адрес:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Адрес"
+                value={formData.address || ''}
+                onChangeText={(value) => handleInputChange('address', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Телефон:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="+7 (XXX) XXX-XX-XX"
+                value={formData.phone || ''}
+                onChangeText={handlePhoneChange}
+                keyboardType="phone-pad"
+                maxLength={18}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Район:</Text>
+              <TouchableOpacity style={styles.selectButton} onPress={() => setDistrictModalVisible(true)}>
+                <Text style={styles.selectText}>{formData.district || 'Выберите район'}</Text>
+                <Icon name="arrow-drop-down" size={24} color={COLORS.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            <Modal visible={districtModalVisible} transparent={true} animationType="fade" onRequestClose={() => setDistrictModalVisible(false)}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Выберите район</Text>
+                  <ScrollView style={styles.optionList}>
+                    {districtOptions.map((option) => (
+                      <View key={option}>
+                        {renderOption(option, 'district', setDistrictModalVisible)}
+                      </View>
+                    ))}
+                  </ScrollView>
+                  <TouchableOpacity style={styles.closeButton} onPress={() => setDistrictModalVisible(false)}>
+                    <Text style={styles.closeButtonText}>Закрыть</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Наименование товара:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Наименование товара"
+                value={formData.itemName || ''}
+                onChangeText={(value) => handleInputChange('itemName', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Материал:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Материал"
+                value={formData.material || ''}
+                onChangeText={(value) => handleInputChange('material', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Тип:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Тип"
+                value={formData.type || ''}
+                onChangeText={(value) => handleInputChange('type', value)}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Стоимость:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Стоимость"
+                value={formData.cost || ''}
+                onChangeText={(value) => handleInputChange('cost', value)}
+                keyboardType="numeric"
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitEditing}
+              />
+            </View>
+          </>
+        );
+
       // case 'Аренда технического оборудования':
       //   return (
       //     <>

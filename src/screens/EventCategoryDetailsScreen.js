@@ -32,6 +32,10 @@ const EventCategoryDetailsScreen = ({ route }) => {
       <Text style={styles.serviceType}>{item.serviceType}</Text>
       {item.serviceDetails ? (
         <View>
+          <Image
+            source={{ uri: item.serviceDetails.photoUrl || 'https://via.placeholder.com/150' }}
+            style={styles.serviceImage}
+          />
           {item.serviceType === 'Restaurant' && (
             <View>
               <Text style={styles.serviceDetailText}>Название: {item.serviceDetails.name}</Text>
@@ -232,6 +236,12 @@ const styles = StyleSheet.create({
     color: '#8B6F47',
     textAlign: 'center',
     marginTop: 50,
+  },
+  serviceImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
   },
 });
 

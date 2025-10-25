@@ -1235,8 +1235,13 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
 console.log('route.params:', route?.params);
 const selectedCategories = route?.params?.selectedCategories || [];
 console.log('Полученные категории:', selectedCategories);
-const [categories, setCategories] = useState(selectedCategories);
-
+  const [categories, setCategories] = useState(() => {
+    const initialCategories = route?.params?.selectedCategories || [];
+    if (!initialCategories.includes('Ювелирные изделия')) {
+      return [...initialCategories, 'Ювелирные изделия'];
+    }
+    return initialCategories;
+  });
 
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);

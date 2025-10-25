@@ -538,6 +538,7 @@ export default function SupplierScreen({ navigation }) {
         api.getAlcohol(),
         api.getTransport(),
         api.getGoods(token),
+        api.getJewelry(),
       ]);
   
       console.log('API responses:', responses);
@@ -567,6 +568,7 @@ export default function SupplierScreen({ navigation }) {
         alcohol: userData[7] || [],
         transport: userData[8] || [],
         goods: userData[9] || [],
+        jewelry: userData[10] || [],
       };
       console.log('Processed data:', newData);
       setData(newData);
@@ -682,6 +684,13 @@ export default function SupplierScreen({ navigation }) {
           setData((prev) => ({
             ...prev,
             goods: prev.goods.filter((item) => item.id !== itemToDelete.id),
+          }));
+          break;
+        case 'jewelry':
+          await api.deleteJewelry(itemToDelete.id);
+          setData((prev) => ({
+            ...prev,
+            jewelry: prev.jewelry.filter((item) => item.id !== itemToDelete.id),
           }));
           break;
         default:
@@ -860,6 +869,18 @@ export default function SupplierScreen({ navigation }) {
           </View>
         );
         break;
+      case 'jewelry':
+        content = (
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Ювелирные изделия</Text>
+            <Text style={styles.cardTitle}>{item.storeName}</Text>
+            <Text style={styles.cardDetail}>Товар: {item.itemName}</Text>
+            <Text style={styles.cardDetail}>Материал: {item.material}</Text>
+            <Text style={styles.cardDetail}>Стоимость: {item.cost} ₸</Text>
+            <Text style={styles.cardDetail}>Адрес: {item.address}</Text>
+          </View>
+        );
+        break;
       default:
         content = <Text style={styles.cardTitle}>Неизвестный тип: {item.type}</Text>;
     }
@@ -892,6 +913,7 @@ export default function SupplierScreen({ navigation }) {
       ...data.alcohol.map((item) => ({ ...item, type: 'alcohol' })),
       ...data.transport.map((item) => ({ ...item, type: 'transport' })),
       ...data.goods.map((item) => ({ ...item, type: 'goods' })),
+      ...data.jewelry.map((item) => ({ ...item, type: 'jewelry' })),
     ].filter((item) => item.supplier_id === userId);
 
     return (

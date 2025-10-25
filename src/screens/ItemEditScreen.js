@@ -70,6 +70,7 @@ export default function ItemEditScreen() {
             case 'cake': response = await api.getCakeById(itemId); break;
             case 'alcohol': response = await api.getAlcoholById(itemId); break;
             case 'goods': response = await api.getGoodById(itemId); break;
+            case 'jewelry': response = await api.getJewelryById(itemId); break;
             default: throw new Error('Неизвестный тип объекта');
           }
           const itemData = Array.isArray(response.data) ? response.data[0] : response.data;
@@ -134,7 +135,7 @@ export default function ItemEditScreen() {
     if (type === 'restaurant') {
       formattedForm.averageCost = parseFloat(form.averageCost) || 0;
       formattedForm.capacity = parseInt(form.capacity, 10) || 0;
-    } else if (['clothing', 'tamada', 'program', 'traditionalGift', 'flowers', 'cake', 'alcohol'].includes(type)) {
+    } else if (['clothing', 'tamada', 'program', 'traditionalGift', 'flowers', 'cake', 'alcohol', 'jewelry'].includes(type)) {
       formattedForm.cost = parseFloat(form.cost) || 0;
     } else if (type === 'goods') {
       if (!form.category || !form.item_name) {
@@ -165,6 +166,7 @@ export default function ItemEditScreen() {
           case 'cake': await api.updateCake(itemId, formattedForm); break;
           case 'alcohol': await api.updateAlcohol(itemId, formattedForm); break;
           case 'goods': await api.updateGoodById(itemId, formattedForm); break;
+          case 'jewelry': await api.updateJewelry(itemId, formattedForm); break;
           default: throw new Error('Неизвестный тип объекта');
         }
         alert(`${type} обновлён!`);
@@ -212,6 +214,7 @@ export default function ItemEditScreen() {
         case 'cake': await api.deleteCakes(itemId); break;
         case 'alcohol': await api.deleteAlcohol(itemId); break;
         case 'goods': await api.deleteGoodsById(itemId); break;
+        case 'jewelry': await api.deleteJewelry(itemId); break;
         default: throw new Error('Неизвестный тип объекта');
       }
       alert(`${type} удалён!`);
@@ -1199,6 +1202,117 @@ export default function ItemEditScreen() {
 
            
 
+          </>
+        );
+      case 'jewelry':
+        return (
+          <>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Наименование магазина:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.storeName}
+                onChangeText={(text) => handleChange('storeName', text)}
+                placeholder="Наименование магазина"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Адрес:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.address}
+                onChangeText={(text) => handleChange('address', text)}
+                placeholder="Адрес"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Телефон:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.phone}
+                onChangeText={(text) => handleChange('phone', formatPhoneNumber(text))}
+                keyboardType="phone-pad"
+                maxLength={18}
+                placeholder="+7 (XXX) XXX-XX-XX"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Район:</Text>
+              <TouchableOpacity
+                style={styles.cuisineButton}
+                onPress={() => setModalVisible({ ...modalVisible, district: true })}
+              >
+                <Text style={styles.cuisineText}>{form.district || 'Выберите район'}</Text>
+              </TouchableOpacity>
+              <Modal
+                visible={modalVisible.district}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setModalVisible({ ...modalVisible, district: false })}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Выберите район</Text>
+                    <Picker
+                      selectedValue={form.district}
+                      onValueChange={(value) => {
+                        handleChange('district', value);
+                        setModalVisible({ ...modalVisible, district: false });
+                      }}
+                      style={styles.modalPicker}
+                    >
+                      <Picker.Item label="Выберите район" value="" />
+                      {districtOptions.map((option) => (
+                        <Picker.Item key={option} label={option} value={option} />
+                      ))}
+                    </Picker>
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setModalVisible({ ...modalVisible, district: false })}
+                    >
+                      <Text style={styles.closeButtonText}>Закрыть</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Наименование товара:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.itemName}
+                onChangeText={(text) => handleChange('itemName', text)}
+                placeholder="Наименование товара"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Материал:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.material}
+                onChangeText={(text) => handleChange('material', text)}
+                placeholder="Материал"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Тип:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.type}
+                onChangeText={(text) => handleChange('type', text)}
+                placeholder="Тип"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Стоимость:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.cost}
+                onChangeText={(text) => handleChange('cost', text)}
+                keyboardType="numeric"
+                placeholder="Стоимость"
+              />
+            </View>
           </>
         );
       default:
