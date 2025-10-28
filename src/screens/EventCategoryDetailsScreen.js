@@ -32,10 +32,6 @@ const EventCategoryDetailsScreen = ({ route }) => {
       <Text style={styles.serviceType}>{item.serviceType}</Text>
       {item.serviceDetails ? (
         <View>
-          <Image
-            source={{ uri: item.serviceDetails.photoUrl || 'https://via.placeholder.com/150' }}
-            style={styles.serviceImage}
-          />
           {item.serviceType === 'Restaurant' && (
             <View>
               <Text style={styles.serviceDetailText}>Название: {item.serviceDetails.name}</Text>
