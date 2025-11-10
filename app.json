@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "my-js-project",
-    "slug": "my-js-project",
+    "slug": "toilab",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.amagzum.myjsproject",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,13 +31,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store"
-
+      "expo-secure-store",
+      "expo-font"
     ],
     "extra": {
       "eas": {
-        "projectId": "52267aee-02b2-479b-8d86-0f562a3715ff"
+        "projectId": "423b2ace-a342-4dcc-91af-78ca07297634"
       }
-    }
+    },
+    "owner": "amagzum2k25"
   }
 }

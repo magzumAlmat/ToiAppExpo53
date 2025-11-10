@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 // Базовый URL для API - замените на ваш актуальный адрес бэкенда
-const API_BASE_URL = 'http://localhost:3000/api';
+
+//const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://89.207.250.181:3000/api';
 
 // Создаем экземпляр axios с базовой конфигурацией
 const apiClient = axios.create({

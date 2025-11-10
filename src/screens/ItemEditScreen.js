@@ -7,7 +7,14 @@ import {
   ScrollView,
   StyleSheet,
   Modal,
+  Image,
+  FlatList,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import axios from 'axios';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 import { useSelector } from 'react-redux';
@@ -30,6 +37,88 @@ export default function ItemEditScreen() {
     category: false, // Для выбора категории в goods
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [files, setFiles] = useState([]);
+  const [loadingFiles, setLoadingFiles] = useState(false);
+  const [errorFiles, setErrorFiles] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
+
+  const pickFile = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Ошибка', 'Требуется разрешение для доступа к галерее');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedFiles([...selectedFiles, ...result.assets]);
+    }
+  };
+
+  const removeFile = (uri) => {
+    setSelectedFiles(selectedFiles.filter(file => file.uri !== uri));
+  };
+
+  const uploadFiles = async (entityType, entityId) => {
+    for (const file of selectedFiles) {
+      const formData = new FormData();
+      formData.append('file', {
+        uri: file.uri,
+        type: file.type === 'image' ? 'image/jpeg' : 'video/mp4',
+        name: file.uri.split('/').pop(),
+      });
+
+      try {
+        await axios.post(
+          `${BASE_URL}/api/${entityType}/${entityId}/files`,
+          formData,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+      } catch (error) {
+        console.error('File upload error:', error.response?.data || error.response || error);
+        throw new Error('Ошибка загрузки файла');
+      }
+    }
+  };
+
+  const handleDeleteFile = async (fileId) => {
+    Alert.alert(
+      'Подтверждение',
+      'Вы уверены, что хотите удалить этот файл?',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Удалить',
+          onPress: async () => {
+            try {
+              await axios.delete(`${BASE_URL}/api/${type}/${itemId}/files/${fileId}`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+              });
+              setFiles(files.filter(file => file.id !== fileId));
+              Alert.alert('Успех', 'Файл удален');
+            } catch (error) {
+              console.error('Error deleting file:', error.response?.data || error.response || error);
+              Alert.alert('Ошибка', 'Не удалось удалить файл');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const cuisineOptions = ['Русская', 'Итальянская', 'Азиатская', 'Французская', 'Американская'];
   const districtOptions = [
@@ -51,6 +140,21 @@ export default function ItemEditScreen() {
     'Алкоголь и гастрономия',
     'Традиционные подарки',
   ];
+
+  const fetchFiles = async (entityType, entityId) => {
+    setLoadingFiles(true);
+    setErrorFiles(null);
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_baseURL}/api/${entityType}/${entityId}/files`);
+      setFiles(response.data || []);
+    } catch (error) {
+      console.error("Error fetching files:", error);
+      setErrorFiles("Ошибка загрузки файлов: " + error.message);
+      setFiles([]);
+    } finally {
+      setLoadingFiles(false);
+    }
+  };
 
   // Загрузка данных объекта для редактирования
   useEffect(() => {
@@ -84,6 +188,7 @@ export default function ItemEditScreen() {
             specs: itemData.specs || { address: '', phone: '', storeName: '' }, // Обеспечиваем наличие specs для goods
           };
           setForm(formattedData);
+          fetchFiles(type, itemId);
         } catch (error) {
           console.error('Ошибка загрузки данных:', error.response || error);
           alert('Ошибка загрузки: ' + (error.response?.data?.message || error.message));
@@ -169,7 +274,11 @@ export default function ItemEditScreen() {
           case 'jewelry': await api.updateJewelry(itemId, formattedForm); break;
           default: throw new Error('Неизвестный тип объекта');
         }
+        if (selectedFiles.length > 0) {
+          await uploadFiles(type, itemId);
+        }
         alert(`${type} обновлён!`);
+        setSelectedFiles([]);
       } else {
         switch (type) {
           case 'restaurant': await api.createRestaurant(formattedForm); break;
@@ -225,6 +334,42 @@ export default function ItemEditScreen() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderMediaSection = () => {
+    if (loadingFiles) {
+      return <ActivityIndicator size="small" color="#0000ff" />;
+    }
+    if (errorFiles) {
+      return <Text style={styles.errorText}>{errorFiles}</Text>;
+    }
+
+    return (
+      <View style={styles.mediaSection}>
+        <Text style={styles.inputLabel}>Фотографии</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {files.map(item => (
+            <View key={item.id} style={styles.carouselItem}>
+              <Image source={{ uri: `${BASE_URL}/${item.path}` }} style={styles.media} />
+              <TouchableOpacity onPress={() => handleDeleteFile(item.id)} style={styles.deleteIcon}>
+                <Icon name="delete" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          ))}
+          {selectedFiles.map(item => (
+            <View key={item.uri} style={styles.carouselItem}>
+              <Image source={{ uri: item.uri }} style={styles.media} />
+              <TouchableOpacity onPress={() => removeFile(item.uri)} style={styles.deleteIcon}>
+                <Icon name="remove-circle" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          ))}
+          <TouchableOpacity onPress={pickFile} style={styles.addButton}>
+            <Icon name="add-a-photo" size={24} color="#374151" />
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
   };
 
   const renderForm = () => {
@@ -1200,8 +1345,6 @@ export default function ItemEditScreen() {
               />
             </View>
 
-           
-
           </>
         );
       case 'jewelry':
@@ -1343,6 +1486,7 @@ export default function ItemEditScreen() {
         </Text>
       </View>
       <View style={styles.formContainer}>
+        {renderMediaSection()}
         {renderForm()}
         <TouchableOpacity
           style={[styles.saveButton, isLoading && styles.disabledButton]}
@@ -1475,5 +1619,52 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4B5563',
     textAlign: 'center',
+  },
+  mediaSection: {
+    marginBottom: 16,
+  },
+  carouselItem: {
+    width: 200,
+    height: 150,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginRight: 10,
+    backgroundColor: '#E0E0E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  media: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  noFilesText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  errorText: {
+    fontSize: 14,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  deleteIcon: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: 2,
+  },
+  addButton: {
+    width: 150,
+    height: 150,
+    borderRadius: 8,
+    backgroundColor: '#E0E0E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
   },
 });

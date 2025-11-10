@@ -134,6 +134,12 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'contain',
   },
+  thumbnail: {
+    width: 100,
+    height: 100,
+    margin: 5,
+    borderRadius: 10,
+  },
   errorText: {
     color: COLORS.error,
     fontSize: 14,
@@ -661,6 +667,9 @@ export default function Item3Screen() {
   const [loadingServiceDetails, setLoadingServiceDetails] = useState(false);
   const [activeWeddingId, setActiveWeddingId] = useState(null);
   const [hasShownNoWeddingsAlert, setHasShownNoWeddingsAlert] = useState(false);
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
 
   const categoryMap = {
@@ -728,7 +737,7 @@ export default function Item3Screen() {
               name: `Service ${es.serviceId}`,
               serviceType: es.serviceType,
               serviceId: es.serviceId,
-              cost: null,
+              cost: details?.cost || 0,
             };
           })
         );
@@ -1751,6 +1760,12 @@ const handleDetailsPress = () => {
     handleDeepLink();
   }, []);
 
+  const openPhotoModal = (images, index) => {
+    setSelectedImages(images);
+    setSelectedImageIndex(index);
+    setPhotoModalVisible(true);
+  };
+
   const groupItemsByCategory = (items) => {
     const categoryMap = {
       restaurant: "Рестораны",
@@ -2497,7 +2512,23 @@ const renderServiceDetailsModal = ({
             ) : (
               <Text style={styles.noItems}>Детали недоступны</Text>
             )}
-          </ScrollView>
+              </ScrollView>
+              {files && files.length > 0 && (
+                <View style={styles.mediaSection}>
+                  <Text style={styles.sectionTitle}>Фотографии</Text>
+                  <FlatList
+                    horizontal
+                    data={files}
+                    keyExtractor={(file) => file.id.toString()}
+                    renderItem={({ item: file, index }) => (
+                      <TouchableOpacity onPress={() => openPhotoModal(files, index)}>
+                        <Image source={{ uri: `${BASE_URL}/${file.path}` }} style={styles.thumbnail} />
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              )}
+
           <TouchableOpacity
             style={[styles.createButton, { backgroundColor: COLORS.error }]}
             onPress={() => {
@@ -3121,6 +3152,29 @@ return (
           </View>
         </ScrollView>
       </SafeAreaView>
+    </Modal>
+
+    <Modal
+      visible={photoModalVisible}
+      transparent={true}
+      onRequestClose={() => setPhotoModalVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <TouchableOpacity style={styles.modalCloseButton} onPress={() => setPhotoModalVisible(false)}>
+          <Text style={styles.closeButtonText}>X</Text>
+        </TouchableOpacity>
+        <FlatList
+          data={selectedImages}
+          horizontal
+          pagingEnabled
+          initialScrollIndex={selectedImageIndex}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <Image source={{ uri: `${BASE_URL}/${item.path}` }} style={styles.fullscreenImage} />
+          )}
+          getItemLayout={(data, index) => ({ length: screenWidth, offset: screenWidth * index, index })}
+        />
+      </View>
     </Modal>
 
     {/* Fullscreen Image Modal */}
