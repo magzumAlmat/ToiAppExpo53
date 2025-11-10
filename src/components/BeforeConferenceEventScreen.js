@@ -910,7 +910,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+
+import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import AddItemModal from './AddItemModal';
 import * as Haptics from 'expo-haptics';
 
@@ -1133,7 +1134,7 @@ const BeforeConferenceEventScreen = ({ navigation, route }) => {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <AntDesign name="left" size={24} color="black" />
+        <AntDesign name="left" size={24} color="black" />npm
       </TouchableOpacity>
 
       <View style={styles.headerContainer}></View>
