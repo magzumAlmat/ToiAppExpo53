@@ -2,7 +2,7 @@
   "expo": {
     "name": "Toilab",
     "slug": "toilab",
-    "version": "1.0.2",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,13 +14,13 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amagzum.toilab",
+      "bundleIdentifier": "com.amagzum.myjsproject",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCalendarsUsageDescription": "Приложение использует календарь для создания напоминаний о задачах и событиях.",
         "NSContactsUsageDescription": "Приложение использует контакты, чтобы вы могли быстро поделиться информацией с друзьями."
       },
-      "buildNumber": "3"
+      "buildNumber": "5"
       
     },
     "android": {
@@ -29,7 +29,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.amagzum.toilab"
+      "package": "com.amagzum.myjsproject"
     },
     "web": {
       "favicon": "./assets/favicon.png"
