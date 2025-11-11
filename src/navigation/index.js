@@ -656,7 +656,10 @@ function NewScreenTabs() {
 
 
 export default function Navigation() {
-  const { token, user } = useSelector((state) => state.auth);
+  const { token, user } = useSelector((state) => {
+    console.log('Inspecting auth state:', JSON.stringify(state.auth, null, 2));
+    return state.auth;
+  });
   console.log('Navigation state:', { token, user });
 
   const navigationRef = useNavigationContainerRef();

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "my-js-project",
+    "name": "Toilab",
     "slug": "toilab",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,10 +14,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amagzum.myjsproject",
+      "bundleIdentifier": "com.amagzum.toilab",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCalendarsUsageDescription": "Приложение использует календарь для создания напоминаний о задачах и событиях.",
+        "NSContactsUsageDescription": "Приложение использует контакты, чтобы вы могли быстро поделиться информацией с друзьями."
+      },
+      "buildNumber": "3"
+      
     },
     "android": {
       "adaptiveIcon": {
@@ -25,14 +29,15 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.amagzum.myjsproject"
+      "package": "com.amagzum.toilab"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ],
     "extra": {
       "eas": {
