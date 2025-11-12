@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { startLoading, loginSuccess, setError, setLoading } from '../store/authSlice';
 import api from '../api/api';
@@ -125,12 +125,16 @@ export default function LoginScreen({ navigation }) {
         {error && <Text style={styles.error}>{error}</Text>}
       </View>
 
-      <TouchableOpacity style={styles.loginButtonContainer} onPress={handleLogin}>
+      <TouchableOpacity style={styles.loginButtonContainer} onPress={handleLogin} disabled={loading}>
         <LinearGradient
           colors={['#D3C5B7', '#A68A6E']}
           style={styles.loginButtonGradient}
         >
-          <Text style={styles.loginButtonText}>Вход</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={styles.loginButtonText}>Вход</Text>
+          )}
         </LinearGradient>
       </TouchableOpacity>
 

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Toilab",
     "slug": "toilab",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,7 +20,7 @@
         "NSCalendarsUsageDescription": "Приложение использует календарь для создания напоминаний о задачах и событиях.",
         "NSContactsUsageDescription": "Приложение использует контакты, чтобы вы могли быстро поделиться информацией с друзьями."
       },
-      "buildNumber": "5"
+      "buildNumber": "6"
       
     },
     "android": {

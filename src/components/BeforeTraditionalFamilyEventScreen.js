@@ -425,86 +425,547 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+// import React, { useState, useEffect } from 'react';
+// import {
+//   View,
+//   Image,
+//   StyleSheet,
+//   TouchableOpacity,
+//   Text,
+//   TextInput,
+//   SafeAreaView,
+//   FlatList,
+//   Dimensions,
+// } from 'react-native';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import Icon from 'react-native-vector-icons/MaterialIcons';
+// import AntDesign from '@expo/vector-icons/AntDesign';
+// import AddItemModal from './AddItemModal';
+// import * as Haptics from 'expo-haptics';
+// const COLORS = {
+//   primary: '#FF6F61',
+//   white: '#FFFFFF',
+  
+  
+// };
+
+// // Mapping of categories to their inactive and active image sources
+// const categoryImages = {
+//   'Ресторан': {
+//     inactive: require('../../assets/restaurantTurnOff.png'), // Replace with actual path
+//     active: require('../../assets/restaurantOn.png'),     // Replace with actual path
+//   },
+//   'Ведущий': {
+//     inactive: require('../../assets/vedushieOff.png'), // Replace with actual path
+//     active: require('../../assets/vedushieOn.png'),     // Replace with actual path
+//   },
+//   'Шоу программа': {
+//     inactive: require('../../assets/showTurnOff.png'), // Use the provided image
+//     active: require('../../assets/show.png'),     // Replace with actual path
+//   },
+//   'Свадебный салон': {
+//     inactive: require('../../assets/svadeblyisalonOff.png'), // Replace with actual path
+//     active: require('../../assets/svadebnyisalon.png'),     // Replace with actual path
+//   },
+//   'Прокат авто': {
+//     inactive: require('../../assets/prokatAutooff.png'), // Replace with actual path
+//     active: require('../../assets/prokatAvtoOn.png'),     // Replace with actual path
+//   },
+//   'Традиционные подарки': {
+//     inactive: require('../../assets/tradGifts.png'), // Replace with actual path
+//     active: require('../../assets/tradGiftsOn.png'),     // Replace with actual path
+//   },
+//   'Ювелирные изделия': {
+//     inactive: require('../../assets/uvIzdeliyaOff.png'), // Use the provided image
+//     active: require('../../assets/uvizdeliyaOn.png'),     // Replace with actual path
+//   },
+//   'Торты': {
+//     inactive: require('../../assets/tortyTurnOff.png'), // Use the provided image
+//     active: require('../../assets/torty.png'),     // Replace with actual path
+//   },
+//   'Алкоголь': {
+//     inactive: require('../../assets/alcoholOff.png'), // Replace with actual path
+//     active: require('../../assets/alcoholOn.png'),     // Replace with actual path
+//   },
+//   'Цветы': {
+//     inactive: require('../../assets/cvetyOff.png'), // Replace with actual path
+//     active: require('../../assets/cvetyOn.png'),     // Replace with actual path
+//   },
+// };
+
+
+
+// const BeforeTraditionalFamilyEventScreen = ({ navigation, route }) => {
+  
+//   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
+//   const selectedCategories = route?.params?.selectedCategories || [];
+
+//   const defaultCategories = [
+//     'Ресторан',
+//     'Ведущий',
+//     'Шоу программа',
+//     // 'Свадебный салон',
+//     'Прокат авто',
+//     'Традиционные подарки',
+//     'Ювелирные изделия',
+//     'Торты',
+//     'Алкоголь',
+//     'Цветы',
+//   ];
+
+//   const [activeCategories, setActiveCategories] = useState(() => {
+//     const initialCategories = {};
+//     selectedCategories.forEach((category) => {
+//       if (defaultCategories.includes(category)) {
+//         initialCategories[category] = true;
+//       }
+//     });
+//     return initialCategories;
+//   });
+
+//   const [budget, setBudget] = useState('');
+//   const [guestCount, setGuestCount] = useState('');
+//   const [currentPage, setCurrentPage] = useState(0);
+
+//   const categories = [...new Set([...defaultCategories, ...selectedCategories])];
+
+//   const ITEMS_PER_PAGE = 9;
+//   const paginatedCategories = [];
+  
+//   for (let i = 0; i < categories.length; i += ITEMS_PER_PAGE) {
+//     paginatedCategories.push(categories.slice(i, i + ITEMS_PER_PAGE));
+//   }
+
+//   const handleScroll = (event) => {
+//     const offsetX = event.nativeEvent.contentOffset.x;
+//     const page = Math.round(offsetX / Dimensions.get('window').width);
+//     setCurrentPage(page);
+//   };
+
+//   const handleCategoryPress =async (category) => {
+//     try {
+//       // Запускаем легкую вибрацию (можно выбрать другой тип)
+//       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+//       console.log('Vibration triggered');
+//     } catch (error) {
+//       console.error('Vibration error:', error);
+//     }
+
+//     if (category === 'Добавить') {
+//       return;
+//     }
+//     setActiveCategories((prev) => ({
+//       ...prev,
+//       [category]: !prev[category],
+//     }));
+//   };
+
+//   const selectedCategoriesList = Object.keys(activeCategories).filter(
+//     (category) => activeCategories[category]
+//   );
+
+//   const handleBudgetChange = (value) => {
+//     const filteredValue = value.replace(/[^0-9]/g, '');
+//     setBudget(filteredValue);
+//   };
+
+//   const handleGuestCountChange = (value) => {
+//     const filteredValue = value.replace(/[^0-9]/g, '');
+//     setGuestCount(filteredValue);
+//   };
+
+//   // const handleProceed = () => {
+//   //   if (selectedCategoriesList.length === 0) {
+//   //     alert('Пожалуйста, выберите хотя бы одну категорию.');
+//   //     return;
+//   //   }
+//   //   // navigation.navigate('Authenticated', {
+//   //   //   screen: 'CreateTraditionalFamilyEvent',
+//   //   //   params: { selectedCategories: selectedCategoriesList },
+//   //   // });
+
+//   //   navigation.navigate('CreateTraditionalFamilyEvent', {
+//   //   selectedCategories: selectedCategoriesList,
+//   //   params: { selectedCategories: selectedCategoriesList },
+//   // });
+
+
+
+
+
+
+// // const handleProceed = () => {
+// //   if (selectedCategoriesList.length === 0) {
+// //     alert('Пожалуйста, выберите хотя бы одну категорию.');
+// //     return;
+// //   }
+// //   console.log('Передаваемые категории:', selectedCategoriesList);
+// //   navigation.navigate('CreateTraditionalFamilyEventTabs', {
+// //     screen: 'CreateTraditionalFamilyEvent',
+// //     params: { selectedCategories: selectedCategoriesList },
+// //   });
+// // };
+
+
+// const handleProceed = () => {
+//   if (selectedCategoriesList.length === 0) {
+//     alert('Пожалуйста, выберите хотя бы одну категорию.');
+//     return;
+//   }
+//   console.log('Передаваемые категории:', selectedCategoriesList);
+//   navigation.navigate('CreateTraditionalFamilyEvent', {
+//     screen: 'CreateTraditionalFamilyEvent',
+//     params: { selectedCategories: selectedCategoriesList },
+//   });
+// };
+
+
+
+
+
+//   const renderCategory = (item) => {
+//     const isActive = activeCategories[item];
+
+//     if (item === 'Добавить') {
+//       return (
+//         <TouchableOpacity style={styles.categoryButton}>
+//           <LinearGradient
+//             colors={['#D3C5B7', '#A68A6E']}
+//             style={styles.categoryButtonGradient}
+//           >
+//             <Icon name="add" size={24} color={COLORS.white} />
+//           </LinearGradient>
+//         </TouchableOpacity>
+//       );
+//     }
+
+//     const imageSource = isActive
+//       ? categoryImages[item]?.active
+//       : categoryImages[item]?.inactive;
+
+//     return (
+//       <TouchableOpacity
+//         style={styles.categoryButton}
+//         onPress={() => handleCategoryPress(item)}
+//       >
+//         {/* <LinearGradient
+//           colors={['#D3C5B7', '#A68A6E']}
+//           style={styles.categoryButtonGradient}
+//         > */}
+//           <Image
+//             source={imageSource}
+//             style={styles.categoryImage}
+//             resizeMode="contain"
+//           />
+//         {/* </LinearGradient> */}
+//       </TouchableOpacity>
+//     );
+//   };
+
+//   const renderPage = ({ item }) => (
+//     <View style={styles.pageContainer}>
+//       {item.map((category, index) => (
+//         <View key={index} style={styles.categoryItem}>
+//           {renderCategory(category)}
+//         </View>
+//       ))}
+//     </View>
+//   );
+
+//   return (
+
+  
+
+//     <LinearGradient
+//       colors={['#F1EBDD', '#897066']}
+//       start={{ x: 0, y: 1 }}
+//       end={{ x: 0, y: 0 }}
+//       style={styles.splashContainer}
+//     >
+//         <TouchableOpacity
+//   style={styles.iconButton}
+//   onPress={() => setAddItemModalVisible(true)}
+//   disabled={!budget}
+// >
+//   <Icon name="add" size={24} color={!budget ? COLORS.textSecondary : '#FFFFFF'} />
+// </TouchableOpacity>
+
+
+//       <Image
+//         source={require('../../assets/footer.png')}
+//         style={styles.topPatternContainer}
+//       />
+
+//       <TouchableOpacity
+//         style={styles.backButton}
+//         onPress={() => navigation.goBack()}
+//       >
+//         <AntDesign name="left" size={24} color="black" />
+//       </TouchableOpacity>
+
+//       <View style={styles.headerContainer}></View>
+
+//       <View style={styles.logoContainer}>
+//         <Image
+//           source={require('../../assets/kazanRevert.png')}
+//           style={styles.potIcon}
+//           resizeMode="contain"
+//         />
+//       </View>
+
+     
+
+//   <View style={styles.listContainer}>
+//           <View style={styles.categoryGrid}>
+//             <FlatList
+//               data={paginatedCategories}
+//               renderItem={renderPage}
+//               keyExtractor={(item, index) => `page-${index}`}
+//               horizontal
+//               pagingEnabled
+//               showsHorizontalScrollIndicator={false}
+//               onScroll={handleScroll}
+//               scrollEventThrottle={16}
+//               style={styles.paginationList}
+//             />
+//             {paginatedCategories.length > 1 && (
+//               <View style={styles.paginationDots}>
+//                 {paginatedCategories.map((_, index) => (
+//                   <Image
+//                     key={index}
+//                     source={
+//                       currentPage === index
+//                         ? require('../../assets/dotOn.png') // Укажите путь к изображению активной точки
+//                         : require('../../assets/dotOff.png') // Укажите путь к изображению неактивной точки
+//                     }
+//                     style={styles.dotImage}
+//                     resizeMode="contain"
+//                   />
+//                 ))}
+//               </View>
+//             )}
+//           </View>
+//         </View>
+
+
+
+//       <View style={styles.bottomContainer}>
+//         <TouchableOpacity style={styles.nextButton} onPress={handleProceed}>
+//           <Image
+//             source={require('../../assets/next.png')}
+//             style={styles.potIcon3}
+//             resizeMode="contain"
+//           />
+//         </TouchableOpacity>
+//       </View>
+//     </LinearGradient>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   splashContainer: {
+//     flex: 1,
+//     position: 'relative',
+//   },
+//   topPatternContainer: {
+//     position: 'absolute',
+//     bottom: 0,
+//     width: '100%',
+//     height: '20%',
+//     zIndex: 1,
+//     resizeMode: 'cover',
+//     opacity: 0.8,
+//   },
+//   backButton: {
+//     marginTop: '10%',
+//     marginLeft: '2%',
+//     padding: 10,
+//     zIndex: 3,
+//   },
+//   headerContainer: {
+//     paddingHorizontal: 50,
+//     backgroundColor: 'transparent',
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     zIndex: 2,
+//   },
+//   logoContainer: {
+//     alignItems: 'center',
+//     marginVertical: 20,
+//     zIndex: 2,
+//   },
+//   potIcon: {
+//     width: 150,
+//     height: 150,
+//   },
+//   potIcon3: {
+//     width: 120,
+//     height: 120,
+//     zIndex: 2,
+//   },
+//   listContainer: {
+//     flex: 1,
+//     paddingHorizontal: 20,
+//     zIndex: 2,
+//   },
+//   categoryGrid: {
+//     flex: 1,
+//     paddingVertical: 10,
+//   },
+//   pageContainer: {
+//     width: Dimensions.get('window').width - 40,
+//     flexDirection: 'row',
+//     flexWrap: 'wrap',
+//     justifyContent: 'space-between',
+//     paddingHorizontal: 10,
+//   },
+//   categoryItem: {
+//     width: '33.33%',
+//     padding: 5,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+//   categoryButton: {
+//     width: '100%',
+//     aspectRatio: 1,
+//     borderRadius: 100,
+//     overflow: 'hidden',
+
+//     shadowColor: 'rgba(0, 0, 0, 0.3)',
+//     shadowOffset: { width: 0, height: 5 },
+//     shadowOpacity: 0.5,
+//     shadowRadius: 8,
+//     elevation: 5,
+//   },
+//   categoryButtonGradient: {
+//     flex: 1,
+//     // justifyContent: 'center',
+//     // alignItems: 'center',
+//     // borderWidth: 2,
+//     // borderColor: '#5A4032',
+//     // borderRadius: 100,
+//   },
+//   categoryImage: {
+//     width: '100%',
+//     height: '100%',
+//   },
+//   paginationList: {
+//     flexGrow: 0,
+//   },
+//   paginationDots: {
+//     flexDirection: 'row',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     marginTop: 10,
+//     zIndex: 2,
+//   },
+//   dotImage: {
+//     width: 14,
+//     height: 14,
+//     borderRadius: 4,
+//     marginHorizontal: 4,
+//   },
+//   activeDot: {
+//     backgroundColor: COLORS.primary,
+//   },
+//   inactiveDot: {
+//     backgroundColor: 'rgba(255, 255, 255, 0.5)',
+//   },
+//   bottomContainer: {
+//     paddingHorizontal: 20,
+//     paddingBottom: 20,
+//     zIndex: 3,
+//   },
+//   nextButton: {
+//     paddingVertical: 15,
+//     borderRadius: 25,
+//     alignItems: 'center',
+//     zIndex:3,
+
+//   },
+// });
+
+// export default BeforeTraditionalFamilyEventScreen;
+
+
+
+
+
+
+
+import React, { useState } from 'react';
 import {
   View,
   Image,
   StyleSheet,
   TouchableOpacity,
-  Text,
-  TextInput,
-  SafeAreaView,
   FlatList,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import AddItemModal from './AddItemModal';
 import * as Haptics from 'expo-haptics';
-const COLORS = {
-  primary: '#FF6F61',
-  white: '#FFFFFF',
-  
-  
-};
 
-// Mapping of categories to their inactive and active image sources
+const COLORS = { primary: '#FF6F61', white: '#FFFFFF' };
+
+/* ──────────────────────  Адаптивные размеры  ────────────────────── */
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isTablet = Platform.isPad || SCREEN_WIDTH >= 768;
+const BUTTON_SIZE = isTablet ? 110 : Math.min(SCREEN_WIDTH / 4.5, 100); // ~85–100 dp на iPhone, 110 на iPad
+const GAP = 16; // расстояние между кнопками
+/* ─────────────────────────────────────────────────────────────────── */
+
+/* ──────────────────────  Картинки категорий  ────────────────────── */
 const categoryImages = {
-  'Ресторан': {
-    inactive: require('../../assets/restaurantTurnOff.png'), // Replace with actual path
-    active: require('../../assets/restaurantOn.png'),     // Replace with actual path
+  Ресторан: {
+    inactive: require('../../assets/restaurantTurnOff.png'),
+    active: require('../../assets/restaurantOn.png'),
   },
-  'Ведущий': {
-    inactive: require('../../assets/vedushieOff.png'), // Replace with actual path
-    active: require('../../assets/vedushieOn.png'),     // Replace with actual path
+  Ведущий: {
+    inactive: require('../../assets/vedushieOff.png'),
+    active: require('../../assets/vedushieOn.png'),
   },
   'Шоу программа': {
-    inactive: require('../../assets/showTurnOff.png'), // Use the provided image
-    active: require('../../assets/show.png'),     // Replace with actual path
-  },
-  'Свадебный салон': {
-    inactive: require('../../assets/svadeblyisalonOff.png'), // Replace with actual path
-    active: require('../../assets/svadebnyisalon.png'),     // Replace with actual path
+    inactive: require('../../assets/showTurnOff.png'),
+    active: require('../../assets/show.png'),
   },
   'Прокат авто': {
-    inactive: require('../../assets/prokatAutooff.png'), // Replace with actual path
-    active: require('../../assets/prokatAvtoOn.png'),     // Replace with actual path
+    inactive: require('../../assets/prokatAutooff.png'),
+    active: require('../../assets/prokatAvtoOn.png'),
   },
   'Традиционные подарки': {
-    inactive: require('../../assets/tradGifts.png'), // Replace with actual path
-    active: require('../../assets/tradGiftsOn.png'),     // Replace with actual path
+    inactive: require('../../assets/tradGifts.png'),
+    active: require('../../assets/tradGiftsOn.png'),
   },
   'Ювелирные изделия': {
-    inactive: require('../../assets/uvIzdeliyaOff.png'), // Use the provided image
-    active: require('../../assets/uvizdeliyaOn.png'),     // Replace with actual path
+    inactive: require('../../assets/uvIzdeliyaOff.png'),
+    active: require('../../assets/uvizdeliyaOn.png'),
   },
-  'Торты': {
-    inactive: require('../../assets/tortyTurnOff.png'), // Use the provided image
-    active: require('../../assets/torty.png'),     // Replace with actual path
+  Торты: {
+    inactive: require('../../assets/tortyTurnOff.png'),
+    active: require('../../assets/torty.png'),
   },
-  'Алкоголь': {
-    inactive: require('../../assets/alcoholOff.png'), // Replace with actual path
-    active: require('../../assets/alcoholOn.png'),     // Replace with actual path
+  Алкоголь: {
+    inactive: require('../../assets/alcoholOff.png'),
+    active: require('../../assets/alcoholOn.png'),
   },
-  'Цветы': {
-    inactive: require('../../assets/cvetyOff.png'), // Replace with actual path
-    active: require('../../assets/cvetyOn.png'),     // Replace with actual path
+  Цветы: {
+    inactive: require('../../assets/cvetyOff.png'),
+    active: require('../../assets/cvetyOn.png'),
   },
 };
-
-
+/* ─────────────────────────────────────────────────────────────────── */
 
 const BeforeTraditionalFamilyEventScreen = ({ navigation, route }) => {
-  
-  const [addItemModalVisible, setAddItemModalVisible] = useState(false);
   const selectedCategories = route?.params?.selectedCategories || [];
 
   const defaultCategories = [
     'Ресторан',
     'Ведущий',
     'Шоу программа',
-    // 'Свадебный салон',
     'Прокат авто',
     'Традиционные подарки',
     'Ювелирные изделия',
@@ -514,197 +975,105 @@ const BeforeTraditionalFamilyEventScreen = ({ navigation, route }) => {
   ];
 
   const [activeCategories, setActiveCategories] = useState(() => {
-    const initialCategories = {};
-    selectedCategories.forEach((category) => {
-      if (defaultCategories.includes(category)) {
-        initialCategories[category] = true;
-      }
+    const init = {};
+    selectedCategories.forEach((c) => {
+      if (defaultCategories.includes(c)) init[c] = true;
     });
-    return initialCategories;
+    return init;
   });
 
-  const [budget, setBudget] = useState('');
-  const [guestCount, setGuestCount] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
 
-  const categories = [...new Set([...defaultCategories, ...selectedCategories])];
-
+  /* ───────  Пагинация: 9 элементов (3×3) на страницу  ─────── */
+  const allCategories = [...new Set([...defaultCategories, ...selectedCategories])];
   const ITEMS_PER_PAGE = 9;
-  const paginatedCategories = [];
-  
-  for (let i = 0; i < categories.length; i += ITEMS_PER_PAGE) {
-    paginatedCategories.push(categories.slice(i, i + ITEMS_PER_PAGE));
+  const paginated = [];
+  for (let i = 0; i < allCategories.length; i += ITEMS_PER_PAGE) {
+    paginated.push(allCategories.slice(i, i + ITEMS_PER_PAGE));
   }
+  /* ─────────────────────────────────────────────────────────── */
 
-  const handleScroll = (event) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const page = Math.round(offsetX / Dimensions.get('window').width);
+  const handleScroll = (e) => {
+    const offsetX = e.nativeEvent.contentOffset.x;
+    const page = Math.round(offsetX / SCREEN_WIDTH);
     setCurrentPage(page);
   };
 
-  const handleCategoryPress =async (category) => {
+  const toggleCategory = async (cat) => {
     try {
-      // Запускаем легкую вибрацию (можно выбрать другой тип)
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      console.log('Vibration triggered');
-    } catch (error) {
-      console.error('Vibration error:', error);
-    }
+    } catch (_) {}
+    setActiveCategories((prev) => ({ ...prev, [cat]: !prev[cat] }));
+  };
 
-    if (category === 'Добавить') {
+  const handleProceed = () => {
+    const chosen = Object.keys(activeCategories).filter((k) => activeCategories[k]);
+    if (!chosen.length) {
+      alert('Пожалуйста, выберите хотя бы одну категорию.');
       return;
     }
-    setActiveCategories((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
+    navigation.navigate('CreateTraditionalFamilyEvent', {
+      screen: 'CreateTraditionalFamilyEvent',
+      params: { selectedCategories: chosen },
+    });
   };
 
-  const selectedCategoriesList = Object.keys(activeCategories).filter(
-    (category) => activeCategories[category]
-  );
+  /* ───────────────────  Рендер одной кнопки  ─────────────────── */
+  const renderCategory = (cat) => {
+    const isActive = activeCategories[cat];
 
-  const handleBudgetChange = (value) => {
-    const filteredValue = value.replace(/[^0-9]/g, '');
-    setBudget(filteredValue);
-  };
-
-  const handleGuestCountChange = (value) => {
-    const filteredValue = value.replace(/[^0-9]/g, '');
-    setGuestCount(filteredValue);
-  };
-
-  // const handleProceed = () => {
-  //   if (selectedCategoriesList.length === 0) {
-  //     alert('Пожалуйста, выберите хотя бы одну категорию.');
-  //     return;
-  //   }
-  //   // navigation.navigate('Authenticated', {
-  //   //   screen: 'CreateTraditionalFamilyEvent',
-  //   //   params: { selectedCategories: selectedCategoriesList },
-  //   // });
-
-  //   navigation.navigate('CreateTraditionalFamilyEvent', {
-  //   selectedCategories: selectedCategoriesList,
-  //   params: { selectedCategories: selectedCategoriesList },
-  // });
-
-
-
-
-
-
-// const handleProceed = () => {
-//   if (selectedCategoriesList.length === 0) {
-//     alert('Пожалуйста, выберите хотя бы одну категорию.');
-//     return;
-//   }
-//   console.log('Передаваемые категории:', selectedCategoriesList);
-//   navigation.navigate('CreateTraditionalFamilyEventTabs', {
-//     screen: 'CreateTraditionalFamilyEvent',
-//     params: { selectedCategories: selectedCategoriesList },
-//   });
-// };
-
-
-const handleProceed = () => {
-  if (selectedCategoriesList.length === 0) {
-    alert('Пожалуйста, выберите хотя бы одну категорию.');
-    return;
-  }
-  console.log('Передаваемые категории:', selectedCategoriesList);
-  navigation.navigate('CreateTraditionalFamilyEvent', {
-    screen: 'CreateTraditionalFamilyEvent',
-    params: { selectedCategories: selectedCategoriesList },
-  });
-};
-
-
-
-
-
-  const renderCategory = (item) => {
-    const isActive = activeCategories[item];
-
-    if (item === 'Добавить') {
+    if (cat === 'Добавить') {
       return (
         <TouchableOpacity style={styles.categoryButton}>
           <LinearGradient
             colors={['#D3C5B7', '#A68A6E']}
             style={styles.categoryButtonGradient}
           >
-            <Icon name="add" size={24} color={COLORS.white} />
+            <Icon name="add" size={32} color={COLORS.white} />
           </LinearGradient>
         </TouchableOpacity>
       );
     }
 
-    const imageSource = isActive
-      ? categoryImages[item]?.active
-      : categoryImages[item]?.inactive;
+    const src = isActive ? categoryImages[cat]?.active : categoryImages[cat]?.inactive;
 
     return (
-      <TouchableOpacity
-        style={styles.categoryButton}
-        onPress={() => handleCategoryPress(item)}
-      >
-        {/* <LinearGradient
-          colors={['#D3C5B7', '#A68A6E']}
-          style={styles.categoryButtonGradient}
-        > */}
-          <Image
-            source={imageSource}
-            style={styles.categoryImage}
-            resizeMode="contain"
-          />
-        {/* </LinearGradient> */}
+      <TouchableOpacity style={styles.categoryButton} onPress={() => toggleCategory(cat)}>
+        <Image source={src} style={styles.categoryImage} resizeMode="contain" />
       </TouchableOpacity>
     );
   };
+  /* ───────────────────────────────────────────────────────────── */
 
   const renderPage = ({ item }) => (
     <View style={styles.pageContainer}>
-      {item.map((category, index) => (
-        <View key={index} style={styles.categoryItem}>
-          {renderCategory(category)}
+      {item.map((cat) => (
+        <View key={cat} style={styles.categoryItem}>
+          {renderCategory(cat)}
         </View>
       ))}
     </View>
   );
 
   return (
-
-  
-
     <LinearGradient
       colors={['#F1EBDD', '#897066']}
       start={{ x: 0, y: 1 }}
       end={{ x: 0, y: 0 }}
       style={styles.splashContainer}
     >
-        <TouchableOpacity
-  style={styles.iconButton}
-  onPress={() => setAddItemModalVisible(true)}
-  disabled={!budget}
->
-  <Icon name="add" size={24} color={!budget ? COLORS.textSecondary : '#FFFFFF'} />
-</TouchableOpacity>
-
-
+      {/* Фон */}
       <Image
         source={require('../../assets/footer.png')}
         style={styles.topPatternContainer}
       />
 
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
+      {/* Назад */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <AntDesign name="left" size={24} color="black" />
       </TouchableOpacity>
 
-      <View style={styles.headerContainer}></View>
-
+      {/* Логотип */}
       <View style={styles.logoContainer}>
         <Image
           source={require('../../assets/kazanRevert.png')}
@@ -713,42 +1082,36 @@ const handleProceed = () => {
         />
       </View>
 
-     
+      {/* Список */}
+      <View style={styles.listContainer}>
+        <FlatList
+          data={paginated}
+          renderItem={renderPage}
+          keyExtractor={(_, i) => `page-${i}`}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          style={styles.paginationList}
+        />
 
-  <View style={styles.listContainer}>
-          <View style={styles.categoryGrid}>
-            <FlatList
-              data={paginatedCategories}
-              renderItem={renderPage}
-              keyExtractor={(item, index) => `page-${index}`}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-              style={styles.paginationList}
-            />
-            {paginatedCategories.length > 1 && (
-              <View style={styles.paginationDots}>
-                {paginatedCategories.map((_, index) => (
-                  <Image
-                    key={index}
-                    source={
-                      currentPage === index
-                        ? require('../../assets/dotOn.png') // Укажите путь к изображению активной точки
-                        : require('../../assets/dotOff.png') // Укажите путь к изображению неактивной точки
-                    }
-                    style={styles.dotImage}
-                    resizeMode="contain"
-                  />
-                ))}
-              </View>
-            )}
+        {/* Точки пагинации */}
+        {paginated.length > 1 && (
+          <View style={styles.paginationDots}>
+            {paginated.map((_, i) => (
+              <Image
+                key={i}
+                source={currentPage === i ? require('../../assets/dotOn.png') : require('../../assets/dotOff.png')}
+                style={styles.dotImage}
+                resizeMode="contain"
+              />
+            ))}
           </View>
-        </View>
+        )}
+      </View>
 
-
-
+      {/* Далее */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.nextButton} onPress={handleProceed}>
           <Image
@@ -762,11 +1125,10 @@ const handleProceed = () => {
   );
 };
 
+/* ──────────────────────  СТИЛИ  ────────────────────── */
 const styles = StyleSheet.create({
-  splashContainer: {
-    flex: 1,
-    position: 'relative',
-  },
+  splashContainer: { flex: 1, position: 'relative' },
+
   topPatternContainer: {
     position: 'absolute',
     bottom: 0,
@@ -776,83 +1138,63 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     opacity: 0.8,
   },
+
   backButton: {
     marginTop: '10%',
     marginLeft: '2%',
     padding: 10,
     zIndex: 3,
   },
-  headerContainer: {
-    paddingHorizontal: 50,
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    zIndex: 2,
-  },
+
   logoContainer: {
     alignItems: 'center',
     marginVertical: 20,
     zIndex: 2,
   },
-  potIcon: {
-    width: 150,
-    height: 150,
-  },
-  potIcon3: {
-    width: 120,
-    height: 120,
-    zIndex: 2,
-  },
-  listContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-    zIndex: 2,
-  },
-  categoryGrid: {
-    flex: 1,
-    paddingVertical: 10,
-  },
+  potIcon: { width: 150, height: 150 },
+  potIcon3: { width: 120, height: 120 },
+
+  listContainer: { flex: 1, paddingHorizontal: 20, zIndex: 2 },
+
+  /* ───────  Страница: ширина экрана, 3×3 сетка  ─────── */
   pageContainer: {
-    width: Dimensions.get('window').width - 40,
+    width: SCREEN_WIDTH,
+    paddingHorizontal: (SCREEN_WIDTH - (BUTTON_SIZE + GAP) * 3) / 2,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    alignContent: 'space-between',
   },
-  categoryItem: {
-    width: '33.33%',
-    padding: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  categoryButton: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: 100,
-    overflow: 'hidden',
 
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
+  categoryItem: {
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
+    marginBottom: GAP,
+  },
+
+  categoryButton: {
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
+    borderRadius: BUTTON_SIZE / 2,
+    overflow: 'hidden',
+    backgroundColor: '#D3C5B7',
+    shadowColor: 'rgba(0,0,0,0.3)',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.5,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 8,
   },
+
   categoryButtonGradient: {
     flex: 1,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-    // borderWidth: 2,
-    // borderColor: '#5A4032',
-    // borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  categoryImage: {
-    width: '100%',
-    height: '100%',
-  },
-  paginationList: {
-    flexGrow: 0,
-  },
+
+  categoryImage: { width: '100%', height: '100%' },
+
+  paginationList: { flexGrow: 0 },
+
   paginationDots: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -860,30 +1202,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     zIndex: 2,
   },
-  dotImage: {
-    width: 14,
-    height: 14,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  activeDot: {
-    backgroundColor: COLORS.primary,
-  },
-  inactiveDot: {
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-  },
-  bottomContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    zIndex: 3,
-  },
-  nextButton: {
-    paddingVertical: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-    zIndex:3,
+  dotImage: { width: 14, height: 14, marginHorizontal: 4 },
 
-  },
+  bottomContainer: { paddingHorizontal: 20, paddingBottom: 20, zIndex: 3 },
+  nextButton: { alignItems: 'center' },
 });
+/* ─────────────────────────────────────────────────── */
 
 export default BeforeTraditionalFamilyEventScreen;

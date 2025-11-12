@@ -1717,4 +1717,21 @@ export default {
     api.put(`/api/hotel/${id}`, data).catch((error) => {
       throw new Error(`Ошибка обновления гостиницы: ${error.response?.data?.message || error.message}`);
     }),
+
+  getPlaceholderService: (serviceType, token) =>
+    api.get(`/api/placeholder-service?type=${serviceType}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch((error) => {
+      if (error.response?.status === 404) {
+        return { data: {} }; // Return empty object if not found
+      }
+      throw new Error(`Ошибка получения placeholder: ${error.response?.data?.message || error.message}`);
+    }),
+
+  createPlaceholderService: (data, token) =>
+    api.post('/api/placeholder-service', data, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch((error) => {
+      throw new Error(`Ошибка создания placeholder: ${error.response?.data?.message || error.message}`);
+    }),
 };

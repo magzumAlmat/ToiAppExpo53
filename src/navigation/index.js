@@ -665,14 +665,6 @@ export default function Navigation() {
   const navigationRef = useNavigationContainerRef();
 
   useEffect(() => {
-    if (token && !user) {
-      console.log('Token exists but user is missing, redirecting to Login in 2s');
-      const timer = setTimeout(() => {
-        navigationRef.current?.navigate('Login');
-      }, 1300);
-      return () => clearTimeout(timer);
-    }
-
     if (token && user && navigationRef.current) {
       if (user.roleId === 1) {
         console.log('User is authenticated with roleId 1, redirecting to Admin');
