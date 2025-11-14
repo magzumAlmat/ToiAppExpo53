@@ -164,7 +164,7 @@ import * as SecureStore from 'expo-secure-store';
 import { LinearGradient } from 'expo-linear-gradient';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
+import { CommonActions } from '@react-navigation/native';
 const COLORS = {
   primary: '#FF6F61',
   white: '#FFFFFF',
@@ -229,19 +229,41 @@ export default function Item4Screen({ navigation }) {
     }
   };
 
+  // const handleLogout = async () => {
+  //   try {
+  //     dispatch(startLoading()); // Устанавливаем состояние загрузки
+  //     await SecureStore.deleteItemAsync('token'); // Удаляем токен асинхронно
+  //     console.log('Token removed from SecureStore');
+  //     dispatch(logout()); // Обновляем состояние в Redux
+  //     navigation.navigate('Login'); // Перенаправляем на экран логина
+  //   } catch (error) {
+  //     console.error('Logout error:', error);
+  //     dispatch(setError('Ошибка при выходе'));
+  //     Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
+  //   }
+  // };
+
   const handleLogout = async () => {
-    try {
-      dispatch(startLoading()); // Устанавливаем состояние загрузки
-      await SecureStore.deleteItemAsync('token'); // Удаляем токен асинхронно
-      console.log('Token removed from SecureStore');
-      dispatch(logout()); // Обновляем состояние в Redux
-      navigation.navigate('Login'); // Перенаправляем на экран логина
-    } catch (error) {
-      console.error('Logout error:', error);
-      dispatch(setError('Ошибка при выходе'));
-      Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
-    }
-  };
+  try {
+    dispatch(startLoading());
+    await SecureStore.deleteItemAsync('token');
+    dispatch(logout());
+
+    // СБРАСЫВАЕМ ВЕСЬ СТЕК И ПЕРЕХОДИМ НА Login
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      })
+    );
+  } catch (error) {
+    console.error('Logout error:', error);
+    dispatch(setError('Ошибка при выходе'));
+    Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
+  }
+};
+
+
 
   return (
     <LinearGradient

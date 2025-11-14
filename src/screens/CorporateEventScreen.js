@@ -541,7 +541,7 @@ const renderAddItem = useCallback(
   );
 };
 
-const SelectedItem = ({
+const SelectedItem = React.memo(({
   item,
   quantities,
   setQuantities,
@@ -853,7 +853,7 @@ const SelectedItem = ({
       )}
     </View>
   );
-};
+});
 
 const CategoryItemsModal = ({
   visible,
@@ -1129,6 +1129,20 @@ const CorporateEventScreen = ({ navigation, route }) => {
   const [blockedDays, setBlockedDays] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  const budgetRef = useRef(budget);
+  const guestCountRef = useRef(guestCount);
+  const categoriesRef = useRef(categories);
+  const disabledCategoriesRef = useRef(disabledCategories);
+  const dataRef = useRef(data);
+
+  useEffect(() => {
+    budgetRef.current = budget;
+    guestCountRef.current = guestCount;
+    categoriesRef.current = categories;
+    disabledCategoriesRef.current = disabledCategories;
+    dataRef.current = data;
+  }, [budget, guestCount, categories, disabledCategories, data]);
+
   const updateCategories = useCallback(
     (newCategory) => {
       setCategories((prevCategories) => {
@@ -1249,54 +1263,35 @@ const fetchData = async () => {
     const filteredValue = value.replace(/[^0-9]/g, "");
     setGuestCount(filteredValue);
     setShouldFilter(true);
-    setFilteredData((prevData) => {
-      let newTotalSpent = 0;
-      const updatedData = prevData.map((item) => {
-        let itemTotalCost = item.totalCost;
-        let itemEffectiveQuantity =
-          item.type === "restaurant"
-            ? parseInt(filteredValue, 10) || 1
-            : parseInt(quantities[`${item.type}-${item.id}`], 10) || 1;
-        const itemCost = item.type === "restaurant" ? item.averageCost : item.cost;
-
-        if (item.type === "restaurant") {
-          if (item.capacity && (parseInt(filteredValue, 10) || 1) > item.capacity) {
-            alert(
-              `Ресторан ${item.name} вмещает максимум ${item.capacity} гостей.`
-            );
-            itemEffectiveQuantity = item.capacity;
-          }
-          itemTotalCost = itemCost * itemEffectiveQuantity;
-        }
-        newTotalSpent += itemTotalCost;
-        return { ...item, totalCost: itemTotalCost };
-      });
-      setRemainingBudget(parseFloat(budget) - newTotalSpent);
-      return updatedData;
-    });
   };
 
   const filterDataByBudget = useDebounce(() => {
-    if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
+    const currentBudget = budgetRef.current;
+    const currentGuestCount = guestCountRef.current;
+    const currentCategories = categoriesRef.current;
+    const currentDisabledCategories = disabledCategoriesRef.current;
+    const currentData = dataRef.current;
+
+    if (!currentBudget || isNaN(currentBudget) || parseFloat(currentBudget) <= 0) {
       alert("Пожалуйста, введите корректную сумму бюджета");
       setIsLoading(false);
       return;
     }
-    if (!guestCount || isNaN(guestCount) || parseFloat(guestCount) <= 0) {
+    if (!currentGuestCount || isNaN(currentGuestCount) || parseFloat(currentGuestCount) <= 0) {
       alert("Пожалуйста, введите корректное количество гостей");
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
-    const budgetValue = parseFloat(budget);
-    const guests = parseInt(guestCount, 10);
+    const budgetValue = parseFloat(currentBudget);
+    const guests = parseInt(currentGuestCount, 10);
     let remaining = budgetValue;
     const newSelectedItems = [];
     const newQuantities = {};
 
-    const activeCategories = categories.filter(
-      (cat) => !disabledCategories.includes(cat)
+    const activeCategories = currentCategories.filter(
+      (cat) => !currentDisabledCategories.includes(cat)
     );
     const allowedTypes = activeCategories
       .map((cat) => categoryToTypeMap[cat])
@@ -1307,7 +1302,7 @@ const fetchData = async () => {
     );
 
     for (const { key, costField, type, label } of typesToProcess) {
-      let itemsForType = data[key] || [];
+      let itemsForType = currentData[key] || [];
       if (itemsForType.length === 0) {
         console.log(`Нет данных для категории ${label}`);
         continue;
@@ -1404,6 +1399,7 @@ const fetchData = async () => {
           );
           return;
         }
+        // Filter out existing restaurant if adding a new one
         setFilteredData((prev) =>
           prev.filter(
             (i) => i.type !== "restaurant" || i.id === itemToAdd.id
@@ -1411,70 +1407,71 @@ const fetchData = async () => {
         );
       }
 
-      setFilteredData((prevSelected) => {
-        const existingItem = prevSelected.find(
-          (i) => `${i.type}-${i.id}` === itemKey
-        );
-        let updatedSelectedItems;
-        let newQuantity = "1";
+      setQuantities((prevQtys) => {
+        let newQuantity;
+        const existingQuantity = parseInt(prevQtys[itemKey] || "0", 10);
 
-        if (existingItem && itemToAdd.type !== "restaurant") {
-          newQuantity = (parseInt(quantities[itemKey] || "1") + 1).toString();
-          updatedSelectedItems = prevSelected.map((i) =>
-            i.id === itemToAdd.id && i.type === itemToAdd.type
-              ? { ...i, totalCost: cost * parseInt(newQuantity) }
-              : i
-          );
-        } else if (!existingItem) {
-          const effectiveQuantity =
-            itemToAdd.type === "restaurant"
-              ? parseInt(guestCount, 10) || 1
-              : 1;
-          const totalItemCost = cost * effectiveQuantity;
-          const newItem = { ...itemToAdd, totalCost: totalItemCost };
-          if (itemToAdd.type === "restaurant") {
-            updatedSelectedItems = [
-              ...prevSelected.filter((i) => i.type !== "restaurant"),
-              newItem,
-            ];
-          } else {
-            updatedSelectedItems = [...prevSelected, newItem];
-          }
+        if (itemToAdd.type !== "restaurant") {
+          newQuantity = (existingQuantity + 1).toString();
         } else {
-          updatedSelectedItems = prevSelected;
+          newQuantity = guestCount || "1";
         }
 
-        setQuantities((prevQtys) => {
-          const updatedQtys = {
-            ...prevQtys,
-            [itemKey]:
+        const updatedQtys = { ...prevQtys, [itemKey]: newQuantity };
+
+        setFilteredData((prevSelected) => {
+          const existingItemIndex = prevSelected.findIndex(
+            (i) => `${i.type}-${i.id}` === itemKey
+          );
+          let updatedSelectedItems;
+
+          if (existingItemIndex !== -1 && itemToAdd.type !== "restaurant") {
+            updatedSelectedItems = prevSelected.map((item, index) =>
+              index === existingItemIndex
+                ? { ...item, totalCost: cost * parseInt(newQuantity, 10) }
+                : item
+            );
+          } else if (existingItemIndex === -1) {
+            const effectiveQuantity =
               itemToAdd.type === "restaurant"
-                ? guestCount || "1"
-                : newQuantity,
-          };
+                ? parseInt(guestCount, 10) || 1
+                : parseInt(newQuantity, 10);
+            const totalItemCost = cost * effectiveQuantity;
+            const newItem = { ...itemToAdd, totalCost: totalItemCost };
+            if (itemToAdd.type === "restaurant") {
+              updatedSelectedItems = [
+                ...prevSelected.filter((i) => i.type !== "restaurant"),
+                newItem,
+              ];
+            } else {
+              updatedSelectedItems = [...prevSelected, newItem];
+            }
+          } else {
+            updatedSelectedItems = prevSelected;
+          }
 
           const totalSpent = updatedSelectedItems.reduce((sum, selItem) => {
             const qtyKey = `${selItem.type}-${selItem.id}`;
             const itemQty =
               selItem.type === "restaurant"
                 ? parseInt(guestCount, 10) || 1
-                : parseInt(updatedQtys[qtyKey] || "1", 10);
+                : parseInt(updatedQtys[qtyKey] || "1", 10); // Use updatedQtys here
             const itemCostVal = selItem.type === "restaurant" ? selItem.averageCost : selItem.cost;
             return sum + itemCostVal * itemQty;
           }, 0);
-
           setRemainingBudget(parseFloat(budget) - totalSpent);
-          return updatedQtys;
-        });
 
-        return updatedSelectedItems.sort(
-          (a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13)
-        );
+          return updatedSelectedItems.sort(
+            (a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13)
+          );
+        });
+        return updatedQtys;
       });
+
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       if (categoryModalVisible) setCategoryModalVisible(false);
     },
-    [budget, guestCount, quantities, categoryModalVisible]
+    [budget, guestCount, categoryModalVisible]
   );
 
   const handleRemoveItem = useCallback(
