@@ -12,7 +12,8 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": { "API_URL": "http://89.207.250.181:3000" }
     }
   },
   "submit": {
