@@ -8,21 +8,24 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_baseURL": "https://ceaf39c807a3.ngrok-free.app",
+
+        "EXPO_PUBLIC_API_baseURL": "https://api.toilab.kz",
         "EXPO_PUBLIC_TEST_VAR": "hello"
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_baseURL": "https://ceaf39c807a3.ngrok-free.app",
+
+        "EXPO_PUBLIC_API_baseURL": "https://api.toilab.kz",
         "EXPO_PUBLIC_TEST_VAR": "hello"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_baseURL": "https://ceaf39c807a3.ngrok-free.app",
+
+        "EXPO_PUBLIC_API_baseURL": "https://api.toilab.kz",
         "EXPO_PUBLIC_TEST_VAR": "hello"
       }
     }
