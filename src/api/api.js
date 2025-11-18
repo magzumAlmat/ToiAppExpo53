@@ -1164,15 +1164,19 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-
+import { env } from '../config/env';
 import Constants from 'expo-constants';
 
 // Берем URL из EAS Build (TestFlight / App Store)
-const API_BASE_URL = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_baseURL;
+const API_BASE_URL = env.API_baseURL;
 
 if (!API_BASE_URL) {
   console.error('API_BASE_URL не найден! Проверь app.config.js и eas.json');
 }
+
+
+
+
 
 // Axios инстанс
 const api = axios.create({

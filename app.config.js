@@ -3,7 +3,7 @@ export default ({ config }) => ({
   ...config,
   name: "Toilab",
   slug: "toilab",
-  version: "1.2.1",
+  version: "1.2.4",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -23,17 +23,35 @@ export default ({ config }) => ({
     backgroundColor: "#F1EBDD"
   },
 
+  // ios: {
+  //   supportsTablet: true,
+  //   bundleIdentifier: "com.amagzum.myjsproject",
+  //   buildNumber: "23",
+  //   jsEngine: "hermes",
+  //   infoPlist: {
+  //     ITSAppUsesNonExemptEncryption: false,
+  //     NSCalendarsUsageDescription: "Приложение использует календарь для создания напоминаний о задачах и событиях.",
+  //     NSContactsUsageDescription: "Приложение использует контакты, чтобы вы могли быстро поделиться информацией с друзьями.",
+  //     NSAppTransportSecurity: {
+  //       NSAllowsArbitraryLoads: true
+  //     }
+  //   }
+  // },
+
+
   ios: {
-    supportsTablet: true,
-    bundleIdentifier: "com.amagzum.myjsproject",
-    buildNumber: "21",
-    jsEngine: "hermes",
-    infoPlist: {
-      ITSAppUsesNonExemptEncryption: false,
-      NSCalendarsUsageDescription: "Приложение использует календарь для создания напоминаний о задачах и событиях.",
-      NSContactsUsageDescription: "Приложение использует контакты, чтобы вы могли быстро поделиться информацией с друзьями."
-    }
-  },
+  supportsTablet: true,
+  bundleIdentifier: "com.amagzum.myjsproject",
+  buildNumber: "24",
+  jsEngine: "hermes",
+  infoPlist: {
+    ITSAppUsesNonExemptEncryption: false,
+    NSCalendarsUsageDescription: "Приложение использует календарь...",
+    NSContactsUsageDescription: "Приложение использует контакты...",
+    // УДАЛИ ЭТО — плагин сам добавит:
+    // NSAppTransportSecurity: { NSAllowsArbitraryLoads: true }
+  }
+},
 
   android: {
     package: "com.amagzum.myjsproject",
@@ -44,11 +62,13 @@ export default ({ config }) => ({
     edgeToEdgeEnabled: true
   },
 
+ 
   plugins: [
     "expo-secure-store",
     "expo-font",
     "expo-asset"
   ],
+  
 
   extra: {
     eas: {

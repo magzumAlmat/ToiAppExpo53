@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 
 const ENV = {
   dev: {
-    API_baseURL: 'http://192.168.1.100:3000',
+    API_baseURL: 'http://89.207.250.181:3000',
     TEST_VAR: 'dev-mode',
   },
   staging: {

@@ -7,27 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		06B2067AAE14EB64063A03AF /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 0FB13FEFC5B8D8C90D7C24B4 /* PrivacyInfo.xcprivacy */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		3B0A0BE072EC1B83053DAEC2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD57DFA9B9A7B8D469E88B /* PrivacyInfo.xcprivacy */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		69BEE7F7DE667B45FB3877FE /* libPods-Toilab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63DB8EDB8DDC411AF78903BF /* libPods-Toilab.a */; };
+		771A10FC55F438F3B49F5363 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7966B21D6AD116A5119C8FD4 /* ExpoModulesProvider.swift */; };
+		9905743F3E5E292921995F68 /* libPods-Toilab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFC0F9E7A206B2B513B2D26F /* libPods-Toilab.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		E5058E23E66D8B812A0BBFE9 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B790D7973B742D94A87906F /* ExpoModulesProvider.swift */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0FB13FEFC5B8D8C90D7C24B4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Toilab/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		0317C4F1B31E4910CA79807E /* Pods-Toilab.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Toilab.release.xcconfig"; path = "Target Support Files/Pods-Toilab/Pods-Toilab.release.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Toilab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Toilab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Toilab/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Toilab/Info.plist; sourceTree = "<group>"; };
-		252C3A57213709E85A003E8A /* Pods-Toilab.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Toilab.release.xcconfig"; path = "Target Support Files/Pods-Toilab/Pods-Toilab.release.xcconfig"; sourceTree = "<group>"; };
-		4B790D7973B742D94A87906F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Toilab/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		63DB8EDB8DDC411AF78903BF /* libPods-Toilab.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Toilab.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A682143DB84FAF33E7C116B1 /* Pods-Toilab.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Toilab.debug.xcconfig"; path = "Target Support Files/Pods-Toilab/Pods-Toilab.debug.xcconfig"; sourceTree = "<group>"; };
+		45E6FAFB6A7563C9B5ADD194 /* Pods-Toilab.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Toilab.debug.xcconfig"; path = "Target Support Files/Pods-Toilab/Pods-Toilab.debug.xcconfig"; sourceTree = "<group>"; };
+		7966B21D6AD116A5119C8FD4 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Toilab/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		9EDD57DFA9B9A7B8D469E88B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Toilab/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Toilab/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		EFC0F9E7A206B2B513B2D26F /* libPods-Toilab.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Toilab.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Toilab/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Toilab-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Toilab-Bridging-Header.h"; path = "Toilab/Toilab-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -37,23 +37,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				69BEE7F7DE667B45FB3877FE /* libPods-Toilab.a in Frameworks */,
+				9905743F3E5E292921995F68 /* libPods-Toilab.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		07E71119A16C8568BE555D28 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				A682143DB84FAF33E7C116B1 /* Pods-Toilab.debug.xcconfig */,
-				252C3A57213709E85A003E8A /* Pods-Toilab.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* Toilab */ = {
 			isa = PBXGroup;
 			children = (
@@ -63,7 +53,15 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				0FB13FEFC5B8D8C90D7C24B4 /* PrivacyInfo.xcprivacy */,
+				9EDD57DFA9B9A7B8D469E88B /* PrivacyInfo.xcprivacy */,
+			);
+			name = Toilab;
+			sourceTree = "<group>";
+		};
+		20A2EB7C9EF323FA652E7B38 /* Toilab */ = {
+			isa = PBXGroup;
+			children = (
+				7966B21D6AD116A5119C8FD4 /* ExpoModulesProvider.swift */,
 			);
 			name = Toilab;
 			sourceTree = "<group>";
@@ -72,25 +70,17 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				63DB8EDB8DDC411AF78903BF /* libPods-Toilab.a */,
+				EFC0F9E7A206B2B513B2D26F /* libPods-Toilab.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		5C0C44BC040BC960C7C05192 /* ExpoModulesProviders */ = {
+		5968A101D83AE7A7616169FA /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				77901AA225BA5BC79C0AB5A9 /* Toilab */,
+				20A2EB7C9EF323FA652E7B38 /* Toilab */,
 			);
 			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
-		77901AA225BA5BC79C0AB5A9 /* Toilab */ = {
-			isa = PBXGroup;
-			children = (
-				4B790D7973B742D94A87906F /* ExpoModulesProvider.swift */,
-			);
-			name = Toilab;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -107,8 +97,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				07E71119A16C8568BE555D28 /* Pods */,
-				5C0C44BC040BC960C7C05192 /* ExpoModulesProviders */,
+				FD8EBCEFE981E9F027EDF281 /* Pods */,
+				5968A101D83AE7A7616169FA /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -132,6 +122,16 @@
 			path = Toilab/Supporting;
 			sourceTree = "<group>";
 		};
+		FD8EBCEFE981E9F027EDF281 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				45E6FAFB6A7563C9B5ADD194 /* Pods-Toilab.debug.xcconfig */,
+				0317C4F1B31E4910CA79807E /* Pods-Toilab.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -140,13 +140,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Toilab" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				024FF96D56A51A12EF0674E2 /* [Expo] Configure project */,
+				D35E15366C218E697079731E /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				C498C5C9F482A53F9A1BC81F /* [CP] Embed Pods Frameworks */,
+				45989420A8120AC4DAB26919 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -196,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				06B2067AAE14EB64063A03AF /* PrivacyInfo.xcprivacy in Resources */,
+				3B0A0BE072EC1B83053DAEC2 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -218,25 +218,6 @@
 			shellPath = /bin/sh;
 			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
 		};
-		024FF96D56A51A12EF0674E2 /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Toilab/expo-configure-project.sh\"\n";
-		};
 		08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -257,6 +238,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		45989420A8120AC4DAB26919 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Toilab/Pods-Toilab-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Toilab/Pods-Toilab-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
@@ -337,23 +336,24 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Toilab/Pods-Toilab-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C498C5C9F482A53F9A1BC81F /* [CP] Embed Pods Frameworks */ = {
+		D35E15366C218E697079731E /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Toilab/Pods-Toilab-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			inputFileListPaths = (
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Toilab/Pods-Toilab-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Toilab/expo-configure-project.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -363,7 +363,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				E5058E23E66D8B812A0BBFE9 /* ExpoModulesProvider.swift in Sources */,
+				771A10FC55F438F3B49F5363 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,7 +372,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A682143DB84FAF33E7C116B1 /* Pods-Toilab.debug.xcconfig */;
+			baseConfigurationReference = 45E6FAFB6A7563C9B5ADD194 /* Pods-Toilab.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -408,7 +408,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 252C3A57213709E85A003E8A /* Pods-Toilab.release.xcconfig */;
+			baseConfigurationReference = 0317C4F1B31E4910CA79807E /* Pods-Toilab.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;

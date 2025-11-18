@@ -169,10 +169,16 @@ import api from '../api/api';
 import * as SecureStore from 'expo-secure-store';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { env } from '../config/env';
+
+console.log('API URL:', env.API_baseURL); // → http://89.207.250.181:3000
 
 const COLORS = { primary: '#FF6F61', white: '#FFFFFF' };
 
 export default function LoginScreen({ navigation }) {
+
+
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -203,6 +209,7 @@ export default function LoginScreen({ navigation }) {
   return (
     <LinearGradient colors={['#F1EBDD', '#897066']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={styles.container}>
       <Image source={require('../../assets/footer.png')} style={styles.footerPattern} />
+      
       <Text style={styles.title}>Вход</Text>
       <View style={styles.iconContainer}>
         <MaterialIcons name="person" size={40} color="#5A4032" />
