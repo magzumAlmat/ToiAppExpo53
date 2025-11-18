@@ -1164,14 +1164,34 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-// Создание экземпляра axios
+
+import Constants from 'expo-constants';
+
+// Берем URL из EAS Build (TestFlight / App Store)
+const API_BASE_URL = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_baseURL;
+
+if (!API_BASE_URL) {
+  console.error('API_BASE_URL не найден! Проверь app.config.js и eas.json');
+}
+
+// Axios инстанс
 const api = axios.create({
-  baseURL: `${process.env.EXPO_PUBLIC_API_baseURL}`,
+  baseURL: API_BASE_URL,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.EXPO_PUBLIC_API_KEY}`,
   },
 });
+
+
+// Создание экземпляра axios
+// const api = axios.create({
+//   baseURL: `${process.env.EXPO_PUBLIC_API_baseURL}`,
+//   headers: {
+//     'Content-Type': 'application/json',
+//     'Authorization': `Bearer ${process.env.EXPO_PUBLIC_API_KEY}`,
+//   },
+// });
 
 // Интерцептор запроса для добавления токена
 api.interceptors.request.use(
