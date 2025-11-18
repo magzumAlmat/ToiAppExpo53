@@ -2,10 +2,13 @@
   "expo": {
     "name": "Toilab",
     "slug": "toilab",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "assets": [
+      "./assets/font/Geologica.ttf"
+    ],
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -20,8 +23,8 @@
         "NSCalendarsUsageDescription": "Приложение использует календарь для создания напоминаний о задачах и событиях.",
         "NSContactsUsageDescription": "Приложение использует контакты, чтобы вы могли быстро поделиться информацией с друзьями."
       },
-      "buildNumber": "35"
-      
+      "buildNumber": "16",
+      "jsEngine": "hermes"
     },
     "android": {
       "adaptiveIcon": {
