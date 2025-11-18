@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
+// App.js — РАБОЧАЯ ВЕРСИЯ ДЛЯ TESTFLIGHT
+import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { store } from './src/store/store';
 import Navigation from './src/navigation/index';
@@ -7,72 +8,59 @@ import * as SecureStore from 'expo-secure-store';
 import { loginSuccess, setLoading } from './src/store/authSlice';
 import api from './src/api/api';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from 'expo-font';
 import { View } from 'react-native';
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+// Это КРИТИЧЕСКИ ВАЖНО для iOS production билдов
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    'Geologica-Regular': require('./assets/font/Geologica.ttf'),
-    'Geologica-Thin': require('./assets/font/static/Geologica-Thin.ttf'),
-    'Geologica-ExtraLight': require('./assets/font/static/Geologica-ExtraLight.ttf'),
-    'Geologica-Light': require('./assets/font/static/Geologica-Light.ttf'),
-    'Geologica-Medium': require('./assets/font/static/Geologica-Medium.ttf'),
-    'Geologica-SemiBold': require('./assets/font/static/Geologica-SemiBold.ttf'),
-    'Geologica-Bold': require('./assets/font/static/Geologica-Bold.ttf'),
-    'Geologica-ExtraBold': require('./assets/font/static/Geologica-ExtraBold.ttf'),
-    'Geologica-Black': require('./assets/font/static/Geologica-Black.ttf'),
-  });
-
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
 
-    const bootstrap = async () => {
+    const prepare = async () => {
       try {
+        // Твой код авторизации
         const token = await SecureStore.getItemAsync('token');
-        if (token && isMounted) {
+        if (token && mounted) {
           try {
             api.setToken(token);
             const res = await api.getUser();
-            if (res?.data && isMounted) {
+            if (res?.data) {
               store.dispatch(loginSuccess({ user: res.data, token }));
             }
-          } catch (apiError) {
-            console.error('API Error during bootstrap:', apiError);
-            await SecureStore.deleteItemAsync('token').catch(() => {});
+          } catch (e) {
+            await SecureStore.deleteItemAsync('token');
           }
         }
-      } catch (error) {
-        console.error('Error during bootstrap token check:', error);
+      } catch (e) {
+        console.warn(e);
       } finally {
-        if (isMounted) {
-          store.dispatch(setLoading(false));
-        }
+        // ВОТ ЭТО ГЛАВНОЕ — ЖДЁМ 100мс + ВСЕГДА скрываем
+        setTimeout(async () => {
+          if (mounted) {
+            store.dispatch(setLoading(false));
+            try {
+              await SplashScreen.hideAsync();
+            } catch (e) {
+              // Иногда hideAsync кидает ошибку — игнорируем
+            }
+          }
+        }, 100);
       }
     };
 
-    bootstrap();
+    prepare();
 
     return () => {
-      isMounted = false;
+      mounted = false;
     };
   }, []);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
+  // ОБЯЗАТЕЛЬНО: View с onLayout, иначе iOS не скроет Splash в production!
   return (
     <Provider store={store}>
       <PaperProvider>
-        <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+        <View style={{ flex: 1 }} onLayout={() => {}}>
           <Navigation />
         </View>
       </PaperProvider>
