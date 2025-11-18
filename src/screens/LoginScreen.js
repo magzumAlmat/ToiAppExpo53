@@ -180,6 +180,7 @@ export default function LoginScreen({ navigation }) {
   const { loading, error } = useSelector(s => s.auth);
 
   const handleLogin = async () => {
+    console.log('email=', email, 'password=', password);
     dispatch(startLoading());
     try {
       const loginResponse = await api.login({ email, password });
@@ -197,7 +198,7 @@ export default function LoginScreen({ navigation }) {
     }
   };
 
-  
+
 
   return (
     <LinearGradient colors={['#F1EBDD', '#897066']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={styles.container}>
