@@ -3,7 +3,7 @@ export default ({ config }) => ({
   ...config,
   name: "Toilab",
   slug: "toilab",
-  version: "1.2.4",
+  version: "1.2.5",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -42,7 +42,7 @@ export default ({ config }) => ({
   ios: {
   supportsTablet: true,
   bundleIdentifier: "com.amagzum.myjsproject",
-  buildNumber: "24",
+  buildNumber: "25",
   jsEngine: "hermes",
   infoPlist: {
     ITSAppUsesNonExemptEncryption: false,
