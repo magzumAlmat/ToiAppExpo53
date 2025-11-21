@@ -177,6 +177,12 @@ export default function Item4Screen({ navigation }) {
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [lastname, setLastname] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
+  const validatePhoneNumber = (phoneNumber) => {
+    const regex = /^\+7\d{10}$/; // Matches +7XXXXXXXXXX
+    return regex.test(phoneNumber);
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -203,13 +209,49 @@ export default function Item4Screen({ navigation }) {
       setPhone(user.phone || '');
       setName(user.name || '');
       setLastname(user.lastname || '');
+      setPhoneError(''); // Clear error on user load
     }
   }, [user]);
+
+  const handlePhoneChange = (text) => {
+    const cleanedText = text.replace(/\D/g, ''); // Удаляем все, кроме цифр
+
+    let formattedText = '';
+    if (cleanedText.length > 0) {
+      if (cleanedText[0] === '7' || cleanedText[0] === '8') {
+        // Если начинается с 7 или 8, считаем что это российский номер
+        const digits = cleanedText.substring(0, 11); // Берем до 11 цифр (7 + 10 цифр)
+        formattedText = '+7' + digits.substring(1); // Добавляем +7 и остальные 10 цифр
+      } else {
+        // Если не начинается с 7 или 8, просто добавляем + и цифры
+        formattedText = '+' + cleanedText;
+      }
+    }
+
+    setPhone(formattedText);
+
+    if (formattedText === '' || validatePhoneNumber(formattedText)) {
+      setPhoneError('');
+    } else {
+      setPhoneError('Неверный формат телефона. Ожидается: +7XXXXXXXXXX');
+    }
+  };
 
   const handleUpdateProfile = async () => {
     if (!token) {
       Alert.alert('Ошибка', 'Токен отсутствует. Пожалуйста, войдите снова.');
       navigation.navigate('Login');
+      return;
+    }
+
+    if (phoneError) {
+      Alert.alert('Ошибка', 'Пожалуйста, исправьте ошибки в номере телефона.');
+      return;
+    }
+
+    if (phone !== '' && !validatePhoneNumber(phone)) {
+      Alert.alert('Ошибка', 'Неверный формат телефона. Ожидается: +7XXXXXXXXXX');
+      setPhoneError('Неверный формат телефона. Ожидается: +7XXXXXXXXXX');
       return;
     }
 
@@ -312,10 +354,12 @@ export default function Item4Screen({ navigation }) {
               style={styles.input}
               placeholder="Телефон"
               value={phone}
-              onChangeText={setPhone}
+              onChangeText={handlePhoneChange}
               keyboardType="phone-pad"
               placeholderTextColor="#B0BEC5"
+              maxLength={12} // +7XXXXXXXXXX (12 characters)
             />
+            {phoneError ? <Text style={styles.error}>{phoneError}</Text> : null}
             {error && <Text style={styles.error}>{error}</Text>}
             <TouchableOpacity
               style={styles.saveButtonContainer}
