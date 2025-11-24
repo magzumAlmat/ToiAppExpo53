@@ -1235,13 +1235,18 @@ const CreateTraditionalFamilyEventScreen = ({ navigation, route }) => {
 console.log('route.params:', route?.params);
 const selectedCategories = route?.params?.selectedCategories || [];
 console.log('Полученные категории:', selectedCategories);
-  const [categories, setCategories] = useState(() => {
-    const initialCategories = route?.params?.selectedCategories || [];
-    if (!initialCategories.includes('Ювелирные изделия')) {
-      return [...initialCategories, 'Ювелирные изделия'];
-    }
-    return initialCategories;
-  });
+  // const [categories, setCategories] = useState(() => {
+  //   const initialCategories = route?.params?.selectedCategories || [];
+  //   if (!initialCategories.includes('Ювелирные изделия')) {
+  //     return [...initialCategories, 'Ювелирные изделия'];
+  //   }
+  //   return initialCategories;
+  // });
+
+  const [categories, setCategories] = useState(
+  route?.params?.selectedCategories || []
+);
+
 
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
@@ -3043,26 +3048,3 @@ const styles = StyleSheet.create({
 
 
 export default CreateTraditionalFamilyEventScreen;
-// ;e: 16,
-//     fontWeight: '600',
-//     color: COLORS.primary,
-//   },
-//   errorContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 18,
-//   },
-//   errorText: {
-//     fontSize: 16,
-//     color: COLORS.error,
-//     textAlign: 'center',
-//   },
-// });
-
-
-// export default CreateTraditionalFamilyEventScreen;,
-// });
-
-
-// export default CreateTraditionalFamilyEventScreen;
