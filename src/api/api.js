@@ -1261,7 +1261,10 @@ const createResourceMethods = () => {
 export default {
   // Аутентификация и профиль
   register: (userData) =>
-    api.post('/api/register', userData).catch((error) => handleError(error, 'регистрации')),
+    api.post('/api/register', userData).catch((error) => {
+      // Перебрасываем оригинальную ошибку, чтобы сохранить детали ответа
+      throw error;
+    }),
 
   login: (credentials) =>
     api.post('/api/auth/login', credentials).catch((error) => handleError(error, 'входа')),

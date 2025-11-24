@@ -186,8 +186,9 @@ export default function RegisterScreen({ navigation }) {
       Alert.alert('Успех', 'Проверьте email для подтверждения.');
       navigation.navigate('Login');
     } catch (error) {
-      dispatch(setError(error.response?.data?.error || 'Ошибка регистрации'));
-      Alert.alert('Ошибка', error.response?.data?.error || 'Не удалось зарегистрироваться');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Ошибка регистрации';
+      dispatch(setError(errorMessage));
+      Alert.alert('Ошибка', errorMessage);
     }
   };
 
