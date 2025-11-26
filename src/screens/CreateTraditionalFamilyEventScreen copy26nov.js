@@ -4859,7 +4859,8 @@ console.log('Полученные категории:', selectedCategories);
     // Пробуем каждый вариант payload
     for (let i = 0; i < payloadVariants.length; i++) {
       const payload = payloadVariants[i];
-      console.log(`=== Попытка ${i + 1}/${payloadVariants.length} ===`);
+      console.log(`
+=== Попытка ${i + 1}/${payloadVariants.length} ===`);
       console.log('Payload:', JSON.stringify(payload, null, 2));
 
       try {
@@ -4889,14 +4890,16 @@ console.log('Полученные категории:', selectedCategories);
       throw new Error('Не получен ID категории от сервера');
     }
 
-    console.log('=== Категория успешно создана ===');
+    console.log('
+=== Категория успешно создана ===');
     console.log('ID категории:', categoryId);
 
     const totalBudget = parseFloat(budget);
     const spentAmount = calculateTotalCost;
     const remaining = remainingBudget;
 
-    console.log('=== Обновление бюджета категории ===');
+    console.log('
+=== Обновление бюджета категории ===');
     console.log('Total:', totalBudget, 'Spent:', spentAmount, 'Remaining:', remaining);
 
     // Обновляем бюджет категории
@@ -4921,7 +4924,8 @@ console.log('Полученные категории:', selectedCategories);
       console.error('✗ Ошибка обновления remaining balance:', error.message);
     }
 
-    console.log('=== Добавление услуг к категории ===');
+    console.log('
+=== Добавление услуг к категории ===');
     let successCount = 0;
     let errorCount = 0;
 
@@ -4979,11 +4983,14 @@ console.log('Полученные категории:', selectedCategories);
       }
     }
 
-    console.log('=== Итоги добавления услуг ===');
+    console.log('
+=== Итоги добавления услуг ===');
     console.log(`Успешно: ${successCount}, Ошибок: ${errorCount}`);
 
-    console.log('=== Мероприятие успешно создано ===');
-    alert(`Мероприятие успешно создано!Добавлено услуг: ${successCount}/${filteredData.length}`);
+    console.log('
+=== Мероприятие успешно создано ===');
+    alert(`Мероприятие успешно создано!
+Добавлено услуг: ${successCount}/${filteredData.length}`);
     
     // Очищаем форму
     setEventName('');
@@ -4997,7 +5004,8 @@ console.log('Полученные категории:', selectedCategories);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     navigation.goBack();
   } catch (error) {
-    console.error('=== ОШИБКА при создании мероприятия ===');
+    console.error('
+=== ОШИБКА при создании мероприятия ===');
     console.error('Тип ошибки:', error.constructor.name);
     console.error('Сообщение:', error.message);
     console.error('Response status:', error.response?.status || error.status);
@@ -5009,15 +5017,20 @@ console.log('Полученные категории:', selectedCategories);
     
     const responseData = error.response?.data || error.data;
     if (responseData?.error) {
-      errorMessage += ':' + responseData.error;
+      errorMessage += ':
+' + responseData.error;
     } else if (responseData?.message) {
-      errorMessage += ':' + responseData.message;
+      errorMessage += ':
+' + responseData.message;
     } else if (error.message) {
-      errorMessage += ':' + error.message;
+      errorMessage += ':
+' + error.message;
     }
     
     // Добавляем подсказку
-    errorMessage += 'Проверьте логи в консоли для деталей.';
+    errorMessage += '
+
+Проверьте логи в консоли для деталей.';
     
     alert(errorMessage);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -5363,8 +5376,6 @@ console.log('Полученные категории:', selectedCategories);
             </View>
 
             {/* Поле бюджета */}
-            
-
             <TextInput
               style={styles.budgetInput}
               placeholder="Бюджет (т)"
@@ -5700,7 +5711,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 20,
-    marginRight:20,
   },
   categoryItemAdd: {
     width: "20%",
