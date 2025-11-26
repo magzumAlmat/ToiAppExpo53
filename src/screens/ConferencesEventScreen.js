@@ -1,6 +1,5 @@
-
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { Component } from "react";
+import React, { Component, useState, useRef, useEffect, useCallback, useMemo } from "react";
+import axios from "axios";
 import {
   View,
   Image,
@@ -13,13 +12,12 @@ import {
   TextInput,
   ActivityIndicator,
   SafeAreaView,
+  ScrollView,
 } from "react-native";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useDispatch, useSelector } from "react-redux";
 import api from "../api/api";
-import * as Animatable from "react-native-animatable";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -42,6 +40,7 @@ export const COLORS = {
   buttonGradientStart: '#D3C5B7',
   buttonGradientEnd: '#A68A6E',
   border: '#B0A092',
+  placeholder: 'rgba(255, 255, 255, 0.7)',
 }
 
 export const MODAL_COLORS = {
@@ -951,6 +950,7 @@ const CategoryItemsModal = ({
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setSelectedItem(item);
+              onClose();
               setDetailsModalVisible(true);
             }}
             accessible
@@ -967,6 +967,7 @@ const CategoryItemsModal = ({
       setSelectedItem,
       updateCategories,
       guestCount,
+      onClose
     ]
   );
 
@@ -1067,9 +1068,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     "Ювелирные изделия"
   ];
 
-  console.log('route.params:', route?.params);
   const selectedCategories = route?.params?.selectedCategories || [];
-  console.log('Полученные категории:', selectedCategories);
   const [categories, setCategories] = useState(selectedCategories.length > 0 ? selectedCategories : defaultCategories);
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
@@ -1077,7 +1076,6 @@ const ConferencesEventScreen = ({ navigation, route }) => {
   const [disabledCategories, setDisabledCategories] = useState([]);
   const [data, setData] = useState({
     restaurants: [],
-    hotels: [],
     tamada: [],
     programs: [],
     transport: [],
@@ -1106,6 +1104,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
   const [shouldFilter, setShouldFilter] = useState(false);
   const [blockedDays, setBlockedDays] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [eventDetailsModalVisible, setEventDetailsModalVisible] = useState(false);
 
   const serviceTypeMap = {
     'transport': 'Transport',
@@ -1146,42 +1145,15 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     setLoading(true);
     try {
       const responses = await Promise.all([
-        api.getRestaurants().catch((err) => {
-          console.error("Ошибка получения ресторанов:", err);
-          return { data: [] };
-        }),
-        api.getTamada().catch((err) => {
-          console.error("Ошибка получения ведущих:", err);
-          return { data: [] };
-        }),
-        api.getPrograms().catch((err) => {
-          console.error("Ошибка получения программ:", err);
-          return { data: [] };
-        }),
-        api.getTransport().catch((err) => {
-          console.error("Ошибка получения транспорта:", err);
-          return { data: [] };
-        }),
-        api.getCakes().catch((err) => {
-          console.error("Ошибка получения тортов:", err);
-          return { data: [] };
-        }),
-        api.getAlcohol().catch((err) => {
-          console.error("Ошибка получения алкоголя:", err);
-          return { data: [] };
-        }),
-        api.getTechnicalEquipmentRentals().catch((err) => {
-          console.error("Ошибка получения аренды технического оснащения:", err);
-          return { data: [] };
-        }),
-        api.getFlowers().catch((err) => {
-          console.error("Ошибка получения цветов:", err);
-          return { data: [] };
-        }),
-        api.getJewelry().catch((err) => {
-          console.error("Ошибка получения ювелирных изделий:", err);
-          return { data: [] };
-        })
+        api.getRestaurants().catch((err) => { console.error("Ошибка получения ресторанов:", err); return { data: [] }; }),
+        api.getTamada().catch((err) => { console.error("Ошибка получения ведущих:", err); return { data: [] }; }),
+        api.getPrograms().catch((err) => { console.error("Ошибка получения программ:", err); return { data: [] }; }),
+        api.getTransport().catch((err) => { console.error("Ошибка получения транспорта:", err); return { data: [] }; }),
+        api.getCakes().catch((err) => { console.error("Ошибка получения тортов:", err); return { data: [] }; }),
+        api.getAlcohol().catch((err) => { console.error("Ошибка получения алкоголя:", err); return { data: [] }; }),
+        api.getTechnicalEquipmentRentals().catch((err) => { console.error("Ошибка получения аренды технического оснащения:", err); return { data: [] }; }),
+        api.getFlowers().catch((err) => { console.error("Ошибка получения цветов:", err); return { data: [] }; }),
+        api.getJewelry().catch((err) => { console.error("Ошибка получения ювелирных изделий:", err); return { data: [] }; })
       ]);
       const [
         restaurants,
@@ -1250,9 +1222,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
 
         if (item.type === "restaurant") {
           if (item.capacity && (parseInt(filteredValue, 10) || 1) > item.capacity) {
-            alert(
-              `Ресторан ${item.name} вмещает максимум ${item.capacity} гостей.`
-            );
+            alert(`Ресторан ${item.name} вмещает максимум ${item.capacity} гостей.`);
             itemEffectiveQuantity = item.capacity;
           }
           itemTotalCost = itemCost * itemEffectiveQuantity;
@@ -1305,9 +1275,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
       if (type === "restaurant") {
         itemsForType = itemsForType.filter((r) => parseFloat(r.capacity) >= guests);
         if (itemsForType.length === 0) {
-          console.log(
-            `Нет ресторанов для ${guests} гостей в категории ${label}`
-          );
+          console.log(`Нет ресторанов для ${guests} гостей в категории ${label}`);
           continue;
         }
 
@@ -1324,9 +1292,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
           newQuantities[`${type}-${selectedVenue.id}`] = guests.toString();
           remaining -= itemCost;
         } else {
-          console.log(
-            `Рестораны в категории ${label} не вписываются в остаток бюджета ${remaining}`
-          );
+          console.log(`Рестораны в категории ${label} не вписываются в остаток бюджета ${remaining}`);
         }
       } else {
         const suitableItems = itemsForType
@@ -1342,17 +1308,13 @@ const ConferencesEventScreen = ({ navigation, route }) => {
           newQuantities[`${type}-${selectedItem.id}`] = "1";
           remaining -= itemCost;
         } else {
-          console.log(
-            `Элементы в категории ${label} не вписываются в остаток бюджета ${remaining}`
-          );
+          console.log(`Элементы в категории ${label} не вписываются в остаток бюджета ${remaining}`);
         }
       }
     }
 
     if (newSelectedItems.length === 0 && activeCategories.length > 0) {
-      alert(
-        "Нет элементов, подходящих под ваш бюджет и количество гостей из выбранных категорий."
-      );
+      alert("Нет элементов, подходящих под ваш бюджет и количество гостей из выбранных категорий.");
     }
 
     newSelectedItems.sort(
@@ -1365,13 +1327,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
   }, 150);
 
   useEffect(() => {
-    if (
-      shouldFilter &&
-      budget &&
-      guestCount &&
-      !isNaN(parseFloat(budget)) &&
-      !isNaN(parseFloat(guestCount))
-    ) {
+    if (shouldFilter && budget && guestCount && !isNaN(parseFloat(budget)) && !isNaN(parseFloat(guestCount))) {
       filterDataByBudget();
       setShouldFilter(false);
     }
@@ -1388,22 +1344,14 @@ const ConferencesEventScreen = ({ navigation, route }) => {
           return;
         }
         if (parseInt(guestCount, 10) > itemToAdd.capacity) {
-          alert(
-            `Этот ресторан не может вместить ${guestCount} гостей. Максимальная вместимость: ${itemToAdd.capacity}.`
-          );
+          alert(`Этот ресторан не может вместить ${guestCount} гостей. Максимальная вместимость: ${itemToAdd.capacity}.`);
           return;
         }
-        setFilteredData((prev) =>
-          prev.filter(
-            (i) => i.type !== "restaurant" || i.id === itemToAdd.id
-          )
-        );
+        setFilteredData((prev) => prev.filter((i) => i.type !== "restaurant" || i.id === itemToAdd.id));
       }
 
       setFilteredData((prevSelected) => {
-        const existingItem = prevSelected.find(
-          (i) => `${i.type}-${i.id}` === itemKey
-        );
+        const existingItem = prevSelected.find((i) => `${i.type}-${i.id}` === itemKey);
         let updatedSelectedItems;
         let newQuantity = "1";
 
@@ -1415,10 +1363,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
               : i
           );
         } else if (!existingItem) {
-          const effectiveQuantity =
-            itemToAdd.type === "restaurant"
-              ? parseInt(guestCount, 10) || 1
-              : 1;
+          const effectiveQuantity = itemToAdd.type === "restaurant" ? parseInt(guestCount, 10) || 1 : 1;
           const totalItemCost = cost * effectiveQuantity;
           const newItem = { ...itemToAdd, totalCost: totalItemCost };
           if (itemToAdd.type === "restaurant") {
@@ -1434,24 +1379,13 @@ const ConferencesEventScreen = ({ navigation, route }) => {
         }
 
         setQuantities((prevQtys) => {
-          const updatedQtys = {
-            ...prevQtys,
-            [itemKey]:
-              itemToAdd.type === "restaurant"
-                ? guestCount || "1"
-                : newQuantity,
-          };
-
+          const updatedQtys = { ...prevQtys, [itemKey]: itemToAdd.type === "restaurant" ? guestCount || "1" : newQuantity };
           const totalSpent = updatedSelectedItems.reduce((sum, selItem) => {
             const qtyKey = `${selItem.type}-${selItem.id}`;
-            const itemQty =
-              selItem.type === "restaurant"
-                ? parseInt(guestCount, 10) || 1
-                : parseInt(updatedQtys[qtyKey] || "1", 10);
+            const itemQty = selItem.type === "restaurant" ? parseInt(guestCount, 10) || 1 : parseInt(updatedQtys[qtyKey] || "1", 10);
             const itemCostVal = selItem.type === "restaurant" ? selItem.averageCost : selItem.cost;
             return sum + itemCostVal * itemQty;
           }, 0);
-
           setRemainingBudget(parseFloat(budget) - totalSpent);
           return updatedQtys;
         });
@@ -1477,10 +1411,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
           const { [itemKey]: _, ...rest } = prevQtys;
           const totalSpent = updatedSelected.reduce((sum, selItem) => {
             const qtyKey = `${selItem.type}-${selItem.id}`;
-            const itemQty =
-              selItem.type === "restaurant"
-                ? parseInt(guestCount, 10) || 1
-                : parseInt(rest[qtyKey] || "1", 10);
+            const itemQty = selItem.type === "restaurant" ? parseInt(guestCount, 10) || 1 : parseInt(rest[qtyKey] || "1", 10);
             const itemCostVal = selItem.type === "restaurant" ? selItem.averageCost : selItem.cost;
             return sum + itemCostVal * itemQty;
           }, 0);
@@ -1518,42 +1449,21 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     return filteredData.reduce((sum, item) => {
       const quantity = parseInt(quantities[`${item.type}-${item.id}`] || "1");
       const cost = item.type === "restaurant" ? item.averageCost : item.cost;
-      const effectiveQuantity =
-        item.type === "restaurant"
-          ? parseInt(guestCount, 10) || 1
-          : quantity;
+      const effectiveQuantity = item.type === "restaurant" ? parseInt(guestCount, 10) || 1 : quantity;
       return sum + cost * effectiveQuantity;
     }, 0);
   }, [filteredData, quantities, guestCount]);
 
   const handleSubmit = async () => {
-    if (!eventName.trim()) {
-      alert("Пожалуйста, укажите название мероприятия");
-      return;
-    }
-    if (!eventDate) {
-      alert("Пожалуйста, выберите дату мероприятия");
-      return;
-    }
-    if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
-      alert("Пожалуйста, укажите корректный бюджет");
-      return;
-    }
-    if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
-      alert("Пожалуйста, укажите корректное количество гостей");
-      return;
-    }
-    if (filteredData.length === 0) {
-      alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
-      return;
-    }
+    if (!eventName.trim()) { alert("Пожалуйста, укажите название мероприятия"); return; }
+    if (!eventDate) { alert("Пожалуйста, выберите дату мероприятия"); return; }
+    if (!budget || isNaN(budget) || parseFloat(budget) <= 0) { alert("Пожалуйста, укажите корректный бюджет"); return; }
+    if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) { alert("Пожалуйста, укажите корректное количество гостей"); return; }
+    if (filteredData.length === 0) { alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия"); return; }
 
     setLoading(true);
     try {
-      const categoryResponse = await api.createEventCategory(
-        { name: eventName },
-        token
-      );
+      const categoryResponse = await api.createEventCategory({ name: eventName }, token);
       const categoryId = categoryResponse.data.id;
 
       const totalCost = calculateTotalCost;
@@ -1561,91 +1471,17 @@ const ConferencesEventScreen = ({ navigation, route }) => {
       await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: 0 });
       await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: totalCost });
 
-      console.log('Создано мероприятие:', {
-        eventName,
-        eventDate: eventDate.toISOString(),
-        budget,
-        guestCount,
-        categoryId,
-        activeCategories: categories.filter(cat => !disabledCategories.includes(cat))
-      });
-
-      // Добавление выбранных услуг
-      const selectedServices = filteredData.map(item => ({
-        serviceId: item.id,
-        serviceType: serviceTypeMap[item.type] || item.type,
-        quantity: item.type === 'restaurant'
-          ? parseInt(guestCount, 10)
-          : parseInt(quantities[`${item.type}-${item.id}`] || '1'),
-        name: item.type === 'restaurant' ? item.name :
-              item.type === 'tamada' ? item.name :
-              item.type === 'program' ? item.teamName :
-              item.type === 'transport' ? `${item.salonName} - ${item.carName}` :
-              item.type === 'cake' ? item.name :
-              item.type === 'alcohol' ? `${item.salonName} - ${item.alcoholName}` :
-              item.type === 'technical-equipment-rental' ? item.name :
-              item.type === 'flowers' ? item.name :
-              item.type === 'jewelry' ? item.name : 'Неизвестный элемент'
-      }));
-
-      console.log('Выбранные услуги:', selectedServices);
-
       for (const item of filteredData) {
         const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
-        if (!typeMapping) {
-          console.error(`Неизвестный тип услуги: ${item.type}`);
-          continue;
-        }
+        if (!typeMapping) { console.error(`Неизвестный тип услуги: ${item.type}`); continue; }
 
         const serviceType = serviceTypeMap[item.type] || item.type;
-        const quantity = item.type === 'restaurant'
-          ? parseInt(guestCount, 10)
-          : parseInt(quantities[`${item.type}-${item.id}`] || '1');
+        const quantity = item.type === 'restaurant' ? parseInt(guestCount, 10) : parseInt(quantities[`${item.type}-${item.id}`] || '1');
 
         try {
-          await api.addServiceToCategory(
-            categoryId,
-            { serviceId: item.id, serviceType, quantity },
-            token
-          );
-          console.log(`Услуга ${serviceType} успешно добавлена с ID ${item.id} и количеством ${quantity}`);
+          await api.addServiceToCategory(categoryId, { serviceId: item.id, serviceType, quantity }, token);
         } catch (error) {
-          console.error(
-            `Ошибка при добавлении услуги ${serviceType} (ID: ${item.id}, Type: ${item.type}):`,
-            error.response?.data || error.message
-          );
-        }
-      }
-
-      // Добавление всех активных категорий
-      const activeCategories = categories.filter(
-        (cat) => !disabledCategories.includes(cat)
-      );
-      console.log('Активные категории:', activeCategories);
-
-      for (const category of activeCategories) {
-        const type = categoryToTypeMap[category];
-        if (!type) {
-          console.warn(`Тип не найден для категории ${category}`);
-          continue;
-        }
-        if (!filteredData.some((item) => item.type === type)) {
-          const serviceType = serviceTypeMap[type] || type;
-          try {
-            const placeholderServiceId = await getPlaceholderServiceId(serviceType);
-            if (placeholderServiceId) {
-              await api.addServiceToCategory(
-                categoryId,
-                { serviceId: placeholderServiceId, serviceType, quantity: 0 },
-                token
-              );
-              console.log(`Категория ${category} добавлена с placeholder услугой (ID: ${placeholderServiceId})`);
-            } else {
-              console.warn(`Не удалось получить placeholderServiceId для ${serviceType}`);
-            }
-          } catch (error) {
-            console.error(`Ошибка при добавлении категории ${category}:`, error);
-          }
+          console.error(`Ошибка при добавлении услуги ${serviceType} (ID: ${item.id}, Type: ${item.type}):`, error.response?.data || error.message);
         }
       }
 
@@ -1667,282 +1503,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
       setLoading(false);
     }
   };
-
-  const getPlaceholderServiceId = async (serviceType) => {
-    try {
-      const response = await api.getPlaceholderService(serviceType, token);
-      if (!response.data.id) {
-        const newPlaceholder = await api.createPlaceholderService({ type: serviceType }, token);
-        return newPlaceholder.data.id;
-      }
-      return response.data.id;
-    } catch (error) {
-      console.error(`Ошибка при получении placeholder для ${serviceType}:`, error);
-      return null;
-    }
-  };
-
-  const handleRemoveCategory = useCallback(
-    (category) => {
-      setDisabledCategories((prev) => {
-        if (prev.includes(category)) {
-          const updatedDisabledCategories = prev.filter(
-            (cat) => cat !== category
-          );
-          const type = categoryToTypeMap[category];
-          if (type) {
-            const itemsToAdd = combinedData.filter(
-              (item) => item.type === type
-            );
-
-            let remaining = parseFloat(budget) || 0;
-            const currentTotalSpent = filteredData.reduce((sum, dataItem) => {
-              const key = `${dataItem.type}-${dataItem.id}`;
-              const itemQuantity =
-                dataItem.type === "restaurant"
-                  ? parseInt(guestCount, 10) || 1
-                  : parseInt(quantities[key] || "1");
-              const itemCost =
-                dataItem.type === "restaurant"
-                  ? dataItem.averageCost
-                  : dataItem.cost;
-              return sum + itemCost * itemQuantity;
-            }, 0);
-            remaining -= currentTotalSpent;
-
-            const filteredItemsToAdd = itemsToAdd
-              .filter((item) => {
-                const cost =
-                  item.type === "restaurant" ? item.averageCost : item.cost;
-                const effectiveQuantity =
-                  item.type === "restaurant"
-                    ? parseInt(guestCount, 10) || 1
-                    : 1;
-                const totalCost = cost * effectiveQuantity;
-                return totalCost <= remaining;
-              })
-              .sort((a, b) => {
-                const costA = a.type === "restaurant" ? a.averageCost : a.cost;
-                const costB = b.type === "restaurant" ? b.averageCost : b.cost;
-                return costA - costB;
-              });
-
-            const maxItemsToSelect = Math.min(1, filteredItemsToAdd.length);
-            const selectedItemsToAdd = [];
-            for (let i = 0; i < maxItemsToSelect; i++) {
-              const selectedItem = filteredItemsToAdd[i];
-              if (selectedItem) {
-                const cost =
-                  selectedItem.type === "restaurant"
-                    ? selectedItem.averageCost
-                    : selectedItem.cost;
-                const effectiveQuantity =
-                  selectedItem.type === "restaurant"
-                    ? parseInt(guestCount, 10) || 1
-                    : 1;
-                const totalCost = cost * effectiveQuantity;
-                selectedItemsToAdd.push({ ...selectedItem, totalCost });
-                remaining -= totalCost;
-              }
-            }
-
-            setFilteredData((prevData) => {
-              const updatedData = [...prevData, ...selectedItemsToAdd].sort(
-                (a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13)
-              );
-
-              setQuantities((prevQuantities) => ({
-                ...prevQuantities,
-                ...selectedItemsToAdd.reduce((acc, item) => {
-                  const itemKey = `${item.type}-${item.id}`;
-                  return { ...acc, [itemKey]: "1" };
-                }, {}),
-              }));
-
-              const totalSpent = updatedData.reduce((sum, dataItem) => {
-                const key = `${dataItem.type}-${dataItem.id}`;
-                const itemQuantity =
-                  dataItem.type === "restaurant"
-                    ? parseInt(guestCount, 10) || 1
-                    : parseInt(quantities[key] || "1");
-                const itemCost =
-                  dataItem.type === "restaurant"
-                    ? dataItem.averageCost
-                    : dataItem.cost;
-                return sum + itemCost * itemQuantity;
-              }, 0);
-              setRemainingBudget(parseFloat(budget) - totalSpent);
-
-              return updatedData;
-            });
-          }
-          return updatedDisabledCategories;
-        } else {
-          const type = categoryToTypeMap[category];
-          if (type) {
-            setFilteredData((prevData) =>
-              prevData.filter((item) => item.type !== type)
-            );
-          }
-          setFilteredData((prevData) => {
-            const totalSpent = prevData.reduce((sum, dataItem) => {
-              const key = `${dataItem.type}-${dataItem.id}`;
-              const itemQuantity =
-                dataItem.type === "restaurant"
-                  ? parseInt(guestCount, 10) || 1
-                  : parseInt(quantities[key] || "1");
-              const itemCost =
-                dataItem.type === "restaurant"
-                  ? dataItem.averageCost
-                  : dataItem.cost;
-              return sum + itemCost * itemQuantity;
-            }, 0);
-            setRemainingBudget(parseFloat(budget) - totalSpent);
-            return prevData;
-          });
-          return [...prev, category];
-        }
-      });
-    },
-    [quantities, budget, guestCount, combinedData]
-  );
-
-  const handleDateSelect = (day) => {
-    setEventDate(new Date(day.dateString));
-    setShowDatePicker(false);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  const handleOpenCategoryModal = (category, type) => {
-    setSelectedCategoryItems(combinedData.filter((dataItem) => dataItem.type === type));
-    setSelectedCategoryLabel(category);
-    setSelectedCategoryType(type);
-    setCategoryModalVisible(true);
-  };
-
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-        accessible
-        accessibilityLabel="Вернуться назад"
-      >
-        <Icon name="arrow-back" size={24} color={COLORS.textPrimary} />
-      </TouchableOpacity>
-      <Text style={styles.headerTitle}>Конференция</Text>
-    </View>
-  );
-
-  const renderEventDetails = () => (
-    <View style={styles.eventDetailsContainer}>
-      <Text style={styles.sectionTitle}>Детали мероприятия</Text>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Название мероприятия</Text>
-        <TextInput
-          style={styles.input}
-          value={eventName}
-          onChangeText={setEventName}
-          placeholder="Введите название..."
-          placeholderTextColor={MODAL_COLORS.textSecondary}
-          accessible
-          accessibilityLabel="Название мероприятия"
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Дата мероприятия</Text>
-        <TouchableOpacity
-          style={styles.datePickerButton}
-          onPress={() => setShowDatePicker(true)}
-          accessible
-          accessibilityLabel="Выбрать дату мероприятия"
-        >
-          <Text style={styles.datePickerText}>
-            {eventDate ? eventDate.toLocaleDateString('ru-RU') : 'Выберите дату'}
-          </Text>
-          <Icon name="calendar-today" size={20} color={MODAL_COLORS.icon} />
-        </TouchableOpacity>
-        {showDatePicker && (
-          <Modal
-            visible={showDatePicker}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setShowDatePicker(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.calendarContainer}>
-                <Calendar
-                  onDayPress={handleDateSelect}
-                  markedDates={{
-                    ...blockedDays,
-                    [eventDate.toISOString().split('T')[0]]: {
-                      selected: true,
-                      selectedColor: COLORS.primary,
-                    },
-                  }}
-                  minDate={new Date()}
-                  theme={{
-                    backgroundColor: MODAL_COLORS.background,
-                    calendarBackground: MODAL_COLORS.background,
-                    textSectionTitleColor: MODAL_COLORS.textPrimary,
-                    selectedDayBackgroundColor: COLORS.primary,
-                    selectedDayTextColor: COLORS.white,
-                    todayTextColor: COLORS.accent,
-                    dayTextColor: MODAL_COLORS.textPrimary,
-                    textDisabledColor: MODAL_COLORS.textSecondary,
-                    arrowColor: COLORS.primary,
-                  }}
-                />
-                <TouchableOpacity
-                  style={styles.closeCalendarButton}
-                  onPress={() => setShowDatePicker(false)}
-                  accessible
-                  accessibilityLabel="Закрыть календарь"
-                >
-                  <Text style={styles.closeCalendarText}>Закрыть</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        )}
-      </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Бюджет (₸)</Text>
-        <TextInput
-          style={styles.input}
-          value={formatBudget(budget)}
-          onChangeText={handleBudgetChange}
-          keyboardType="numeric"
-          placeholder="Введите бюджет..."
-          placeholderTextColor={MODAL_COLORS.textSecondary}
-          accessible
-          accessibilityLabel="Бюджет мероприятия"
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Количество гостей</Text>
-        <TextInput
-          style={styles.input}
-          value={guestCount}
-          onChangeText={handleGuestCountChange}
-          keyboardType="numeric"
-          placeholder="Введите количество гостей..."
-          placeholderTextColor={MODAL_COLORS.textSecondary}
-          accessible
-          accessibilityLabel="Количество гостей"
-        />
-      </View>
-      <View style={styles.budgetInfo}>
-        <Text style={styles.budgetText}>
-          Остаток бюджета: {remainingBudget.toLocaleString()} ₸
-          {'\n'}
-          {'\n'}
-          Общая стоимость: {calculateTotalCost.toLocaleString()} ₸
-        </Text>
-      </View>
-    </View>
-  );
-
+  
   const handleCategoryPress = (category) => {
     const type = categoryToTypeMap[category];
     if (!type) return;
@@ -1953,30 +1514,40 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     setCategoryModalVisible(true);
   };
 
-  const handleCloseCategoryModal = () => {
-    setCategoryModalVisible(false);
-    setSelectedCategoryItems([]);
-    setSelectedCategoryLabel("");
-    setSelectedCategoryType("");
+  const handleRemoveCategory = (category) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setDisabledCategories((prev) => {
+      const isCurrentlyDisabled = prev.includes(category);
+      if (isCurrentlyDisabled) {
+        console.log(`Категория "${category}" включена`);
+        return prev.filter((cat) => cat !== category);
+      } else {
+        console.log(`Категория "${category}" отключена`);
+        const type = categoryToTypeMap[category];
+        if (type) {
+          setFilteredData((prevData) => prevData.filter((item) => item.type !== type));
+          setQuantities((prevQuantities) => {
+            const newQuantities = { ...prevQuantities };
+            Object.keys(newQuantities).forEach((key) => {
+              if (key.startsWith(`${type}-`)) {
+                delete newQuantities[key];
+              }
+            });
+            return newQuantities;
+          });
+        }
+        return [...prev, category];
+      }
+    });
   };
 
   const renderCategories = ({ item }) => {
     if (item === "Добавить") {
-      return (
-        <View style={styles.categoryRow}>
-          <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => setAddItemModalVisible(true)}>
-            <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
-              <Text style={styles.categoryPlusText}>+</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      );
+      return null;
     }
 
     const isDisabled = disabledCategories.includes(item);
-    const type = categoryToTypeMap[item];
-    const itemsForCategory = filteredData.filter((dataItem) => dataItem.type === type);
-
+    
     const categoryIcons = {
       "Прокат авто": { on: require("../../assets/prokatAvtoOn.png"), off: require("../../assets/prokatAutooff.png") },
       "Ресторан": { on: require("../../assets/restaurantOn.png"), off: require("../../assets/restaurantTurnOff.png") },
@@ -1985,7 +1556,6 @@ const ConferencesEventScreen = ({ navigation, route }) => {
       "Ведущий": { on: require("../../assets/vedushieOn.png"), off: require("../../assets/vedushieOff.png") },
       "Шоу программа": { on: require("../../assets/show.png"), off: require("../../assets/showTurnOff.png") },
       // "Аренда технического оборудования": { on: require("../../assets/techEquipmentOn.png"), off: require("../../assets/techEquipmentOff.png") },
-      "Аренда технического оборудования": { on: require("../../assets/show.png"), off: require("../../assets/showTurnOff.png") },
       "Цветы": { on: require("../../assets/cvetyOn.png"), off: require("../../assets/cvetyOff.png") },
       "Ювелирные изделия": { on: require("../../assets/uvizdeliyaOn.png"), off: require("../../assets/uvIzdeliyaOff.png") }
     };
@@ -1994,9 +1564,9 @@ const ConferencesEventScreen = ({ navigation, route }) => {
 
     return (
       <View style={styles.categoryRow}>
-        <TouchableOpacity style={styles.removeCategoryButton} onPress={() => handleRemoveCategory(item)}>
+         <TouchableOpacity style={styles.removeCategoryButton} onPress={() => handleRemoveCategory(item)}>
           <Image
-            source={isDisabled ? categoryIcons[item]?.on : (categoryIcons[item]?.off || defaultIcon)}
+            source={isDisabled ? categoryIcons[item]?.on : (categoryIcons[item]?.off || defaultIcon) }
             style={{ width: 60, height: 70, resizeMode: 'contain' }}
           />
         </TouchableOpacity>
@@ -2032,254 +1602,396 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     );
   };
 
-  const renderSelectedItems = ({ item }) => (
-    <SelectedItem
-      item={item}
-      quantities={quantities}
-      setQuantities={setQuantities}
-      filteredData={filteredData}
-      setFilteredData={setFilteredData}
-      budget={budget}
-      setRemainingBudget={setRemainingBudget}
-      handleRemoveItem={handleRemoveItem}
-      setDetailsModalVisible={setDetailsModalVisible}
-      setSelectedItem={setSelectedItem}
-      guestCount={guestCount}
-      setGuestCount={setGuestCount}
-    />
-  );
-
   const DetailsModal = ({ visible, onClose, item }) => {
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [files, setFiles] = useState([]);
+    const [loadingFiles, setLoadingFiles] = useState(true);
+    
     if (!item) return null;
 
-    const renderDetailRow = (label, value) => {
+    const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
+
+    const getEndpointForServiceType = (serviceType) => {
+      let normalizedServiceType = serviceType.toLowerCase();
+      if (normalizedServiceType === 'flower') {
+        normalizedServiceType = 'flowers';
+      } else if (normalizedServiceType === 'technicalequipmentrental') {
+        normalizedServiceType = 'technical-equipment-rental';
+      } else {
+        normalizedServiceType = normalizedServiceType.replace(/s$/, '');
+      }
+      return normalizedServiceType;
+    };
+
+    useEffect(() => {
+      const fetchFiles = async () => {
+        if (!item || !item.type || !item.id) {
+          setLoadingFiles(false);
+          return;
+        }
+        
+        try {
+          setLoadingFiles(true);
+          const endpoint = getEndpointForServiceType(item.type);
+          const response = await axios.get(`${BASE_URL}/api/${endpoint}/${item.id}/files`);
+          const fetchedFiles = response.data || [];
+          setFiles(fetchedFiles);
+        } catch (err) {
+          console.error("Ошибка загрузки файлов:", err);
+          setFiles([]);
+        } finally {
+          setLoadingFiles(false);
+        }
+      };
+      
+      if (visible && item) {
+        fetchFiles();
+      }
+    }, [visible, item]);
+
+    const getItemTitle = () => {
+        switch (item.type) {
+            case "restaurant": return item.name;
+            case "tamada": return item.name;
+            case "program": return item.teamName || item.name;
+            case "transport": return `${item.salonName || ''} - ${item.carName || ''}`.trim();
+            case "cake": return item.name;
+            case "alcohol": return `${item.salonName || ''} - ${item.alcoholName || ''}`.trim();
+            case "flowers": return `${item.salonName || ''} - ${item.flowerName || ''}`.trim();
+            case "jewelry": return `${item.storeName || ''} - ${item.itemName || ''}`.trim();
+            case "technical-equipment-rental": return item.name;
+            default: return item.name || "Детали";
+        }
+    };
+
+    const photoFiles = files.filter(file => file.mimetype && file.mimetype.startsWith('image/'));
+    const displayPhotos = photoFiles.length > 0 
+      ? photoFiles.map(file => `${BASE_URL}/${file.path}`)
+      : ['https://via.placeholder.com/800x400/F1EBDD/897066?text=Нет+фото'];
+
+    const cost = item.type === 'restaurant' ? item.averageCost : item.cost;
+    const displayCost = (cost !== null && cost !== undefined) ? `${cost.toLocaleString()} ₸` : 'Не указана';
+
+    const renderField = (label, value) => {
       if (!value) return null;
       return (
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>{label}:</Text>
-          <Text style={styles.detailValue}>{value}</Text>
+        <View style={styles.fullscreenDetailField}>
+          <Text style={styles.fullscreenDetailLabel}>{label.toUpperCase()}</Text>
+          <Text style={styles.fullscreenDetailValue}>{value}</Text>
         </View>
       );
     };
 
-    const handleOpenLink = (url) => {
-      if (url) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Linking.openURL(url).catch((err) => console.error("Ошибка открытия ссылки:", err));
-      }
+    const handleScroll = (event) => {
+      const slideSize = event.nativeEvent.layoutMeasurement.width;
+      const offset = event.nativeEvent.contentOffset.x;
+      const currentIndex = Math.round(offset / slideSize);
+      setCurrentPhotoIndex(currentIndex);
     };
 
     return (
-      <Modal
-        visible={visible}
-        transparent
-        animationType="fade"
-        onRequestClose={onClose}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.detailsModalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {item.type === "restaurant" ? item.name :
-                 item.type === "tamada" ? item.name :
-                 item.type === "program" ? item.teamName :
-                 item.type === "transport" ? `${item.salonName} - ${item.carName}` :
-                 item.type === "cake" ? item.name :
-                 item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
-                 item.type === "technical-equipment-rental" ? item.name :
-                 item.type === "flowers" ? item.name :
-                 item.type === "jewelry" ? item.name :
-                 "Детали"}
-              </Text>
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={onClose}
-                accessible
-                accessibilityLabel="Закрыть модальное окно"
-              >
-                <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={[
-                { label: 'Тип', value: typeToCategoryMap[item.type] },
-                { label: 'Адрес', value: item.address },
-                { label: 'Телефон', value: item.phone },
-                { label: 'Кухня', value: item.cuisine },
-                { label: 'Вместимость', value: item.capacity },
-                { label: 'Категория', value: item.category },
-                { label: 'Бренд', value: item.brand },
-                { label: 'Портфолио', value: item.portfolio },
-                { label: 'Тип торта', value: item.cakeType },
-                { label: 'Материал', value: item.material },
-                { label: 'Район', value: item.district },
-                { 
-                  label: 'Стоимость',
-                  value: `${(item.type === 'restaurant' ? item.averageCost : item.cost).toLocaleString()} ₸`
-                }
-              ].filter(d => d.value)}
-              renderItem={({ item }) => renderDetailRow(item.label, item.value)}
-              keyExtractor={(item, index) => `${item.label}-${index}`}
-              contentContainerStyle={styles.detailsModalContent}
-              showsVerticalScrollIndicator={false}
-            />
-            {item.portfolio && (
-              <TouchableOpacity
-                style={styles.portfolioButton}
-                onPress={() => handleOpenLink(item.portfolio)}
-                accessible
-                accessibilityLabel="Открыть портфолио"
-              >
-                <LinearGradient
-                  colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-                  style={styles.portfolioButtonGradient}
-                >
-                  <Text style={styles.portfolioButtonText}>Открыть портфолио</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            )}
+      <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+        <View style={styles.fullscreenModalContainer}>
+          <View style={styles.fullscreenModalHeader}>
+            <TouchableOpacity style={styles.fullscreenBackButton} onPress={onClose} accessible accessibilityLabel="Назад">
+              <AntDesign name="left" size={24} color="#5A4032" />
+            </TouchableOpacity>
+            <Text style={styles.fullscreenModalHeaderTitle} numberOfLines={1}>{getItemTitle()}</Text>
+            <View style={{ width: 40 }} />
           </View>
+
+          <ScrollView style={styles.fullscreenModalScroll} showsVerticalScrollIndicator={false}>
+            <View style={styles.photoSliderWrapper}>
+              {loadingFiles ? (
+                <View style={[styles.fullscreenPhoto, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <ActivityIndicator size="large" color="#897066" />
+                  <Text style={{ marginTop: 10, color: '#897066' }}>Загрузка...</Text>
+                </View>
+              ) : (
+                <>
+                  <FlatList
+                    data={displayPhotos}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
+                    keyExtractor={(photo, index) => `photo-${index}`}
+                    renderItem={({ item: photo }) => (
+                      <Image source={{ uri: photo }} style={styles.fullscreenPhoto} resizeMode="cover" />
+                    )}
+                  />
+                  {displayPhotos.length > 1 && (
+                    <View style={styles.photoIndicators}>
+                      {displayPhotos.map((_, index) => (
+                        <View key={`indicator-${index}`} style={[styles.photoIndicator, index === currentPhotoIndex && styles.photoIndicatorActive]} />
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+            </View>
+
+            <View style={styles.fullscreenContentCard}>
+              <Text style={styles.fullscreenTitle}>{getItemTitle()}</Text>
+              {renderField('Тип', typeToCategoryMap[item.type] || item.type)}
+              {renderField('Вместимость', item.capacity)}
+              {renderField('Кухня', item.cuisine)}
+              {renderField('Средний чек', displayCost)}
+              {renderField('Адрес', item.address)}
+              {renderField('Телефон', item.phone)}
+              {renderField('Район', item.district)}
+              {renderField('Email', item.email)}
+              {renderField('Описание', item.description)}
+              {renderField('Категория', item.category)}
+              {renderField('Бренд', item.brand)}
+              {renderField('Материал', item.material)}
+              {item.portfolio && (
+                <TouchableOpacity style={styles.fullscreenPortfolioButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Linking.openURL(item.portfolio).catch((err) => console.error("Ошибка:", err)); }}>
+                  <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.fullscreenPortfolioGradient}>
+                    <Text style={styles.fullscreenPortfolioText}>Открыть портфолио</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+            </View>
+          </ScrollView>
         </View>
       </Modal>
     );
   };
 
-  const renderMainContent = () => {
-    const sections = [
-      { type: 'header', id: 'header' },
-      { type: 'eventDetails', id: 'eventDetails' },
-      { type: 'categories', id: 'categories' },
-      { type: 'selectedItemsHeader', id: 'selectedItemsHeader' },
-      ...filteredData.map(item => ({ type: 'selectedItem', id: `${item.type}-${item.id}`, data: item })),
-      { type: 'submitButton', id: 'submitButton' },
-    ];
+  return (
+    <>
+      <LinearGradient colors={["#F1EBDD", "#897066"]} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={styles.splashContainer}>
+        <TouchableOpacity style={styles.backButtonTop} onPress={() => navigation.goBack()} accessible accessibilityLabel="Вернуться назад">
+          <AntDesign name="left" size={24} color="black" />
+        </TouchableOpacity>
+        <View style={styles.logoContainer}>
+          <Image source={require("../../assets/kazanRevert.png")} style={styles.potIcon} resizeMode="contain" />
+        </View>
+        <Image source={require("../../assets/footer.png")} style={styles.topPatternContainer} />
+        <View style={styles.headerContainer}>
+          <View style={styles.budgetContainer}>
+            <View style={styles.categoryItemAdd}>
+              <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddItemModalVisible(true); }} accessible accessibilityLabel="Добавить элемент">
+                <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
+                  <Text style={styles.categoryPlusText}>+</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+            <TextInput style={styles.budgetInput} placeholder="Бюджет (т)" value={formatBudget(budget)} onChangeText={handleBudgetChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={18} accessible accessibilityLabel="Бюджет мероприятия" />
+            <TextInput style={styles.guestInput} placeholder="Гостей" value={guestCount} onChangeText={handleGuestCountChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={5} accessible accessibilityLabel="Количество гостей" />
+          </View>
+          <Modal animationType="fade" transparent={true} visible={isLoading}>
+            <View style={styles.loaderOverlay}>
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={styles.loaderText}>Подбираем...</Text>
+              </View>
+            </View>
+          </Modal>
+        </View>
+        <View style={styles.listContainer}>
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          ) : (
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+              <View style={styles.categoryGrid}>
+                {[...categories, 'Добавить'].map((item, index) => (
+                  <View key={index} style={styles.categoryItem}>
+                    {renderCategories({ item })}
+                  </View>
+                ))}
+              </View>
 
-    return (
-      <FlatList
-        data={sections}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          switch (item.type) {
-            case 'header':
-              return renderHeader();
-            case 'eventDetails':
-              return renderEventDetails();
-            case 'categories':
-              return (
-                <View style={styles.categoriesContainer}>
-                  <Text style={styles.sectionTitle}>Категории</Text>
-                  <FlatList
-                    data={[...categories, 'Добавить']}
-                    renderItem={renderCategories}
-                    keyExtractor={(item) => item}
-                  />
+            </ScrollView>
+          )}
+        </View>
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity style={styles.nextButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setEventDetailsModalVisible(true); }} disabled={loading} accessible accessibilityLabel="Далее">
+            <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
+          </TouchableOpacity>
+        </View>
+        <AddItemModal visible={addItemModalVisible} onClose={() => setAddItemModalVisible(false)} filteredItems={combinedData} filteredData={filteredData} handleAddItem={handleAddItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} updateCategories={updateCategories} />
+        <CategoryItemsModal visible={categoryModalVisible} onClose={() => setCategoryModalVisible(false)} categoryItems={selectedCategoryItems} categoryLabel={selectedCategoryLabel} categoryType={selectedCategoryType} filteredData={filteredData} handleAddItem={handleAddItem} handleRemoveItem={handleRemoveItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} setQuantities={setQuantities} budget={budget} setFilteredData={setFilteredData} setRemainingBudget={setRemainingBudget} updateCategories={updateCategories} guestCount={guestCount} setGuestCount={setGuestCount} />
+        <DetailsModal visible={detailsModalVisible} onClose={() => setDetailsModalVisible(false)} item={selectedItem} />
+        <Modal visible={eventDetailsModalVisible} transparent animationType="slide" onRequestClose={() => setEventDetailsModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.eventDetailsModalContainer}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Данные конференции</Text>
+                <TouchableOpacity style={styles.modalCloseButton} onPress={() => setEventDetailsModalVisible(false)} accessible accessibilityLabel="Закрыть">
+                  <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.modalContent}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Название конференции</Text>
+                  <TextInput style={styles.input} value={eventName} onChangeText={setEventName} placeholder="Введите название..." placeholderTextColor={MODAL_COLORS.textSecondary} accessible accessibilityLabel="Название мероприятия" />
                 </View>
-              );
-            case 'selectedItemsHeader':
-              return (
-                <View style={styles.selectedItemsContainer}>
-                  <Text style={styles.sectionTitle}>Выбранные элементы</Text>
-                  {isLoading && <ActivityIndicator size="large" color={COLORS.primary} />}
-                  {!isLoading && filteredData.length === 0 && (
-                    <Text style={styles.emptyText}>Нет выбранных элементов</Text>
-                  )}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Дата конференции</Text>
+                  <TouchableOpacity style={styles.datePickerButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowDatePicker(true); }} accessible accessibilityLabel="Выбрать дату">
+                    <Text style={styles.datePickerText}>{eventDate ? eventDate.toLocaleDateString('ru-RU') : 'Выберите дату'}</Text>
+                    <Icon name="calendar-today" size={20} color={MODAL_COLORS.icon} />
+                  </TouchableOpacity>
                 </View>
-              );
-            case 'selectedItem':
-              return renderSelectedItems({ item: item.data });
-            case 'submitButton':
-              return (
-                <TouchableOpacity
-                  style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-                  onPress={handleSubmit}
-                  disabled={loading}
-                  accessible
-                  accessibilityLabel="Создать конференцию"
-                >
-                  <LinearGradient
-                    colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-                    style={styles.submitButtonGradient}
-                  >
-                    {loading ? (
-                      <ActivityIndicator size="small" color={COLORS.white} />
-                    ) : (
-                      <Text style={styles.submitButtonText}>Создать конференцию</Text>
-                    )}
+                {showDatePicker && (
+                  <Modal visible={showDatePicker} transparent animationType="fade" onRequestClose={() => setShowDatePicker(false)}>
+                    <View style={styles.modalOverlay}>
+                      <View style={styles.calendarContainer}>
+                        <Calendar onDayPress={(day) => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setEventDate(new Date(day.dateString)); setShowDatePicker(false); }} markedDates={{ ...blockedDays, [eventDate.toISOString().split('T')[0]]: { selected: true, selectedColor: COLORS.primary } }} minDate={new Date().toISOString().split('T')[0]} theme={{ backgroundColor: MODAL_COLORS.background, calendarBackground: MODAL_COLORS.background, textSectionTitleColor: MODAL_COLORS.textPrimary, selectedDayBackgroundColor: COLORS.primary, selectedDayTextColor: COLORS.white, todayTextColor: COLORS.accent, dayTextColor: MODAL_COLORS.textPrimary, textDisabledColor: MODAL_COLORS.textSecondary, arrowColor: COLORS.primary }} />
+                        <TouchableOpacity style={styles.closeCalendarButton} onPress={() => setShowDatePicker(false)} accessible accessibilityLabel="Закрыть календарь">
+                          <Text style={styles.closeCalendarText}>Закрыть</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
+                )}
+                <TouchableOpacity style={[styles.submitButton, loading && styles.submitButtonDisabled]} onPress={() => { setEventDetailsModalVisible(false); handleSubmit(); }} disabled={loading} accessible accessibilityLabel="Создать конференцию">
+                  <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.submitButtonGradient}>
+                    {loading ? <ActivityIndicator size="small" color={COLORS.white} /> : <Text style={styles.submitButtonText}>Создать конференцию</Text>}
                   </LinearGradient>
                 </TouchableOpacity>
-              );
-            default:
-              return null;
-          }
-        }}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      />
-    );
-  };
-
-  return (
-    <ErrorBoundary>
-      <SafeAreaView style={styles.container}>
-        {renderMainContent()}
-
-        <AddItemModal
-          visible={addItemModalVisible}
-          onClose={() => setAddItemModalVisible(false)}
-          filteredItems={combinedData}
-          filteredData={filteredData}
-          handleAddItem={handleAddItem}
-          setDetailsModalVisible={setDetailsModalVisible}
-          setSelectedItem={setSelectedItem}
-          quantities={quantities}
-          updateCategories={updateCategories}
-        />
-
-        <CategoryItemsModal
-          visible={categoryModalVisible}
-          onClose={() => setCategoryModalVisible(false)}
-          categoryItems={selectedCategoryItems}
-          categoryLabel={selectedCategoryLabel}
-          categoryType={selectedCategoryType}
-          filteredData={filteredData}
-          handleAddItem={handleAddItem}
-          handleRemoveItem={handleRemoveItem}
-          setDetailsModalVisible={setDetailsModalVisible}
-          setSelectedItem={setSelectedItem}
-          quantities={quantities}
-          setQuantities={setQuantities}
-          budget={budget}
-          setFilteredData={setFilteredData}
-          setRemainingBudget={setRemainingBudget}
-          updateCategories={updateCategories}
-          guestCount={guestCount}
-          setGuestCount={setGuestCount}
-        />
-
-        <DetailsModal
-          visible={detailsModalVisible}
-          onClose={() => setDetailsModalVisible(false)}
-          item={selectedItem}
-        />
-      </SafeAreaView>
-    </ErrorBoundary>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </LinearGradient>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  splashContainer: { 
+    flex: 1 
+  },
+  loaderOverlay: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: MODAL_COLORS.overlayBackground,
+  },
+  loaderContainer: {
+    backgroundColor: MODAL_COLORS.cardBackground,
+    borderRadius: 15,
+    padding: 25,
+    alignItems: "center",
+    shadowColor: MODAL_COLORS.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  loaderText: {
+    marginTop: 15,
+    fontSize: 17,
+    color: MODAL_COLORS.textPrimary,
+    fontWeight: "500",
+  },
+  backButtonTop: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    zIndex: 10,
+    padding: 10,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginTop: 60,
+    marginBottom: 20,
+  },
+  potIcon: {
+    width: 80,
+    height: 80,
+  },
+  topPatternContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    height: "15%",
+    zIndex: -1,
+    resizeMode: "cover",
+    opacity: 0.8,
+  },
+  headerContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  budgetContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  categoryItemAdd: {
+    width: "20%",
+    marginRight: 10,
+  },
+  budgetInput: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
+    color: COLORS.white,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  guestInput: {
+    flex: 0.6,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 10,
+    padding: 10,
+    color: COLORS.white,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  listContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
+  scrollView: { 
+    flex: 1 
+  },
+  categoryGrid: {
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+  categoryItem: {
+    width: "100%",
+    marginBottom: 10,
+  },
+
+  bottomContainer: {
+    alignItems: 'center',
+    marginTop: 20, // Add some top margin to separate it from categories
+    marginBottom: 40, // Add bottom margin for spacing
+    backgroundColor: 'transparent',
+  },
+  nextButton: {
+    width: 80,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  potIcon3: { 
+    width: 70, 
+    height: 70, 
+  },
+  categoryPlusText: {
+    fontSize: 24,
+    color: COLORS.white,
+    fontWeight: "bold",
+  },
+  categoryText: {
+    fontSize: 14,
+    color: COLORS.white,
+    fontWeight: "600",
+    textAlign: "center",
   },
   scrollContent: {
     padding: 18,
     paddingBottom: 120,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 24,
   },
   headerTitle: {
     fontSize: 26,
@@ -2298,13 +2010,10 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginBottom: 16,
   },
-  inputContainer: {
-    marginBottom: 18,
-  },
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: COLORS.textPrimary,
+    color: MODAL_COLORS.textPrimary,
     marginBottom: 10,
   },
   input: {
@@ -2314,7 +2023,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 14,
     fontSize: 16,
-    color: COLORS.textPrimary,
+    color: MODAL_COLORS.textPrimary,
   },
   datePickerButton: {
     flexDirection: 'row',
@@ -2330,25 +2039,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textPrimary,
   },
-  budgetInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  budgetText: {
-    flex: 1,
-    fontSize: 18,
-    color: COLORS.textPrimary,
-  },
-  categoriesContainer: {
-    marginBottom: 24,
-  },
   categoryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    marginRight: 10,
-    marginBottom: 12,
+    width: '100%',
   },
   categoryButton: {
     flex: 1,
@@ -2361,19 +2055,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   disabledCategoryButton: {
-    opacity: 0.7,
+    opacity: 0.5,
   },
   categoryButtonGradient: {
-    padding: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     alignItems: 'center',
-  },
-  categoryText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.white,
+    justifyContent: 'center'
   },
   categoryButtonAdd: {
-    width: '48%',
+    width: '100%',
     borderRadius: 10,
     overflow: 'hidden',
     shadowColor: COLORS.shadow,
@@ -2382,17 +2073,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  categoryPlusText: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: COLORS.white,
-    textAlign: 'center',
-  },
   removeCategoryButton: {
     padding: 10,
-  },
-  selectedItemsContainer: {
-    marginBottom: 24,
+    marginRight: 5,
   },
   card: {
     backgroundColor: COLORS.card,
@@ -2453,11 +2136,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginTop: 24,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
   },
   submitButtonDisabled: {
     opacity: 0.7,
@@ -2482,7 +2160,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     width: '100%',
     maxHeight: SCREEN_HEIGHT * 0.9,
-    padding: 18,
+    paddingHorizontal: 18,
+    paddingTop: 18,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -2491,8 +2170,8 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '700',
     color: MODAL_COLORS.textPrimary,
   },
   modalCloseButton: {
@@ -2521,7 +2200,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   addModalFilterScroll: {
-    maxHeight: 160,
     marginBottom: 18,
   },
   addModalFilterLabel: {
@@ -2535,6 +2213,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 20,
     marginRight: 10,
+    marginBottom: 10,
   },
   addModalTypeButton: {
     backgroundColor: MODAL_COLORS.inactiveFilter,
@@ -2587,10 +2266,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignItems: 'center',
     shadowColor: MODAL_COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   addModalItemContent: {
     flex: 1,
@@ -2627,59 +2306,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: MODAL_COLORS.textPrimary,
     marginBottom: 14,
+    paddingHorizontal: 5,
   },
-  detailsModalContainer: {
+  eventDetailsModalContainer: {
     backgroundColor: MODAL_COLORS.background,
-    borderRadius: 16,
-    width: '90%',
-    padding: 18,
-    maxHeight: SCREEN_HEIGHT * 0.7,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    width: '100%',
   },
-  detailsModalContent: {
-    paddingBottom: 18,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: MODAL_COLORS.separator,
-  },
-  detailLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: MODAL_COLORS.textPrimary,
-    width: '40%',
-  },
-  detailValue: {
-    fontSize: 16,
-    color: MODAL_COLORS.textPrimary,
-    flex: 1,
-  },
-  portfolioButton: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginTop: 18,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  portfolioButtonGradient: {
-    padding: 14,
-    alignItems: 'center',
-  },
-  portfolioButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.white,
+  modalContent: {
+    paddingTop: 10,
   },
   calendarContainer: {
     backgroundColor: MODAL_COLORS.background,
     borderRadius: 16,
     padding: 18,
-    width: '100%', // Ensure full width
-    maxHeight: SCREEN_HEIGHT * 0.7, // Adjust max height if needed
+    marginHorizontal: 20,
   },
   closeCalendarButton: {
     marginTop: 18,
@@ -2701,6 +2344,117 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     textAlign: 'center',
   },
+  fullscreenModalContainer: {
+    flex: 1,
+    backgroundColor: '#F1EBDD',
+  },
+  fullscreenModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 16,
+    backgroundColor: '#F1EBDD',
+    width: '100%',
+  },
+  fullscreenBackButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  fullscreenModalHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#5A4032',
+    textAlign: 'center',
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  fullscreenModalScroll: {
+    flex: 1,
+  },
+  fullscreenPhoto: {
+    width: Dimensions.get('window').width,
+    height: 400,
+    backgroundColor: '#E0D5C7',
+  },
+  photoSliderWrapper: {
+    position: 'relative',
+  },
+  photoIndicators: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  photoIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  photoIndicatorActive: {
+    width: 24,
+    backgroundColor: '#FFFFFF',
+  },
+  fullscreenContentCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -24,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40,
+    minHeight: 400,
+  },
+  fullscreenTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#2D2D2D',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  fullscreenDetailField: {
+    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
+    paddingBottom: 16,
+  },
+  fullscreenDetailLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999999',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  fullscreenDetailValue: {
+    fontSize: 18,
+    fontWeight: '400',
+    color: '#2D2D2D',
+    lineHeight: 24,
+  },
+  fullscreenPortfolioButton: {
+    marginTop: 32,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  fullscreenPortfolioGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  fullscreenPortfolioText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
 });
+
 
 export default ConferencesEventScreen;
