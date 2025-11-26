@@ -1,4 +1,11 @@
+
+//////////////////////////////////////
+
+
+
+
 import React, { Component, useState, useRef, useEffect, useCallback, useMemo } from "react";
+import axios from "axios";
 import {
   View,
   Image,
@@ -2172,104 +2179,220 @@ console.log('Полученные категории:', selectedCategories);
     />
   );
 
-  const DetailsModal = ({ visible, onClose, item }) => {
+            const DetailsModal = ({ visible, onClose, item }) => {
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [files, setFiles] = useState([]);
+    const [loadingFiles, setLoadingFiles] = useState(true);
+    
     if (!item) return null;
 
-    const renderDetailRow = (label, value) => {
-      if (!value) return null;
-      return (
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>{label}:</Text>
-          <Text style={styles.detailValue}>{value}</Text>
-        </View>
-      );
+    console.log('=== DetailsModal opened ===');
+    console.log('Item:', item);
+
+    const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
+
+    // Функция для нормализации типа сервиса
+    const getEndpointForServiceType = (serviceType) => {
+      let normalizedServiceType = serviceType.toLowerCase();
+      if (normalizedServiceType === 'flower') {
+        normalizedServiceType = 'flowers';
+      } else if (normalizedServiceType === 'technicalequipmentrental') {
+        normalizedServiceType = 'technical-equipment-rental';
+      } else {
+        normalizedServiceType = normalizedServiceType.replace(/s$/, '');
+      }
+      return normalizedServiceType;
     };
 
-    const handleOpenLink = (url) => {
-      if (url) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Linking.openURL(url).catch((err) => console.error("Ошибка открытия ссылки:", err));
+    // Загрузка файлов из API
+    useEffect(() => {
+      const fetchFiles = async () => {
+        if (!item || !item.type || !item.id) {
+          console.log('Недостаточно данных для загрузки файлов');
+          setLoadingFiles(false);
+          return;
+        }
+        
+        try {
+          setLoadingFiles(true);
+          const endpoint = getEndpointForServiceType(item.type);
+          const response = await axios.get(`${BASE_URL}/api/${endpoint}/${item.id}/files`);
+          const fetchedFiles = response.data || [];
+          setFiles(fetchedFiles);
+          console.log(`Загружено ${fetchedFiles.length} файлов для ${item.type} #${item.id}`);
+        } catch (err) {
+          console.error("Ошибка загрузки файлов:", err);
+          setFiles([]);
+        } finally {
+          setLoadingFiles(false);
+        }
+      };
+      
+      if (visible && item) {
+        fetchFiles();
       }
+    }, [visible, item]);
+
+    const getItemTitle = () => {
+      if (item.type === "restaurant") return item.name;
+      if (item.type === "hotels") return item.name;
+      if (item.type === "tamada") return item.name;
+      if (item.type === "program") return item.teamName || item.name;
+      if (item.type === "flowers") return `${item.salonName || ''} - ${item.flowerName || ''}`.trim();
+      if (item.type === "transport") return `${item.salonName || ''} - ${item.carName || ''}`.trim();
+      if (item.type === "cake") return item.name;
+      if (item.type === "alcohol") return `${item.salonName || ''} - ${item.alcoholName || ''}`.trim();
+      if (item.type === "jewelry") return `${item.storeName || ''} - ${item.itemName || ''}`.trim();
+      if (item.type === "traditional-gifts") return `${item.salonName || ''} - ${item.itemName || ''}`.trim();
+      return item.name || "Детали";
     };
+
+    // Получаем фотографии из загруженных файлов
+    const photoFiles = files.filter(file => file.mimetype && file.mimetype.startsWith('image/'));
+    const displayPhotos = photoFiles.length > 0 
+      ? photoFiles.map(file => `${BASE_URL}/${file.path}`)
+      : ['https://via.placeholder.com/800x400/F1EBDD/897066?text=Нет+фото'];
 
     const cost = item.type === 'restaurant' ? item.averageCost : item.cost;
     const displayCost = (cost !== null && cost !== undefined) ? `${cost.toLocaleString()} ₸` : 'Не указана';
 
+    const renderField = (label, value) => {
+      if (!value) return null;
+      return (
+        <View style={styles.fullscreenDetailField}>
+          <Text style={styles.fullscreenDetailLabel}>{label.toUpperCase()}</Text>
+          <Text style={styles.fullscreenDetailValue}>{value}</Text>
+        </View>
+      );
+    };
+
+    const handleScroll = (event) => {
+      const slideSize = event.nativeEvent.layoutMeasurement.width;
+      const offset = event.nativeEvent.contentOffset.x;
+      const currentIndex = Math.round(offset / slideSize);
+      setCurrentPhotoIndex(currentIndex);
+    };
+
     return (
       <Modal
         visible={visible}
-        transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={onClose}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.detailsModalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-
-                {item.type === "restaurant" ? item.name :
-                 item.type === "hotels" ? item.name :
-                 item.type === "tamada" ? item.name :
-                 item.type === "program" ? item.teamName :
-                 item.type === "flowers" ? `${item.salonName} - ${item.flowerName}` :
-                 item.type === "transport" ? `${item.salonName} - ${item.carName}` :
-                 item.type === "cake" ? item.name :
-                 item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
-                 item.type === "jewelry" ? `${item.storeName} - ${item.itemName}` :
-                 item.type === "traditional-gifts" ? `${item.salonName} - ${item.itemName}` :
-                 "Детали"}
-              </Text>
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={onClose}
-                accessible
-                accessibilityLabel="Закрыть модальное окно"
-              >
-                <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={[
-                { label: 'Тип', value: typeToCategoryMap[item.type] },
-                { label: 'Адрес', value: item.address },
-                { label: 'Телефон', value: item.phone },
-                { label: 'Кухня', value: item.cuisine },
-                { label: 'Вместимость', value: item.capacity },
-                { label: 'Категория', value: item.category },
-                { label: 'Бренд', value: item.brand },
-                { label: 'Пол', value: item.gender },
-                { label: 'Портфолио', value: item.portfolio },
-                { label: 'Тип торта', value: item.cakeType },
-                { label: 'Тип цветов', value: item.flowerType },
-                { label: 'Материал', value: item.material },
-                { label: 'Район', value: item.district },
-                { 
-                  label: 'Стоимость',
-                  value: displayCost
-                }
-              ].filter(d => d.value)}
-              renderItem={({ item }) => renderDetailRow(item.label, item.value)}
-              keyExtractor={(item, index) => `${item.label}-${index}`}
-              contentContainerStyle={styles.detailsModalContent}
-              showsVerticalScrollIndicator={false}
-            />
-
-            {item.portfolio && (
-              <TouchableOpacity
-                style={styles.portfolioButton}
-                onPress={() => handleOpenLink(item.portfolio)}
-                accessible
-                accessibilityLabel="Открыть портфолио"
-              >
-                <LinearGradient
-                  colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-                  style={styles.portfolioButtonGradient}
-                >
-                  <Text style={styles.portfolioButtonText}>Открыть портфолио</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            )}
+        <View style={styles.fullscreenModalContainer}>
+          {/* Header with back button */}
+          <View style={styles.fullscreenModalHeader}>
+            <TouchableOpacity
+              style={styles.fullscreenBackButton}
+              onPress={onClose}
+              accessible
+              accessibilityLabel="Назад"
+            >
+              <AntDesign name="left" size={24} color="#5A4032" />
+            </TouchableOpacity>
+            <Text style={styles.fullscreenModalHeaderTitle}>{getItemTitle()}</Text>
+            <View style={{ width: 40 }} />
           </View>
+
+          <ScrollView 
+            style={styles.fullscreenModalScroll}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Photo Slider */}
+            <View style={styles.photoSliderWrapper}>
+              {loadingFiles ? (
+                <View style={[styles.fullscreenPhoto, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <ActivityIndicator size="large" color="#897066" />
+                  <Text style={{ marginTop: 10, color: '#897066' }}>Загрузка фотографий...</Text>
+                </View>
+              ) : (
+                <>
+                  <FlatList
+                    data={displayPhotos}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
+                    keyExtractor={(photo, index) => `photo-${index}`}
+                    renderItem={({ item: photo }) => (
+                      <Image
+                        source={{ uri: photo }}
+                        style={styles.fullscreenPhoto}
+                        resizeMode="cover"
+                      />
+                    )}
+                  />
+                  
+                  {/* Photo Indicators */}
+                  {displayPhotos.length > 1 && (
+                    <View style={styles.photoIndicators}>
+                      {displayPhotos.map((_, index) => (
+                        <View
+                          key={`indicator-${index}`}
+                          style={[
+                            styles.photoIndicator,
+                            index === currentPhotoIndex && styles.photoIndicatorActive
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+            </View>
+
+            {/* Content Card */}
+            <View style={styles.fullscreenContentCard}>
+              {/* Title */}
+              <Text style={styles.fullscreenTitle}>{getItemTitle()}</Text>
+
+              {/* Fields */}
+              {renderField('Тип', typeToCategoryMap[item.type] || item.type)}
+              {renderField('Вместимость', item.capacity)}
+              {renderField('Кухня', item.cuisine)}
+              {renderField('Средний чек', displayCost)}
+              {renderField('Адрес', item.address)}
+              {renderField('Телефон', item.phone)}
+              {renderField('Район', item.district)}
+              {renderField('Email', item.email)}
+              {renderField('Описание', item.description)}
+              {renderField('Категория', item.category)}
+              {renderField('Бренд', item.brand)}
+              {renderField('Материал', item.material)}
+              {renderField('Время работы', item.workingHours)}
+              {renderField('Рейтинг', item.rating)}
+              {renderField('Опыт работы', item.experience)}
+              {renderField('Название салона', item.salonName)}
+              {renderField('Название магазина', item.storeName)}
+              {renderField('Название команды', item.teamName)}
+              {renderField('Название машины', item.carName)}
+              {renderField('Название цветов', item.flowerName)}
+              {renderField('Название алкоголя', item.alcoholName)}
+              {renderField('Название изделия', item.itemName)}
+              {renderField('Тип торта', item.cakeType)}
+              {renderField('Тип цветов', item.flowerType)}
+              {renderField('Пол', item.gender)}
+
+              {/* Portfolio Button */}
+              {item.portfolio && (
+                <TouchableOpacity
+                  style={styles.fullscreenPortfolioButton}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    Linking.openURL(item.portfolio).catch((err) => console.error("Ошибка:", err));
+                  }}
+                >
+                  <LinearGradient
+                    colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
+                    style={styles.fullscreenPortfolioGradient}
+                  >
+                    <Text style={styles.fullscreenPortfolioText}>Открыть портфолио</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+            </View>
+          </ScrollView>
         </View>
       </Modal>
     );
@@ -3281,6 +3404,193 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     textAlign: 'center',
   },
+  // Photo Slider Styles
+  photoSliderContainer: {
+    width: '100%',
+    height: 250,
+    backgroundColor: COLORS.textSecondary,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+    position: 'relative',
+  },
+  photoSliderImage: {
+    width: '100%',
+    height: '100%',
+  },
+  photoNavButton: {
+    position: 'absolute',
+    top: '50%',
+    transform: [{ translateY: -20 }],
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  photoNavButtonLeft: {
+    left: 10,
+  },
+  photoNavButtonRight: {
+    right: 10,
+  },
+  photoCounter: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    zIndex: 10,
+  },
+  photoCounterText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  photoDotsContainer: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  photoDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    marginHorizontal: 4,
+  },
+  photoDotActive: {
+    backgroundColor: COLORS.white,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  detailsModalScrollView: {
+    flex: 1,
+  },
+  detailsFieldsContainer: {
+    paddingTop: 8,
+  },
+  // Fullscreen Details Modal Styles
+  fullscreenModalContainer: {
+    flex: 1,
+    backgroundColor: '#F1EBDD',
+  },
+  fullscreenModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 16,
+    backgroundColor: '#F1EBDD',
+  },
+  fullscreenBackButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  fullscreenModalHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#5A4032',
+    textAlign: 'center',
+    flex: 1,
+  },
+  fullscreenModalScroll: {
+    flex: 1,
+  },
+  fullscreenPhoto: {
+    width: Dimensions.get('window').width,
+    height: 400,
+    backgroundColor: '#E0D5C7',
+  },
+  // Photo Slider Styles
+  photoSliderWrapper: {
+    position: 'relative',
+  },
+  photoIndicators: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  photoIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  photoIndicatorActive: {
+    width: 24,
+    backgroundColor: '#FFFFFF',
+  },
+  fullscreenContentCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -24,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40,
+    minHeight: 400,
+  },
+  fullscreenTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#2D2D2D',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  fullscreenDetailField: {
+    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
+    paddingBottom: 16,
+  },
+  fullscreenDetailLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999999',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  fullscreenDetailValue: {
+    fontSize: 18,
+    fontWeight: '400',
+    color: '#2D2D2D',
+    lineHeight: 24,
+  },
+  fullscreenPortfolioButton: {
+    marginTop: 32,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  fullscreenPortfolioGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  fullscreenPortfolioText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+
 });
 
 
