@@ -1,9 +1,3 @@
-
-//////////////////////////////////////
-
-
-
-
 import React, { Component, useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   View,
@@ -1979,6 +1973,46 @@ console.log('Полученные категории:', selectedCategories);
     setSelectedCategoryType(type);
     setCategoryModalVisible(true);
   };
+
+
+  const handleRemoveCategory = (category) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    setDisabledCategories((prev) => {
+      const isCurrentlyDisabled = prev.includes(category);
+      
+      if (isCurrentlyDisabled) {
+        // Включаем категорию (удаляем из disabledCategories)
+        console.log(`Категория "${category}" включена`);
+        return prev.filter((cat) => cat !== category);
+      } else {
+        // Отключаем категорию (добавляем в disabledCategories)
+        console.log(`Категория "${category}" отключена`);
+        
+        // Удаляем все элементы этой категории из filteredData
+        const type = categoryToTypeMap[category];
+        if (type) {
+          setFilteredData((prevData) => 
+            prevData.filter((item) => item.type !== type)
+          );
+          
+          // Удаляем quantities для этой категории
+          setQuantities((prevQuantities) => {
+            const newQuantities = { ...prevQuantities };
+            Object.keys(newQuantities).forEach((key) => {
+              if (key.startsWith(`${type}-`)) {
+                delete newQuantities[key];
+              }
+            });
+            return newQuantities;
+          });
+        }
+        
+        return [...prev, category];
+      }
+    });
+  };
+
 
   const handleCloseCategoryModal = () => {
     setCategoryModalVisible(false);
