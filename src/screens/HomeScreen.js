@@ -2097,7 +2097,7 @@ useEffect(() => {
           onPress={() => { if (!isDisabled) handleCategoryPress(item); }}
           disabled={isDisabled}
         >
-          <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
+          <LinearGradient colors={['#F1EBDD', '#E1D3C1']} style={styles.categoryButtonGradient}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Icon
                 name={ item === "Ресторан" ? "restaurant" : item === "Прокат авто" ? "directions-car" :
@@ -2150,14 +2150,15 @@ const openDetailsModal = (item) => {
           <AntDesign name="left" size={24} color="black" />
         </TouchableOpacity>
         <View style={styles.logoContainer}>
-          <Image source={require("../../assets/kazanRevert.png")} style={styles.potIcon} resizeMode="contain" />
+          <Image source={require("../../assets/toilab_logo.png")} style={styles.potIcon} resizeMode="contain" />
         </View>
-        <Image source={require("../../assets/footer.png")} style={styles.topPatternContainer} />
+        <Image source={require("../../assets/ornament_sheet.jpg")} style={styles.topPatternContainer} />
 
-        <View style={styles.headerContainer}>
-          <View style={styles.budgetContainer}>
-            <View style={styles.categoryItemAdd}>
-              {renderCategory("Добавить")}
+        <ImageBackground source={require("../../assets/ornament_sheet.jpg")} style={styles.headerBackground} imageStyle={styles.headerBackgroundImage}>
+          <View style={styles.headerContainer}>
+            <View style={styles.budgetContainer}>
+              <View style={styles.categoryItemAdd}>
+                {renderCategory("Добавить")}
             </View>
             <TextInput
               style={styles.budgetInput}
@@ -2178,6 +2179,8 @@ const openDetailsModal = (item) => {
               maxLength={5}
             />
           </View>
+        </View>
+      </ImageBackground>
           <Modal animationType="fade" transparent={true} visible={isLoading} onRequestClose={() => {}}>
             <View style={styles.loaderOverlay}>
               <View style={styles.loaderContainer}>
@@ -2715,8 +2718,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#5A4032",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.2)",
     borderRadius: 10,
   },
   categoryPlusText: {
@@ -2726,7 +2729,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 14, // Reduced from 16 to 14 for compactness
-    color: COLORS.white,
+    color: COLORS.textPrimary,
     fontWeight: "600",
     textAlign: "center",
     paddingHorizontal: 8, // Reduced from 10 to 8
@@ -2736,9 +2739,18 @@ const styles = StyleSheet.create({
     zIndex:8
   },
   splashContainer: { flex: 1 },
-  headerContainer: {
+  headerBackground: {
     paddingHorizontal: 20,
-    marginTop: 10, // Reduced from 20 to 10 to bring content up
+    paddingTop: 10,
+    paddingBottom: 20,
+  },
+  headerBackgroundImage: {
+    resizeMode: 'repeat',
+    opacity: 0.1,
+  },
+  headerContainer: {
+    // paddingHorizontal: 20,
+    // marginTop: 10, // Reduced from 20 to 10 to bring content up
   },
   budgetContainer: {
     flexDirection: "row",
