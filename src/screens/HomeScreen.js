@@ -136,6 +136,38 @@ const typeToCategoryMap = Object.fromEntries(
   Object.entries(categoryToTypeMap).map(([category, type]) => [type, category])
 );
 
+const useDebounce = (callback, delay) => {
+  const callbackRef = useRef(callback);
+  const timeoutRef = useRef(null);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    // Cleanup the timeout on unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const debouncedCallback = useCallback(
+    (...args) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        callbackRef.current(...args);
+      }, delay);
+    },
+    [delay]
+  );
+
+  return debouncedCallback;
+};
+
 
 const AddItemModal = ({
   visible,
@@ -1330,6 +1362,7 @@ const CreateEventScreen = ({ navigation, route }) => {
   const [quantities, setQuantities] = useState({});
   const [budget, setBudget] = useState("");
   const [guestCount, setGuestCount] = useState("");
+  const [guestCountInput, setGuestCountInput] = useState(""); // For responsive input
   const [remainingBudget, setRemainingBudget] = useState(0);
   const [loading, setLoading] = useState(false); // For initial data fetch
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
@@ -1630,7 +1663,7 @@ useEffect(() => {
     setShouldFilter(true);
   };
 
-  const handleGuestCountChange = (value) => {
+  const updateGuestCountCalculations = useCallback((value) => {
     const filteredValue = value.replace(/[^\d]/g, "");
     setGuestCount(filteredValue);
     setShouldFilter(true);
@@ -1658,6 +1691,14 @@ useEffect(() => {
       setRemainingBudget(parseFloat(budget) - newTotalSpent);
       return updatedData;
     });
+  }, [budget, quantities]);
+
+  const debouncedGuestCountUpdate = useDebounce(updateGuestCountCalculations, 500);
+
+  const handleGuestCountChange = (value) => {
+    const filteredValue = value.replace(/[^\d]/g, "");
+    setGuestCountInput(filteredValue);
+    debouncedGuestCountUpdate(filteredValue);
   };
 
   const filterDataByBudget = useCallback(() => {
@@ -2060,7 +2101,7 @@ const openDetailsModal = (item) => {
             <TextInput
               style={styles.guestInput}
               placeholder="Гостей"
-              value={guestCount}
+              value={guestCountInput}
               onChangeText={handleGuestCountChange}
               placeholderTextColor={COLORS.placeholder}
               keyboardType="numeric"
