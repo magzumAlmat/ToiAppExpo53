@@ -1102,6 +1102,65 @@ const CorporateEventScreen = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [eventDetailsModalVisible, setEventDetailsModalVisible] = useState(false);
 
+  const fetchAllBlockedDays = useCallback(async () => {
+    try {
+      const [blockedDaysResponse, restaurantsResponse] = await Promise.all([
+        api.fetchAllBlockedDays(),
+        api.getRestaurants()
+      ]);
+
+      const allRestaurants = restaurantsResponse.data || [];
+      const totalRestaurants = allRestaurants.length;
+      
+      const bookingsByDate = {};
+      blockedDaysResponse.data.forEach((entry) => {
+        const { date } = entry;
+        if (!bookingsByDate[date]) {
+          bookingsByDate[date] = new Set();
+        }
+        bookingsByDate[date].add(entry.restaurantId);
+      });
+
+      const blockedDaysData = {};
+      blockedDaysResponse.data.forEach((entry) => {
+        const { date, restaurantId, restaurantName } = entry;
+        if (!blockedDaysData[date]) {
+          const isFullyBooked = totalRestaurants > 0 && bookingsByDate[date] && bookingsByDate[date].size >= totalRestaurants;
+          blockedDaysData[date] = {
+            marked: true,
+            dots: [],
+            disabled: isFullyBooked,
+            disableTouchEvent: isFullyBooked,
+            customStyles: {
+              container: {
+                backgroundColor: isFullyBooked ? '#f2a0a0' : MODAL_COLORS.inactiveFilter,
+                borderRadius: 5,
+                opacity: 0.7,
+              },
+              text: {
+                color: MODAL_COLORS.textSecondary,
+                textDecorationLine: isFullyBooked ? 'line-through' : 'none',
+              },
+            },
+          };
+        }
+        blockedDaysData[date].dots.push({ key: restaurantId.toString(), restaurantId, restaurantName, color: 'red' });
+      });
+
+      setBlockedDays(blockedDaysData);
+    } catch (error) {
+      console.error("Ошибка загрузки заблокированных дней:", error.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token && user?.id) {
+      fetchAllBlockedDays();
+    }
+    const unsubscribe = navigation.addListener('focus', fetchAllBlockedDays);
+    return unsubscribe;
+  }, [token, user, navigation, fetchAllBlockedDays]);
+
   const serviceTypeMap = {
     transport: 'Transport',
     restaurant: 'Restaurant',
@@ -1429,25 +1488,21 @@ const CorporateEventScreen = ({ navigation, route }) => {
     [budget, guestCount]
   );
 
-  const fetchAllBlockedDays = async () => {
-    try {
-      const response = await api.fetchAllBlockedDays();
-      const blocked = response.data.reduce((acc, date) => {
-        acc[date] = { disabled: true, disableTouchEvent: true, marked: true, dotColor: COLORS.error };
-        return acc;
-      }, {});
-      setBlockedDays(blocked);
-    } catch (error) {
-      console.error("Ошибка загрузки заблокированных дат:", error);
-      alert("Не удалось загрузить заблокированные даты.");
-    }
-  };
+  // Duplicate fetchAllBlockedDays and associated effect removed because the function and listener
+  // are already declared and handled earlier in the file; reuse the original implementation.
 
-  useEffect(() => {
-    if (token && user?.id) {
-      fetchAllBlockedDays();
-    }
-  }, [token, user?.id]);
+  console.log('Current blockedDays state (CorporateEventScreen):', JSON.stringify(blockedDays, null, 2));
+  const calendarMarkedDates = Object.keys(blockedDays).reduce((acc, date) => {
+    acc[date] = { ...blockedDays[date], marked: true };
+    return acc;
+  }, {
+    [eventDate.toISOString().split('T')[0]]: {
+      selected: true,
+      selectedColor: COLORS.primary,
+      disableTouchEvent: true,
+    },
+  });
+  console.log('Passing to Calendar markedDates (CorporateEventScreen):', JSON.stringify(calendarMarkedDates, null, 2));
 
   const calculateTotalCost = useMemo(() => {
     return filteredData.reduce((sum, item) => {
@@ -1461,14 +1516,50 @@ const CorporateEventScreen = ({ navigation, route }) => {
   const handleSubmit = async () => {
     if (!eventName.trim()) { alert("Пожалуйста, укажите название мероприятия"); return; }
     if (!eventDate) { alert("Пожалуйста, выберите дату мероприятия"); return; }
+    const dateString = eventDate.toISOString().split("T")[0];
+    const restaurantItem = filteredData.find(item => item.type === "restaurant");
+
+    if (restaurantItem && blockedDays[dateString]) {
+      const dayInfo = blockedDays[dateString];
+      if (dayInfo.disabled) {
+        alert(`Дата ${dateString} полностью забронирована. Пожалуйста, выберите другую дату.`);
+        return;
+      }
+      const isRestaurantBooked = dayInfo.dots.some(dot => dot.restaurantId === restaurantItem.id);
+      if (isRestaurantBooked) {
+        alert(`Ресторан "${restaurantItem.name}" уже забронирован на ${dateString}. Пожалуйста, выберите другую дату или другой ресторан.`);
+        return;
+      }
+    }
     if (!budget || isNaN(budget) || parseFloat(budget) <= 0) { alert("Пожалуйста, укажите корректный бюджет"); return; }
     if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) { alert("Пожалуйста, укажите корректное количество гостей"); return; }
     if (filteredData.length === 0) { alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия"); return; }
 
     setLoading(true);
     try {
-      const categoryResponse = await api.createEventCategory({ name: eventName }, token);
+      const payload = { 
+        name: eventName.trim(), 
+        date: eventDate.toISOString().split('T')[0],
+        budget: parseFloat(budget),
+        guestCount: parseInt(guestCount, 10),
+        type: 'corporate' 
+      };
+
+      const categoryResponse = await api.createEventCategory(payload, token);
       const categoryId = categoryResponse.data.id;
+      if (!categoryId) {
+        throw new Error('Не получен ID категории от сервера');
+      }
+
+      if (restaurantItem) {
+          try {
+              await api.addDataBlockToRestaurant(restaurantItem.id, eventDate);
+              fetchAllBlockedDays();
+          } catch (bookingError) {
+              console.error('Ошибка автоматического бронирования даты:', bookingError.response?.data || bookingError.message);
+              alert('Мероприятие создано, но произошла ошибка при автоматическом бронировании даты для ресторана. Пожалуйста, забронируйте вручную.');
+          }
+      }
 
       const totalCost = calculateTotalCost;
       await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalCost });
@@ -1961,14 +2052,42 @@ const CorporateEventScreen = ({ navigation, route }) => {
                         <Calendar
                           onDayPress={(day) => {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            const dateString = day.dateString;
+                            const dayInfo = blockedDays[dateString];
+
+                            if (dayInfo && dayInfo.disabled) {
+                              alert(`Дата ${dateString} полностью забронирована.`);
+                              return;
+                            }
+
+                            const selectedRestaurant = filteredData.find(item => item.type === 'restaurant');
+                            if (selectedRestaurant && dayInfo && dayInfo.dots) {
+                              const isRestaurantBooked = dayInfo.dots.some(dot => dot.restaurantId === selectedRestaurant.id);
+                              if (isRestaurantBooked) {
+                                alert(`Ресторан "${selectedRestaurant.name}" уже забронирован на ${dateString}. Пожалуйста, выберите другую дату или другой ресторан.`);
+                                return;
+                              }
+                            }
+                            
                             setEventDate(new Date(day.dateString));
                             setShowDatePicker(false);
                           }}
+                          markingType={'custom'}
                           markedDates={{
                             ...blockedDays,
                             [eventDate.toISOString().split('T')[0]]: {
                               selected: true,
-                              selectedColor: COLORS.primary,
+                              disableTouchEvent: true,
+                              customStyles: {
+                                container: {
+                                  backgroundColor: COLORS.primary,
+                                  borderRadius: 5,
+                                },
+                                text: {
+                                  color: COLORS.white,
+                                  fontWeight: 'bold',
+                                },
+                              },
                             },
                           }}
                           minDate={new Date().toISOString().split('T')[0]}

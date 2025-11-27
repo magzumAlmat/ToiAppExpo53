@@ -1670,25 +1670,66 @@ console.log('Полученные категории:', selectedCategories);
     [budget, guestCount]
   );
 
-  const fetchAllBlockedDays = async () => {
+  const fetchAllBlockedDays = useCallback(async () => {
     try {
-      const response = await api.fetchAllBlockedDays();
-      const blocked = response.data.reduce((acc, date) => {
-        acc[date] = { disabled: true, disableTouchEvent: true, marked: true, dotColor: COLORS.error };
-        return acc;
-      }, {});
-      setBlockedDays(blocked);
+      const [blockedDaysResponse, restaurantsResponse] = await Promise.all([
+        api.fetchAllBlockedDays(),
+        api.getRestaurants()
+      ]);
+
+      const allRestaurants = restaurantsResponse.data || [];
+      const totalRestaurants = allRestaurants.length;
+      
+      const bookingsByDate = {};
+      blockedDaysResponse.data.forEach((entry) => {
+        const { date } = entry;
+        if (!bookingsByDate[date]) {
+          bookingsByDate[date] = new Set();
+        }
+        bookingsByDate[date].add(entry.restaurantId);
+      });
+
+      const blockedDaysData = {};
+      blockedDaysResponse.data.forEach((entry) => {
+        const { date, restaurantId, restaurantName } = entry;
+        if (!blockedDaysData[date]) {
+          const isFullyBooked = totalRestaurants > 0 && bookingsByDate[date] && bookingsByDate[date].size >= totalRestaurants;
+          blockedDaysData[date] = {
+            marked: true,
+            dots: [],
+            disabled: isFullyBooked,
+            disableTouchEvent: isFullyBooked,
+            customStyles: {
+              container: {
+                backgroundColor: isFullyBooked ? '#f2a0a0' : MODAL_COLORS.inactiveFilter,
+                borderRadius: 5,
+                opacity: 0.7,
+              },
+              text: {
+                color: MODAL_COLORS.textSecondary,
+                textDecorationLine: isFullyBooked ? 'line-through' : 'none',
+              },
+            },
+          };
+        }
+        blockedDaysData[date].dots.push({ key: restaurantId.toString(), restaurantId, restaurantName, color: 'red' });
+      });
+
+      setBlockedDays(blockedDaysData);
+      console.log('Processed blockedDaysData:', blockedDaysData);
     } catch (error) {
-      console.error("Ошибка загрузки заблокированных дат:", error);
-      alert("Не удалось загрузить заблокированные даты.");
+      console.error("Ошибка загрузки заблокированных дней:", error.message);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (token && user?.id) {
       fetchAllBlockedDays();
     }
-  }, [token, user?.id]);
+    const unsubscribe = navigation.addListener('focus', fetchAllBlockedDays);
+    return unsubscribe;
+  }, [token, user, navigation, fetchAllBlockedDays]);
+
 
   const calculateTotalCost = useMemo(() => {
     return filteredData.reduce((sum, item) => {
@@ -1764,6 +1805,24 @@ console.log('Полученные категории:', selectedCategories);
     return;
   }
 
+  const dateString = eventDate.toISOString().split('T')[0];
+  const dayInfo = blockedDays[dateString];
+  const restaurantToBlock = filteredData.find(item => item.type === 'restaurant');
+
+  if (dayInfo && dayInfo.disabled) {
+      alert(`Дата ${dateString} полностью забронирована. Пожалуйста, выберите другую дату.`);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+  }
+  if (restaurantToBlock && dayInfo && dayInfo.dots) {
+      const isRestaurantBooked = dayInfo.dots.some(dot => dot.restaurantId === restaurantToBlock.id);
+      if (isRestaurantBooked) {
+          alert(`Ресторан "${restaurantToBlock.name}" уже забронирован на ${dateString}. Пожалуйста, выберите другую дату или другой ресторан.`);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+      }
+  }
+
   setLoading(true);
   try {
     console.log('=== Начало создания мероприятия ===');
@@ -1830,6 +1889,18 @@ console.log('Полученные категории:', selectedCategories);
 
     console.log('=== Категория успешно создана ===');
     console.log('ID категории:', categoryId);
+
+    if (restaurantToBlock) {
+        try {
+            console.log(`Автоматическое бронирование даты для ресторана: ${restaurantToBlock.name}`);
+            await api.addDataBlockToRestaurant(restaurantToBlock.id, eventDate);
+            console.log('Дата для ресторана успешно забронирована.');
+            fetchAllBlockedDays();
+        } catch (bookingError) {
+            console.error('Ошибка автоматического бронирования даты:', bookingError.response?.data || bookingError.message);
+            alert('Мероприятие создано, но произошла ошибка при автоматическом бронировании даты для ресторана. Пожалуйста, забронируйте вручную.');
+        }
+    }
 
     const totalBudget = parseFloat(budget);
     const spentAmount = calculateTotalCost;
@@ -1956,7 +2027,7 @@ console.log('Полученные категории:', selectedCategories);
     }
     
     // Добавляем подсказку
-    errorMessage += 'Проверьте логи в консоли для деталей.';
+    errorMessage += '. Проверьте логи в консоли для деталей.';
     
     alert(errorMessage);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -2657,14 +2728,45 @@ console.log('Полученные категории:', selectedCategories);
                         <Calendar
                           onDayPress={(day) => {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            setEventDate(new Date(day.dateString));
+                            const dateString = day.dateString;
+                            const dayInfo = blockedDays[dateString];
+
+                            // Check if the date is fully blocked
+                            if (dayInfo && dayInfo.disabled) {
+                              alert(`Дата ${dateString} полностью забронирована.`);
+                              return;
+                            }
+
+                            // Check if a specific restaurant is selected and if it's blocked on this date
+                            const selectedRestaurant = filteredData.find(item => item.type === 'restaurant');
+                            if (selectedRestaurant && dayInfo && dayInfo.dots) {
+                              const isRestaurantBooked = dayInfo.dots.some(dot => dot.restaurantId === selectedRestaurant.id);
+                              if (isRestaurantBooked) {
+                                alert(`Ресторан "${selectedRestaurant.name}" уже забронирован на ${dateString}. Пожалуйста, выберите другую дату или другой ресторан.`);
+                                return;
+                              }
+                            }
+                            
+                            // If not blocked, set the date
+                            setEventDate(new Date(dateString));
                             setShowDatePicker(false);
                           }}
+                          markingType={'custom'}
                           markedDates={{
                             ...blockedDays,
                             [eventDate.toISOString().split('T')[0]]: {
                               selected: true,
-                              selectedColor: COLORS.primary,
+                              disableTouchEvent: true,
+                              customStyles: {
+                                container: {
+                                  backgroundColor: COLORS.primary,
+                                  borderRadius: 5,
+                                },
+                                text: {
+                                  color: COLORS.white,
+                                  fontWeight: 'bold',
+                                },
+                              },
                             },
                           }}
                           minDate={new Date().toISOString().split('T')[0]}

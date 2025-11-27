@@ -1,52 +1,11 @@
-// import React, { Component, useState, useRef, useEffect, useCallback, useMemo } from "react";
-// import {
-//   View,
-//   Image,
-//   StyleSheet,
-//   TouchableOpacity,
-//   Text,
-//   Dimensions,
-//   FlatList,
-//   Modal,
-//   TextInput,
-//   ActivityIndicator,
-//   ScrollView,
-//   SafeAreaView,
-// } from "react-native";
-// import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
-// import Ionicons from "react-native-vector-icons/Ionicons";
-// import { LinearGradient } from "expo-linear-gradient";
-// import { useDispatch, useSelector } from "react-redux";
-// import api from "../api/api";
-// import * as Animatable from "react-native-animatable";
-// import AntDesign from "@expo/vector-icons/AntDesign";
-// import { Calendar } from "react-native-calendars";
-// import Icon from "react-native-vector-icons/MaterialIcons";
-// import * as Haptics from "expo-haptics";
-// import * as Linking from "expo-linking";
 
-// const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-
-// export const COLORS = {
-//   background: "#EDE7D9",
-//   primary: '#FF6F61',
-//   secondary: '#4A90E2',
-//   card: '#FFFFFF',
-//   textPrimary: '#1A2533',
-//   textSecondary: '#64748B',
-//   accent: '#FBBF24',
-//   shadow: 'rgba(0, 0, 0, 0.08)',
-//   error: '#EF4444',
-//   white: '#FFFFFF',
-//   buttonGradientStart: '#FF6F61',
-//   buttonGradientEnd: '#F43F5E',
-//   border: '#E0E0E0',
-// };
+//////////////////////////////////////
 
 
 
 
 import React, { Component, useState, useRef, useEffect, useCallback, useMemo } from "react";
+import axios from "axios";
 import {
   View,
   Image,
@@ -59,6 +18,7 @@ import {
   TextInput,
   ActivityIndicator,
   SafeAreaView,
+  ScrollView,
 } from "react-native";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -89,6 +49,7 @@ export const COLORS = {
   buttonGradientStart: '#D3C5B7',
   buttonGradientEnd: '#A68A6E',
   border: '#B0A092',
+  placeholder: 'rgba(255, 255, 255, 0.7)',
 }
 
 export const MODAL_COLORS = {
@@ -1288,6 +1249,7 @@ console.log('Полученные категории:', selectedCategories);
   const [shouldFilter, setShouldFilter] = useState(false);
   const [blockedDays, setBlockedDays] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [eventDetailsModalVisible, setEventDetailsModalVisible] = useState(false);
 
   const updateCategories = useCallback(
     (newCategory) => {
@@ -1708,25 +1670,44 @@ console.log('Полученные категории:', selectedCategories);
     [budget, guestCount]
   );
 
-  const fetchAllBlockedDays = async () => {
+  const fetchAllBlockedDays = useCallback(async () => {
     try {
       const response = await api.fetchAllBlockedDays();
-      const blocked = response.data.reduce((acc, date) => {
-        acc[date] = { disabled: true, disableTouchEvent: true, marked: true, dotColor: COLORS.error };
-        return acc;
-      }, {});
-      setBlockedDays(blocked);
+      const blockedDaysData = {};
+      response.data.forEach((entry) => {
+        const { date, restaurantId, restaurantName } = entry;
+        if (!blockedDaysData[date]) {
+          blockedDaysData[date] = { marked: true, dots: [], disabled: true, disableTouchEvent: true };
+        }
+        blockedDaysData[date].dots.push({ key: restaurantId.toString(), restaurantId, restaurantName, color: 'red' });
+      });
+      setBlockedDays(blockedDaysData);
+      console.log('Fetched and set blocked days (CreateTraditionalFamilyEventScreen):', JSON.stringify(blockedDaysData, null, 2));
     } catch (error) {
-      console.error("Ошибка загрузки заблокированных дат:", error);
-      alert("Не удалось загрузить заблокированные даты.");
+      console.error("Ошибка загрузки заблокированных дней:", error.message);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (token && user?.id) {
       fetchAllBlockedDays();
     }
-  }, [token, user?.id]);
+    const unsubscribe = navigation.addListener('focus', fetchAllBlockedDays);
+    return unsubscribe;
+  }, [token, user, navigation, fetchAllBlockedDays]);
+  
+  console.log('Current blockedDays state (CreateTraditionalFamilyEventScreen):', JSON.stringify(blockedDays, null, 2));
+  const calendarMarkedDates = Object.keys(blockedDays).reduce((acc, date) => {
+    acc[date] = { ...blockedDays[date], marked: true };
+    return acc;
+  }, {
+    [eventDate.toISOString().split('T')[0]]: {
+      selected: true,
+      selectedColor: COLORS.primary,
+      disableTouchEvent: true,
+    },
+  });
+  console.log('Passing to Calendar markedDates (CreateTraditionalFamilyEventScreen):', JSON.stringify(calendarMarkedDates, null, 2));
 
   const calculateTotalCost = useMemo(() => {
     return filteredData.reduce((sum, item) => {
@@ -1774,55 +1755,156 @@ console.log('Полученные категории:', selectedCategories);
   };
 
 
-  const handleSubmit = async () => {
+      const handleSubmit = async () => {
+  // Валидация полей
   if (!eventName.trim()) {
     alert("Пожалуйста, укажите название мероприятия");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     return;
   }
   if (!eventDate) {
     alert("Пожалуйста, выберите дату мероприятия");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     return;
   }
+    const dateString = eventDate.toISOString().split("T")[0];
+    const restaurantItem = filteredData.find(item => item.type === "restaurant");
+    if (restaurantItem && blockedDays[dateString]) {
+      const isRestaurantBlocked = blockedDays[dateString].dots.some(dot => dot.restaurantId === restaurantItem.id);
+      if (isRestaurantBlocked) {
+        alert(`Дата ${dateString} уже забронирована для ресторана ${restaurantItem.name}. Пожалуйста, выберите другую дату.`);
+        return;
+      }
+    }
   if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
     alert("Пожалуйста, укажите корректный бюджет");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     return;
   }
   if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
     alert("Пожалуйста, укажите корректное количество гостей");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     return;
   }
   if (filteredData.length === 0) {
     alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     return;
   }
 
   setLoading(true);
   try {
-    const categoryResponse = await api.createEventCategory(
-      { name: eventName },
-      token
-    );
+    console.log('=== Начало создания мероприятия ===');
+    console.log('Название:', eventName);
+    console.log('Дата:', eventDate);
+    console.log('Бюджет:', budget);
+    console.log('Гостей:', guestCount);
+    console.log('Элементов:', filteredData.length);
+
+    // Пробуем разные варианты payload
+    const payloadVariants = [
+      // Вариант 1: Только название
+      { name: eventName.trim() },
+      // Вариант 2: С датой YYYY-MM-DD
+      { name: eventName.trim(), date: eventDate.toISOString().split('T')[0] },
+      // Вариант 3: С eventDate вместо date
+      { name: eventName.trim(), eventDate: eventDate.toISOString().split('T')[0] },
+      // Вариант 4: С description
+      { name: eventName.trim(), date: eventDate.toISOString().split('T')[0], description: '' },
+      // Вариант 5: С budget и guestCount
+      { 
+        name: eventName.trim(), 
+        date: eventDate.toISOString().split('T')[0],
+        budget: parseFloat(budget),
+        guestCount: parseInt(guestCount, 10)
+      },
+    ];
+
+    let categoryResponse = null;
+    let lastError = null;
+
+    // Пробуем каждый вариант payload
+    for (let i = 0; i < payloadVariants.length; i++) {
+      const payload = payloadVariants[i];
+      console.log(`=== Попытка ${i + 1}/${payloadVariants.length} ===`);
+      console.log('Payload:', JSON.stringify(payload, null, 2));
+
+      try {
+        categoryResponse = await api.createEventCategory(payload, token);
+        console.log('✓ Успех! Категория создана:', categoryResponse.data);
+        break; // Выходим из цикла при успехе
+      } catch (error) {
+        console.error(`✗ Попытка ${i + 1} не удалась`);
+        console.error('Status:', error.response?.status || error.status);
+        console.error('Message:', error.message);
+        console.error('Response data:', JSON.stringify(error.response?.data || error.data, null, 2));
+        lastError = error;
+        
+        // Если это последняя попытка, выбрасываем ошибку
+        if (i === payloadVariants.length - 1) {
+          throw lastError;
+        }
+      }
+    }
+
+    if (!categoryResponse) {
+      throw lastError || new Error('Не удалось создать категорию ни одним из способов');
+    }
+
     const categoryId = categoryResponse.data.id;
+    if (!categoryId) {
+      throw new Error('Не получен ID категории от сервера');
+    }
+
+    console.log('=== Категория успешно создана ===');
+    console.log('ID категории:', categoryId);
 
     const totalBudget = parseFloat(budget);
     const spentAmount = calculateTotalCost;
     const remaining = remainingBudget;
 
-    await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalBudget });
-    await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: spentAmount });
-    await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: remaining });
+    console.log('=== Обновление бюджета категории ===');
+    console.log('Total:', totalBudget, 'Spent:', spentAmount, 'Remaining:', remaining);
 
+    // Обновляем бюджет категории
+    try {
+      await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalBudget });
+      console.log('✓ Total cost обновлен');
+    } catch (error) {
+      console.error('✗ Ошибка обновления total cost:', error.message);
+    }
+
+    try {
+      await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: spentAmount });
+      console.log('✓ Paid amount обновлен');
+    } catch (error) {
+      console.error('✗ Ошибка обновления paid amount:', error.message);
+    }
+
+    try {
+      await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: remaining });
+      console.log('✓ Remaining balance обновлен');
+    } catch (error) {
+      console.error('✗ Ошибка обновления remaining balance:', error.message);
+    }
+
+    console.log('=== Добавление услуг к категории ===');
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Добавляем услуги к категории
     for (const item of filteredData) {
       const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
       if (!typeMapping) {
         console.error(`Неизвестный тип услуги: ${item.type}`);
+        errorCount++;
         continue;
       }
 
       // Map frontend types to backend-expected serviceType values
       const serviceTypeMap = {
-        'restaurant': 'Restaurant', // Try capitalized form
-        'hotels': 'Hotel', // Backend might expect singular
+        'restaurant': 'Restaurant',
+        'hotels': 'Hotel',
         'tamada': 'Tamada',
         'program': 'Program',
         'flowers': 'Flowers',
@@ -1831,14 +1913,14 @@ console.log('Полученные категории:', selectedCategories);
         'alcohol': 'Alcohol',
         'jewelry': 'Jewelry',
         'typography': 'Typography',
-        'technical-equipment-rental': 'TechnicalEquipmentRental', // CamelCase for multi-word
-        'traditional-gifts': 'TraditionalGifts', // CamelCase for multi-word
-        'national-costumes': 'NationalCostumes', // CamelCase for multi-word
-        'musicians': 'Musician', // Backend might expect singular
-        'photographers': 'Photographer', // Backend might expect singular
-        'videographers': 'Videographer', // Backend might expect singular
+        'technical-equipment-rental': 'TechnicalEquipmentRental',
+        'traditional-gifts': 'TraditionalGifts',
+        'national-costumes': 'NationalCostumes',
+        'musicians': 'Musician',
+        'photographers': 'Photographer',
+        'videographers': 'Videographer',
         'decor': 'Decor',
-        'event-category': 'EventCategory', // CamelCase for multi-word
+        'event-category': 'EventCategory',
       };
 
       const serviceType = serviceTypeMap[item.type] || item.type;
@@ -1849,21 +1931,28 @@ console.log('Полученные категории:', selectedCategories);
           : parseInt(quantities[`${item.type}-${item.id}`] || '1');
 
       try {
+        console.log(`Добавление: ${serviceType} (ID: ${item.id}, Кол-во: ${quantity})`);
         await api.addServiceToCategory(
           categoryId,
           { serviceId: item.id, serviceType, quantity },
           token
         );
-        console.log(`Услуга ${serviceType} успешно добавлена с ID ${item.id} и количеством ${quantity}`);
+        console.log(`✓ ${serviceType} добавлен`);
+        successCount++;
       } catch (error) {
-        console.error(
-          `Ошибка при добавлении услуги ${serviceType} (ID: ${item.id}, Type: ${item.type}):`,
-          error.response?.data || error.message
-        );
+        console.error(`✗ Ошибка добавления ${serviceType}:`, error.message);
+        errorCount++;
+        // Продолжаем добавление остальных услуг
       }
     }
 
-    alert('Мероприятие успешно создано!');
+    console.log('=== Итоги добавления услуг ===');
+    console.log(`Успешно: ${successCount}, Ошибок: ${errorCount}`);
+
+    console.log('=== Мероприятие успешно создано ===');
+    alert(`Мероприятие успешно создано!Добавлено услуг: ${successCount}/${filteredData.length}`);
+    
+    // Очищаем форму
     setEventName('');
     setEventDate(new Date());
     setBudget('');
@@ -1871,298 +1960,42 @@ console.log('Полученные категории:', selectedCategories);
     setFilteredData([]);
     setQuantities({});
     setRemainingBudget(0);
-    navigation.goBack();
+    
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    navigation.goBack();
   } catch (error) {
-    console.error('Ошибка при создании мероприятия:', error.response?.data || error.message);
-    alert('Ошибка: ' + (error.response?.data?.error || error.message));
+    console.error('=== ОШИБКА при создании мероприятия ===');
+    console.error('Тип ошибки:', error.constructor.name);
+    console.error('Сообщение:', error.message);
+    console.error('Response status:', error.response?.status || error.status);
+    console.error('Response data:', JSON.stringify(error.response?.data || error.data, null, 2));
+    console.error('Request URL:', error.config?.url);
+    console.error('Stack trace:', error.stack);
+    
+    let errorMessage = 'Ошибка при создании мероприятия';
+    
+    const responseData = error.response?.data || error.data;
+    if (responseData?.error) {
+      errorMessage += ':' + responseData.error;
+    } else if (responseData?.message) {
+      errorMessage += ':' + responseData.message;
+    } else if (error.message) {
+      errorMessage += ':' + error.message;
+    }
+    
+    // Добавляем подсказку
+    errorMessage += 'Проверьте логи в консоли для деталей.';
+    
+    alert(errorMessage);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } finally {
     setLoading(false);
   }
 };
 
-
-
-
-
-
-
-  const handleRemoveCategory = useCallback(
-    (category) => {
-      setDisabledCategories((prev) => {
-        if (prev.includes(category)) {
-          const updatedDisabledCategories = prev.filter(
-            (cat) => cat !== category
-          );
-          const type = categoryToTypeMap[category];
-          if (type) {
-            const itemsToAdd = combinedData.filter(
-              (item) => item.type === type
-            );
-
-            let remaining = parseFloat(budget) || 0;
-            const currentTotalSpent = filteredData.reduce((sum, dataItem) => {
-              const key = `${dataItem.type}-${dataItem.id}`;
-              const itemQuantity =
-                dataItem.type === "restaurant" || dataItem.type === "hotels"
-                  ? parseInt(guestCount, 10) || 1
-                  : parseInt(quantities[key] || "1");
-              const itemCost =
-                dataItem.type === "restaurant"
-                  ? dataItem.averageCost
-                  : dataItem.cost;
-              return sum + itemCost * itemQuantity;
-            }, 0);
-            remaining -= currentTotalSpent;
-
-            const filteredItemsToAdd = itemsToAdd
-              .filter((item) => {
-                const cost =
-                  item.type === "restaurant" ? item.averageCost : item.cost;
-                const effectiveQuantity =
-                  item.type === "restaurant" || item.type === "hotels"
-                    ? parseInt(guestCount, 10) || 1
-                    : 1;
-                const totalCost = cost * effectiveQuantity;
-                return totalCost <= remaining;
-              })
-              .sort((a, b) => {
-                const costA = a.type === "restaurant" ? a.averageCost : a.cost;
-                const costB = b.type === "restaurant" ? b.averageCost : b.cost;
-                return costA - costB;
-              });
-
-            const maxItemsToSelect = Math.min(1, filteredItemsToAdd.length);
-            const selectedItemsToAdd = [];
-            for (let i = 0; i < maxItemsToSelect; i++) {
-              const selectedItem = filteredItemsToAdd[i];
-              if (selectedItem) {
-                const cost =
-                  selectedItem.type === "restaurant"
-                    ? selectedItem.averageCost
-                    : selectedItem.cost;
-                const effectiveQuantity =
-                  selectedItem.type === "restaurant" || selectedItem.type === "hotels"
-                    ? parseInt(guestCount, 10) || 1
-                    : 1;
-                const totalCost = cost * effectiveQuantity;
-                selectedItemsToAdd.push({ ...selectedItem, totalCost });
-                remaining -= totalCost;
-              }
-            }
-
-            setFilteredData((prevData) => {
-              const updatedData = [...prevData, ...selectedItemsToAdd].sort(
-                (a, b) => (typeOrder[a.type] || 13) - (typeOrder[b.type] || 13)
-              );
-
-              setQuantities((prevQuantities) => ({
-                ...prevQuantities,
-                ...selectedItemsToAdd.reduce((acc, item) => {
-                  const itemKey = `${item.type}-${item.id}`;
-                  return { ...acc, [itemKey]: "1" };
-                }, {}),
-              }));
-
-              const totalSpent = updatedData.reduce((sum, dataItem) => {
-                const key = `${dataItem.type}-${dataItem.id}`;
-                const itemQuantity =
-                  dataItem.type === "restaurant" || dataItem.type === "hotels"
-                    ? parseInt(guestCount, 10) || 1
-                    : parseInt(quantities[key] || "1");
-                const itemCost =
-                  dataItem.type === "restaurant"
-                    ? dataItem.averageCost
-                    : dataItem.cost;
-                return sum + itemCost * itemQuantity;
-              }, 0);
-              setRemainingBudget(parseFloat(budget) - totalSpent);
-
-              return updatedData;
-            });
-          }
-          return updatedDisabledCategories;
-        } else {
-          const type = categoryToTypeMap[category];
-          if (type) {
-            setFilteredData((prevData) =>
-              prevData.filter((item) => item.type !== type)
-            );
-          }
-          setFilteredData((prevData) => {
-            const totalSpent = prevData.reduce((sum, dataItem) => {
-              const key = `${dataItem.type}-${dataItem.id}`;
-              const itemQuantity =
-                dataItem.type === "restaurant" || dataItem.type === "hotels"
-                  ? parseInt(guestCount, 10) || 1
-                  : parseInt(quantities[key] || "1");
-              const itemCost =
-                dataItem.type === "restaurant"
-                  ? dataItem.averageCost
-                  : dataItem.cost;
-              return sum + itemCost * itemQuantity;
-            }, 0);
-            setRemainingBudget(parseFloat(budget) - totalSpent);
-            return prevData;
-          });
-          return [...prev, category];
-        }
-      });
-    },
-    [quantities, budget, guestCount, combinedData]
-  );
-
-  const handleDateSelect = (day) => {
-    setEventDate(new Date(day.dateString));
-    setShowDatePicker(false);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  const handleOpenCategoryModal = (category, type) => {
-    setSelectedCategoryItems(combinedData.filter((dataItem) => dataItem.type === type));
-    setSelectedCategoryLabel(category);
-    setSelectedCategoryType(type);
-    setCategoryModalVisible(true);
-  };
-
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
   
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-        accessible
-        accessibilityLabel="Вернуться назад"
-      >
-        <Icon name="arrow-back" size={24} color={COLORS.textPrimary} />
-      </TouchableOpacity>
-          <Text style={styles.headerTitle}>Создать мероприятие</Text>
-    </View>
-  );
 
-  const renderEventDetails = () => (
-    <View style={styles.eventDetailsContainer}>
-      <Text style={styles.sectionTitle}>Детали мероприятия</Text>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Название мероприятия</Text>
-        <TextInput
-          style={styles.input}
-          value={eventName}
-          onChangeText={setEventName}
-          placeholder="Введите название..."
-          placeholderTextColor={MODAL_COLORS.textSecondary}
-          accessible
-          accessibilityLabel="Название мероприятия"
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Дата мероприятия</Text>
-        <TouchableOpacity
-          style={styles.datePickerButton}
-          onPress={() => setShowDatePicker(true)}
-          accessible
-          accessibilityLabel="Выбрать дату мероприятия"
-        >
-          <Text style={styles.datePickerText}>
-            {eventDate ? eventDate.toLocaleDateString('ru-RU') : 'Выберите дату'}
-          </Text>
-          <Icon name="calendar-today" size={20} color={MODAL_COLORS.icon} />
-        </TouchableOpacity>
-        {showDatePicker && (
-          <Modal
-            visible={showDatePicker}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setShowDatePicker(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.calendarContainer}>
-                <Calendar
-                  onDayPress={handleDateSelect}
-                  markedDates={{
-                    ...blockedDays,
-                    [eventDate.toISOString().split('T')[0]]: {
-                      selected: true,
-                      selectedColor: COLORS.primary,
-                    },
-                  }}
-                  minDate={new Date()}
-                  theme={{
-                    backgroundColor: MODAL_COLORS.background,
-                    calendarBackground: MODAL_COLORS.background,
-                    textSectionTitleColor: MODAL_COLORS.textPrimary,
-                    selectedDayBackgroundColor: COLORS.primary,
-                    selectedDayTextColor: COLORS.white,
-                    todayTextColor: COLORS.accent,
-                    dayTextColor: MODAL_COLORS.textPrimary,
-                    textDisabledColor: MODAL_COLORS.textSecondary,
-                    arrowColor: COLORS.primary,
-                  }}
-                />
-                <TouchableOpacity
-                  style={styles.closeCalendarButton}
-                  onPress={() => setShowDatePicker(false)}
-                  accessible
-                  accessibilityLabel="Закрыть календарь"
-                >
-                  <Text style={styles.closeCalendarText}>Закрыть</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        )}
-      </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Бюджет (₸)</Text>
-        <TextInput
-          style={styles.input}
-          value={formatBudget(budget)}
-          onChangeText={handleBudgetChange}
-          keyboardType="numeric"
-          placeholder="Введите бюджет..."
-          placeholderTextColor={MODAL_COLORS.textSecondary}
-          accessible
-          accessibilityLabel="Бюджет мероприятия"
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Количество гостей</Text>
-        <TextInput
-          style={styles.input}
-          value={guestCount}
-          onChangeText={handleGuestCountChange}
-          keyboardType="numeric"
-          placeholder="Введите количество гостей..."
-          placeholderTextColor={MODAL_COLORS.textSecondary}
-          accessible
-          accessibilityLabel="Количество гостей"
-        />
-      </View>
-      <View style={styles.budgetInfo}>
-
-
-
-
-        <Text style={styles.budgetText}>
-        
-          Остаток бюджета: {remainingBudget.toLocaleString()} ₸
-          {'\n'}
-          {'\n'}
-          
-
-
-
-         Общая стоимость: {calculateTotalCost.toLocaleString()} ₸
-
-    
-         
-        </Text>
-
-
-      </View>
-    </View>
-  );
+  
 
 
   const handleCategoryPress = (category) => {
@@ -2175,6 +2008,46 @@ console.log('Полученные категории:', selectedCategories);
     setSelectedCategoryType(type);
     setCategoryModalVisible(true);
   };
+
+
+  const handleRemoveCategory = (category) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    setDisabledCategories((prev) => {
+      const isCurrentlyDisabled = prev.includes(category);
+      
+      if (isCurrentlyDisabled) {
+        // Включаем категорию (удаляем из disabledCategories)
+        console.log(`Категория "${category}" включена`);
+        return prev.filter((cat) => cat !== category);
+      } else {
+        // Отключаем категорию (добавляем в disabledCategories)
+        console.log(`Категория "${category}" отключена`);
+        
+        // Удаляем все элементы этой категории из filteredData
+        const type = categoryToTypeMap[category];
+        if (type) {
+          setFilteredData((prevData) => 
+            prevData.filter((item) => item.type !== type)
+          );
+          
+          // Удаляем quantities для этой категории
+          setQuantities((prevQuantities) => {
+            const newQuantities = { ...prevQuantities };
+            Object.keys(newQuantities).forEach((key) => {
+              if (key.startsWith(`${type}-`)) {
+                delete newQuantities[key];
+              }
+            });
+            return newQuantities;
+          });
+        }
+        
+        return [...prev, category];
+      }
+    });
+  };
+
 
   const handleCloseCategoryModal = () => {
     setCategoryModalVisible(false);
@@ -2205,11 +2078,11 @@ console.log('Полученные категории:', selectedCategories);
             </LinearGradient>
           </TouchableOpacity> */}
 
-          <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => setAddItemModalVisible(true)}>
+          {/* <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => setAddItemModalVisible(true)}>
             <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
               <Text style={styles.categoryPlusText}>+</Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
         </View>
       );
@@ -2334,196 +2207,371 @@ console.log('Полученные категории:', selectedCategories);
     />
   );
 
-  const DetailsModal = ({ visible, onClose, item }) => {
+            const DetailsModal = ({ visible, onClose, item }) => {
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [files, setFiles] = useState([]);
+    const [loadingFiles, setLoadingFiles] = useState(true);
+    
     if (!item) return null;
 
-    const renderDetailRow = (label, value) => {
-      if (!value) return null;
-      return (
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>{label}:</Text>
-          <Text style={styles.detailValue}>{value}</Text>
-        </View>
-      );
+    console.log('=== DetailsModal opened ===');
+    console.log('Item:', item);
+
+    const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
+
+    // Функция для нормализации типа сервиса
+    const getEndpointForServiceType = (serviceType) => {
+      let normalizedServiceType = serviceType.toLowerCase();
+      if (normalizedServiceType === 'flower') {
+        normalizedServiceType = 'flowers';
+      } else if (normalizedServiceType === 'technicalequipmentrental') {
+        normalizedServiceType = 'technical-equipment-rental';
+      } else {
+        normalizedServiceType = normalizedServiceType.replace(/s$/, '');
+      }
+      return normalizedServiceType;
     };
 
-    const handleOpenLink = (url) => {
-      if (url) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Linking.openURL(url).catch((err) => console.error("Ошибка открытия ссылки:", err));
+    // Загрузка файлов из API
+    useEffect(() => {
+      const fetchFiles = async () => {
+        if (!item || !item.type || !item.id) {
+          console.log('Недостаточно данных для загрузки файлов');
+          setLoadingFiles(false);
+          return;
+        }
+        
+        try {
+          setLoadingFiles(true);
+          const endpoint = getEndpointForServiceType(item.type);
+          const response = await axios.get(`${BASE_URL}/api/${endpoint}/${item.id}/files`);
+          const fetchedFiles = response.data || [];
+          setFiles(fetchedFiles);
+          console.log(`Загружено ${fetchedFiles.length} файлов для ${item.type} #${item.id}`);
+        } catch (err) {
+          console.error("Ошибка загрузки файлов:", err);
+          setFiles([]);
+        } finally {
+          setLoadingFiles(false);
+        }
+      };
+      
+      if (visible && item) {
+        fetchFiles();
       }
+    }, [visible, item]);
+
+    const getItemTitle = () => {
+      if (item.type === "restaurant") return item.name;
+      if (item.type === "hotels") return item.name;
+      if (item.type === "tamada") return item.name;
+      if (item.type === "program") return item.teamName || item.name;
+      if (item.type === "flowers") return `${item.salonName || ''} - ${item.flowerName || ''}`.trim();
+      if (item.type === "transport") return `${item.salonName || ''} - ${item.carName || ''}`.trim();
+      if (item.type === "cake") return item.name;
+      if (item.type === "alcohol") return `${item.salonName || ''} - ${item.alcoholName || ''}`.trim();
+      if (item.type === "jewelry") return `${item.storeName || ''} - ${item.itemName || ''}`.trim();
+      if (item.type === "traditional-gifts") return `${item.salonName || ''} - ${item.itemName || ''}`.trim();
+      return item.name || "Детали";
     };
+
+    // Получаем фотографии из загруженных файлов
+    const photoFiles = files.filter(file => file.mimetype && file.mimetype.startsWith('image/'));
+    const displayPhotos = photoFiles.length > 0 
+      ? photoFiles.map(file => `${BASE_URL}/${file.path}`)
+      : ['https://via.placeholder.com/800x400/F1EBDD/897066?text=Нет+фото'];
 
     const cost = item.type === 'restaurant' ? item.averageCost : item.cost;
     const displayCost = (cost !== null && cost !== undefined) ? `${cost.toLocaleString()} ₸` : 'Не указана';
 
+    const renderField = (label, value) => {
+      if (!value) return null;
+      return (
+        <View style={styles.fullscreenDetailField}>
+          <Text style={styles.fullscreenDetailLabel}>{label.toUpperCase()}</Text>
+          <Text style={styles.fullscreenDetailValue}>{value}</Text>
+        </View>
+      );
+    };
+
+    const handleScroll = (event) => {
+      const slideSize = event.nativeEvent.layoutMeasurement.width;
+      const offset = event.nativeEvent.contentOffset.x;
+      const currentIndex = Math.round(offset / slideSize);
+      setCurrentPhotoIndex(currentIndex);
+    };
+
     return (
       <Modal
         visible={visible}
-        transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={onClose}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.detailsModalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-
-                {item.type === "restaurant" ? item.name :
-                 item.type === "hotels" ? item.name :
-                 item.type === "tamada" ? item.name :
-                 item.type === "program" ? item.teamName :
-                 item.type === "flowers" ? `${item.salonName} - ${item.flowerName}` :
-                 item.type === "transport" ? `${item.salonName} - ${item.carName}` :
-                 item.type === "cake" ? item.name :
-                 item.type === "alcohol" ? `${item.salonName} - ${item.alcoholName}` :
-                 item.type === "jewelry" ? `${item.storeName} - ${item.itemName}` :
-                 item.type === "traditional-gifts" ? `${item.salonName} - ${item.itemName}` :
-                 "Детали"}
-              </Text>
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={onClose}
-                accessible
-                accessibilityLabel="Закрыть модальное окно"
-              >
-                <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={[
-                { label: 'Тип', value: typeToCategoryMap[item.type] },
-                { label: 'Адрес', value: item.address },
-                { label: 'Телефон', value: item.phone },
-                { label: 'Кухня', value: item.cuisine },
-                { label: 'Вместимость', value: item.capacity },
-                { label: 'Категория', value: item.category },
-                { label: 'Бренд', value: item.brand },
-                { label: 'Пол', value: item.gender },
-                { label: 'Портфолио', value: item.portfolio },
-                { label: 'Тип торта', value: item.cakeType },
-                { label: 'Тип цветов', value: item.flowerType },
-                { label: 'Материал', value: item.material },
-                { label: 'Район', value: item.district },
-                { 
-                  label: 'Стоимость',
-                  value: displayCost
-                }
-              ].filter(d => d.value)}
-              renderItem={({ item }) => renderDetailRow(item.label, item.value)}
-              keyExtractor={(item, index) => `${item.label}-${index}`}
-              contentContainerStyle={styles.detailsModalContent}
-              showsVerticalScrollIndicator={false}
-            />
-
-            {item.portfolio && (
-              <TouchableOpacity
-                style={styles.portfolioButton}
-                onPress={() => handleOpenLink(item.portfolio)}
-                accessible
-                accessibilityLabel="Открыть портфолио"
-              >
-                <LinearGradient
-                  colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-                  style={styles.portfolioButtonGradient}
-                >
-                  <Text style={styles.portfolioButtonText}>Открыть портфолио</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            )}
+        <View style={styles.fullscreenModalContainer}>
+          {/* Header with back button */}
+          <View style={styles.fullscreenModalHeader}>
+            <TouchableOpacity
+              style={styles.fullscreenBackButton}
+              onPress={onClose}
+              accessible
+              accessibilityLabel="Назад"
+            >
+              <AntDesign name="left" size={24} color="#5A4032" />
+            </TouchableOpacity>
+            <Text style={styles.fullscreenModalHeaderTitle}>{getItemTitle()}</Text>
+            <View style={{ width: 40 }} />
           </View>
+
+          <ScrollView 
+            style={styles.fullscreenModalScroll}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Photo Slider */}
+            <View style={styles.photoSliderWrapper}>
+              {loadingFiles ? (
+                <View style={[styles.fullscreenPhoto, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <ActivityIndicator size="large" color="#897066" />
+                  <Text style={{ marginTop: 10, color: '#897066' }}>Загрузка фотографий...</Text>
+                </View>
+              ) : (
+                <>
+                  <FlatList
+                    data={displayPhotos}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
+                    keyExtractor={(photo, index) => `photo-${index}`}
+                    renderItem={({ item: photo }) => (
+                      <Image
+                        source={{ uri: photo }}
+                        style={styles.fullscreenPhoto}
+                        resizeMode="cover"
+                      />
+                    )}
+                  />
+                  
+                  {/* Photo Indicators */}
+                  {displayPhotos.length > 1 && (
+                    <View style={styles.photoIndicators}>
+                      {displayPhotos.map((_, index) => (
+                        <View
+                          key={`indicator-${index}`}
+                          style={[
+                            styles.photoIndicator,
+                            index === currentPhotoIndex && styles.photoIndicatorActive
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+            </View>
+
+            {/* Content Card */}
+            <View style={styles.fullscreenContentCard}>
+              {/* Title */}
+              <Text style={styles.fullscreenTitle}>{getItemTitle()}</Text>
+
+              {/* Fields */}
+              {renderField('Тип', typeToCategoryMap[item.type] || item.type)}
+              {renderField('Вместимость', item.capacity)}
+              {renderField('Кухня', item.cuisine)}
+              {renderField('Средний чек', displayCost)}
+              {renderField('Адрес', item.address)}
+              {renderField('Телефон', item.phone)}
+              {renderField('Район', item.district)}
+              {renderField('Email', item.email)}
+              {renderField('Описание', item.description)}
+              {renderField('Категория', item.category)}
+              {renderField('Бренд', item.brand)}
+              {renderField('Материал', item.material)}
+              {renderField('Время работы', item.workingHours)}
+              {renderField('Рейтинг', item.rating)}
+              {renderField('Опыт работы', item.experience)}
+              {renderField('Название салона', item.salonName)}
+              {renderField('Название магазина', item.storeName)}
+              {renderField('Название команды', item.teamName)}
+              {renderField('Название машины', item.carName)}
+              {renderField('Название цветов', item.flowerName)}
+              {renderField('Название алкоголя', item.alcoholName)}
+              {renderField('Название изделия', item.itemName)}
+              {renderField('Тип торта', item.cakeType)}
+              {renderField('Тип цветов', item.flowerType)}
+              {renderField('Пол', item.gender)}
+
+              {/* Portfolio Button */}
+              {item.portfolio && (
+                <TouchableOpacity
+                  style={styles.fullscreenPortfolioButton}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    Linking.openURL(item.portfolio).catch((err) => console.error("Ошибка:", err));
+                  }}
+                >
+                  <LinearGradient
+                    colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
+                    style={styles.fullscreenPortfolioGradient}
+                  >
+                    <Text style={styles.fullscreenPortfolioText}>Открыть портфолио</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+            </View>
+          </ScrollView>
         </View>
       </Modal>
     );
   };
 
   // Combine all sections into a single FlatList
-  const renderMainContent = () => {
-    const sections = [
-      { type: 'header', id: 'header' },
-      { type: 'eventDetails', id: 'eventDetails' },
-      { type: 'categories', id: 'categories' },
-      { type: 'selectedItemsHeader', id: 'selectedItemsHeader' },
-      ...filteredData.map(item => ({ type: 'selectedItem', id: `${item.type}-${item.id}`, data: item })),
-      { type: 'submitButton', id: 'submitButton' },
-    ];
+  
 
     return (
-    
-      <FlatList
-        data={sections}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          switch (item.type) {
-            case 'header':
-              return renderHeader();
-            case 'eventDetails':
-              return renderEventDetails();
-            case 'categories':
-              return (
-                <View style={styles.categoriesContainer}>
-                  <Text style={styles.sectionTitle}>Категории</Text>
-                  <FlatList
-                    data={[...categories, 'Добавить']}
-                    renderItem={renderCategories}
-                    keyExtractor={(item) => item}
-                    // numColumns={2}
-                    // columnWrapperStyle={styles.categoryRowWrapper}
-                    // contentContainerStyle={styles.categoriesList}
-                    // nestedScrollEnabled
-                  />
-                </View>
-              );
-            case 'selectedItemsHeader':
-              return (
-                <View style={styles.selectedItemsContainer}>
-                  {/* <Text style={styles.sectionTitle}>Выбранные элементы</Text> */}
-                  {isLoading && <ActivityIndicator size="large" color={COLORS.primary} />}
-                  {!isLoading && filteredData.length === 0 && (
-                    <Text style={styles.emptyText}>Нет выбранных элементов</Text>
-                  )}
-                </View>
-              );
-            case 'selectedItem':
-              return 
-              // renderSelectedItems({ item: item.data });
-            case 'submitButton':
-              return (
-                <TouchableOpacity
-                  style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-                  onPress={handleSubmit}
-                  disabled={loading}
-                  accessible
-                  accessibilityLabel="Добавить мероприятие"
+    <>
+      <LinearGradient 
+        colors={["#F1EBDD", "#897066"]} 
+        start={{ x: 0, y: 1 }} 
+        end={{ x: 0, y: 0 }} 
+        style={styles.splashContainer}
+      >
+        {/* Кнопка назад */}
+        <TouchableOpacity 
+          style={styles.backButtonTop} 
+          onPress={() => navigation.goBack()}
+          accessible
+          accessibilityLabel="Вернуться назад"
+        >
+          <AntDesign name="left" size={24} color="black" />
+        </TouchableOpacity>
+
+        {/* Логотип */}
+        <View style={styles.logoContainer}>
+          <Image 
+            source={require("../../assets/kazanRevert.png")} 
+            style={styles.potIcon} 
+            resizeMode="contain" 
+          />
+        </View>
+
+        {/* Footer паттерн */}
+        <Image 
+          source={require("../../assets/footer.png")} 
+          style={styles.topPatternContainer} 
+        />
+
+        {/* Поля ввода */}
+        <View style={styles.headerContainer}>
+          <View style={styles.budgetContainer}>
+            {/* Кнопка добавить */}
+            <View style={styles.categoryItemAdd}>
+              <TouchableOpacity 
+                style={styles.categoryButtonAdd} 
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setAddItemModalVisible(true);
+                }}
+                accessible
+                accessibilityLabel="Добавить элемент"
+              >
+                <LinearGradient 
+                  colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} 
+                  style={styles.categoryButtonGradient}
                 >
-                  <LinearGradient
-                    colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
-                    style={styles.submitButtonGradient}
-                  >
-                    {loading ? (
-                      <ActivityIndicator size="small" color={COLORS.white} />
-                    ) : (
-                      <Text style={styles.submitButtonText}>Создать мероприятие</Text>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
-              );
-            default:
-              return null;
-          }
-        }}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      />
+                  <Text style={styles.categoryPlusText}>+</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
 
-    );
-  };
+            {/* Поле бюджета */}
+            
 
-  return (
-    <ErrorBoundary>
-      <SafeAreaView style={styles.container}>
-        {renderMainContent()}
+            <TextInput
+              style={styles.budgetInput}
+              placeholder="Бюджет (т)"
+              value={formatBudget(budget)}
+              onChangeText={handleBudgetChange}
+              placeholderTextColor={COLORS.placeholder}
+              keyboardType="numeric"
+              maxLength={18}
+              accessible
+              accessibilityLabel="Бюджет мероприятия"
+            />
 
+            {/* Поле количества гостей */}
+            <TextInput
+              style={styles.guestInput}
+              placeholder="Гостей"
+              value={guestCount}
+              onChangeText={handleGuestCountChange}
+              placeholderTextColor={COLORS.placeholder}
+              keyboardType="numeric"
+              maxLength={5}
+              accessible
+              accessibilityLabel="Количество гостей"
+            />
+          </View>
+
+          {/* Loader modal */}
+          <Modal 
+            animationType="fade" 
+            transparent={true} 
+            visible={isLoading} 
+            onRequestClose={() => {}}
+          >
+            <View style={styles.loaderOverlay}>
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={styles.loaderText}>Подбираем...</Text>
+              </View>
+            </View>
+          </Modal>
+        </View>
+
+        {/* Список категорий */}
+        <View style={styles.listContainer}>
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          ) : (
+            <ScrollView 
+              style={styles.scrollView} 
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.categoryGrid}>
+                {[...categories, 'Добавить'].map((item, index) => (
+                  <View key={index} style={styles.categoryItem}>
+                    {renderCategories({ item })}
+                  </View>
+                ))}
+              </View>
+              <View style={styles.bottomPadding} />
+            </ScrollView>
+          )}
+        </View>
+
+        {/* Кнопка далее */}
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity 
+            style={styles.nextButton} 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setEventDetailsModalVisible(true);
+            }}
+            disabled={loading}
+            accessible
+            accessibilityLabel="Далее"
+          >
+            <Image 
+              source={require("../../assets/next.png")} 
+              style={styles.potIcon3} 
+              resizeMode="contain" 
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Модальные окна */}
         <AddItemModal
           visible={addItemModalVisible}
           onClose={() => setAddItemModalVisible(false)}
@@ -2568,17 +2616,295 @@ console.log('Полученные категории:', selectedCategories);
           onClose={() => setDetailsModalVisible(false)}
           item={selectedItem}
         />
-      </SafeAreaView>
-    </ErrorBoundary>
+
+        {/* Модальное окно для ввода данных мероприятия */}
+        <Modal
+          visible={eventDetailsModalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setEventDetailsModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.eventDetailsModalContainer}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Данные мероприятия</Text>
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={() => setEventDetailsModalVisible(false)}
+                  accessible
+                  accessibilityLabel="Закрыть"
+                >
+                  <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.modalContent}>
+                {/* Название мероприятия */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Название мероприятия</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={eventName}
+                    onChangeText={setEventName}
+                    placeholder="Введите название..."
+                    placeholderTextColor={MODAL_COLORS.textSecondary}
+                    accessible
+                    accessibilityLabel="Название мероприятия"
+                  />
+                </View>
+
+                {/* Дата мероприятия */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Дата мероприятия</Text>
+                  <TouchableOpacity
+                    style={styles.datePickerButton}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowDatePicker(true);
+                    }}
+                    accessible
+                    accessibilityLabel="Выбрать дату"
+                  >
+                    <Text style={styles.datePickerText}>
+                      {eventDate ? eventDate.toLocaleDateString('ru-RU') : 'Выберите дату'}
+                    </Text>
+                    <Icon name="calendar-today" size={20} color={MODAL_COLORS.icon} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Календарь */}
+                {showDatePicker && (
+                  <Modal
+                    visible={showDatePicker}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setShowDatePicker(false)}
+                  >
+                    <View style={styles.modalOverlay}>
+                      <View style={styles.calendarContainer}>
+                        <Calendar
+                          onDayPress={(day) => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            setEventDate(new Date(day.dateString));
+                            setShowDatePicker(false);
+                          }}
+                          markedDates={Object.keys(blockedDays).reduce((acc, date) => {
+                            acc[date] = { ...blockedDays[date], marked: true };
+                            return acc;
+                          }, {
+                            [eventDate.toISOString().split('T')[0]]: {
+                              selected: true,
+                              selectedColor: COLORS.primary,
+                              disableTouchEvent: true,
+                            },
+                          })}
+                          markingType={'multi-dot'}
+                          minDate={new Date().toISOString().split('T')[0]}
+                          theme={{
+                            backgroundColor: MODAL_COLORS.background,
+                            calendarBackground: MODAL_COLORS.background,
+                            textSectionTitleColor: MODAL_COLORS.textPrimary,
+                            selectedDayBackgroundColor: COLORS.primary,
+                            selectedDayTextColor: COLORS.white,
+                            todayTextColor: COLORS.accent,
+                            dayTextColor: MODAL_COLORS.textPrimary,
+                            textDisabledColor: MODAL_COLORS.textSecondary,
+                            arrowColor: COLORS.primary,
+                          }}
+                        />
+                        <TouchableOpacity
+                          style={styles.closeCalendarButton}
+                          onPress={() => setShowDatePicker(false)}
+                          accessible
+                          accessibilityLabel="Закрыть календарь"
+                        >
+                          <Text style={styles.closeCalendarText}>Закрыть</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
+                )}
+
+                {/* Кнопка создать */}
+                <TouchableOpacity
+                  style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+                  onPress={() => {
+                    setEventDetailsModalVisible(false);
+                    handleSubmit();
+                  }}
+                  disabled={loading}
+                  accessible
+                  accessibilityLabel="Создать мероприятие"
+                >
+                  <LinearGradient
+                    colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]}
+                    style={styles.submitButtonGradient}
+                  >
+                    {loading ? (
+                      <ActivityIndicator size="small" color={COLORS.white} />
+                    ) : (
+                      <Text style={styles.submitButtonText}>Создать мероприятие</Text>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+      </LinearGradient>
+    </>
   );
 };
 
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
+  splashContainer: { 
+    flex: 1 
   },
+  // Loader
+  loaderOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: MODAL_COLORS.overlayBackground,
+  },
+  loaderContainer: {
+    backgroundColor: MODAL_COLORS.cardBackground,
+    borderRadius: 15,
+    padding: 25,
+    alignItems: "center",
+    shadowColor: MODAL_COLORS.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  loaderText: {
+    marginTop: 15,
+    fontSize: 17,
+    color: MODAL_COLORS.textPrimary,
+    fontWeight: "500",
+  },
+
+  // Кнопка назад
+  backButtonTop: {
+    marginTop: "15%",
+    marginLeft: "2%",
+  },
+
+  // Логотип
+  logoContainer: {
+    alignItems: "center",
+    marginVertical: 5,
+    marginTop: "0%",
+  },
+  potIcon: {
+    width: 80,
+    height: 80,
+  },
+  potIcon3: { 
+    width: 70, 
+    height: 70, 
+    zIndex: 3 
+  },
+
+  // Footer паттерн
+  topPatternContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    height: "15%",
+    zIndex: -1,
+    resizeMode: "cover",
+    opacity: 0.8,
+    marginBottom: "1%",
+  },
+
+  // Поля ввода
+  budgetContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    marginRight:20,
+    marginLeft:40
+    
+  },
+  categoryItemAdd: {
+    width: "20%",
+    marginRight: 10,
+  },
+  budgetInput: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
+    color: COLORS.white,
+    fontSize: 16,
+  },
+  guestInput: {
+    flex: 0.6,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 10,
+    padding: 10,
+    color: COLORS.white,
+    fontSize: 16,
+  },
+
+  // Список категорий
+  listContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    marginTop: 5,
+  },
+  scrollView: { 
+    flex: 1 
+  },
+  categoryGrid: {
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+  categoryItem: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // Нижний контейнер
+  bottomPadding: { 
+    height: 20 
+  },
+  bottomContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    backgroundColor: "transparent",
+    zIndex: 5,
+    marginBottom: "10%",
+  },
+  nextButton: {
+    borderRadius: 25,
+    overflow: "hidden",
+    marginVertical: 5,
+    alignItems: "center",
+    zIndex: 6,
+  },
+
+  // Обновленные стили кнопок
+  categoryPlusText: {
+    fontSize: 18,
+    color: COLORS.white,
+    fontWeight: "bold",
+  },
+  categoryText: {
+    fontSize: 14,
+    color: COLORS.white,
+    fontWeight: "600",
+    textAlign: "center",
+    paddingHorizontal: 8,
+  },
+
   scrollContent: {
     padding: 18,
     paddingBottom: 120,
@@ -2690,7 +3016,7 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   categoryButtonAdd: {
-    width: '48%',
+    width: '100%',
     borderRadius: 10,
     overflow: 'hidden',
     shadowColor: COLORS.shadow,
@@ -2700,7 +3026,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   categoryPlusText: {
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: '700',
     color: COLORS.white,
     textAlign: 'center',
@@ -3014,6 +3340,72 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
 
+
+  // Модальное окно данных мероприятия
+  eventDetailsModalContainer: {
+    backgroundColor: MODAL_COLORS.background,
+    borderRadius: 20,
+    padding: 20,
+    margin: 20,
+    maxHeight: SCREEN_HEIGHT * 0.7,
+  },
+  modalContent: {
+    paddingVertical: 10,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: MODAL_COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: MODAL_COLORS.inputBackground,
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    color: MODAL_COLORS.textPrimary,
+    borderWidth: 1,
+    borderColor: MODAL_COLORS.inputBorder,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: MODAL_COLORS.inputBackground,
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: MODAL_COLORS.inputBorder,
+  },
+  datePickerText: {
+    fontSize: 16,
+    color: MODAL_COLORS.textPrimary,
+  },
+  submitButton: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginTop: 20,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  submitButtonGradient: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.white,
+  },
+  submitButtonDisabled: {
+    opacity: 0.5,
+  },
   calendarContainer: {
     backgroundColor: MODAL_COLORS.background,
     borderRadius: 16,
@@ -3044,6 +3436,193 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     textAlign: 'center',
   },
+  // Photo Slider Styles
+  photoSliderContainer: {
+    width: '100%',
+    height: 250,
+    backgroundColor: COLORS.textSecondary,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+    position: 'relative',
+  },
+  photoSliderImage: {
+    width: '100%',
+    height: '100%',
+  },
+  photoNavButton: {
+    position: 'absolute',
+    top: '50%',
+    transform: [{ translateY: -20 }],
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  photoNavButtonLeft: {
+    left: 10,
+  },
+  photoNavButtonRight: {
+    right: 10,
+  },
+  photoCounter: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    zIndex: 10,
+  },
+  photoCounterText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  photoDotsContainer: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  photoDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    marginHorizontal: 4,
+  },
+  photoDotActive: {
+    backgroundColor: COLORS.white,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  detailsModalScrollView: {
+    flex: 1,
+  },
+  detailsFieldsContainer: {
+    paddingTop: 8,
+  },
+  // Fullscreen Details Modal Styles
+  fullscreenModalContainer: {
+    flex: 1,
+    backgroundColor: '#F1EBDD',
+  },
+  fullscreenModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 16,
+    backgroundColor: '#F1EBDD',
+  },
+  fullscreenBackButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  fullscreenModalHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#5A4032',
+    textAlign: 'center',
+    flex: 1,
+  },
+  fullscreenModalScroll: {
+    flex: 1,
+  },
+  fullscreenPhoto: {
+    width: Dimensions.get('window').width,
+    height: 400,
+    backgroundColor: '#E0D5C7',
+  },
+  // Photo Slider Styles
+  photoSliderWrapper: {
+    position: 'relative',
+  },
+  photoIndicators: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  photoIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  photoIndicatorActive: {
+    width: 24,
+    backgroundColor: '#FFFFFF',
+  },
+  fullscreenContentCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -24,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40,
+    minHeight: 400,
+  },
+  fullscreenTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#2D2D2D',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  fullscreenDetailField: {
+    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
+    paddingBottom: 16,
+  },
+  fullscreenDetailLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999999',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  fullscreenDetailValue: {
+    fontSize: 18,
+    fontWeight: '400',
+    color: '#2D2D2D',
+    lineHeight: 24,
+  },
+  fullscreenPortfolioButton: {
+    marginTop: 32,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  fullscreenPortfolioGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  fullscreenPortfolioText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+
 });
 
 

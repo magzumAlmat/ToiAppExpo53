@@ -147,7 +147,7 @@ const {  loading, error } = useSelector((state) => state.auth);
 
   // const fetchAllBlockedDays = async () => {
   //   try {
-  //     const response = await api.fetchAllBlockDays();
+  //     const response = await api.fetchAllBlockedDays();
   //     const blockedDays = {};
   //     response.data.forEach((entry) => {
   //       const { date, restaurantId, restaurantName } = entry;
@@ -172,8 +172,7 @@ const {  loading, error } = useSelector((state) => state.auth);
 
   const fetchAllBlockedDays = async () => {
     try {
-      const response = await api.fetchAllBlockDays();
-      console.log('Ответ API fetchAllBlockDays:', response.data);
+      const response = await api.fetchAllBlockedDays();
       const blockedDays = {};
       response.data.forEach((entry) => {
         const { date, restaurantId, restaurantName } = entry;
@@ -282,11 +281,13 @@ const {  loading, error } = useSelector((state) => state.auth);
 
   const blockRestaurantDay = async (restaurantId, date) => {
     try {
-      const response = await api.addDataBlockToRestaurant(restaurantId, selectedDate);
-      alert('Успешно поставлена бронь', response.data.message);
+      // Предполагается, что в api.js есть функция blockDay, отправляющая POST запрос
+      const response = await api.addDataBlockToRestaurant(restaurantId, date);
+      alert('Успешно поставлена бронь');
+      fetchAllBlockedDays(); // Обновляем календарь после успешной брони
     } catch (error) {
-      console.error('Ошибка блокировки:', error);
-      alert('В этот день у данного ресторана уже стоит бронь');
+      console.error('Ошибка блокировки:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Ошибка при блокировке дня.');
     }
   };
 
@@ -301,16 +302,25 @@ const {  loading, error } = useSelector((state) => state.auth);
       return;
     }
 
-    const defaultCalendar = await ExpoCalendar.getDefaultCalendarAsync();
-    await ExpoCalendar.createEventAsync(defaultCalendar.id, {
-      title: `Забронирован день для ${selectedRestaurant.name}`,
-      startDate: selectedDate,
-      endDate: new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000),
-      allDay: true,
-      notes: `Ресторан ${selectedRestaurant.name} забронирован менеджером`,
-      availability: 'busy',
-    });
+    const hasPermission = await getCalendarPermissions();
+    if (hasPermission) {
+        try {
+            const defaultCalendar = await ExpoCalendar.getDefaultCalendarAsync();
+            await ExpoCalendar.createEventAsync(defaultCalendar.id, {
+              title: `Забронирован день для ${selectedRestaurant.name}`,
+              startDate: selectedDate,
+              endDate: new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000),
+              allDay: true,
+              notes: `Ресторан ${selectedRestaurant.name} забронирован менеджером`,
+              availability: 'busy',
+            });
+        } catch(e) {
+            console.warn('Не удалось создать событие в календаре:', e);
+            // Не критическая ошибка, можно продолжить
+        }
+    }
 
+    // Pass the Date object directly. The API layer should handle formatting.
     await blockRestaurantDay(selectedRestaurant.id, selectedDate);
     setShowCalendarModal(false);
   };

@@ -1425,67 +1425,176 @@ const ConferencesEventScreen = ({ navigation, route }) => {
     [budget, guestCount]
   );
 
-  const fetchAllBlockedDays = async () => {
+  const fetchAllBlockedDays = useCallback(async () => {
     try {
-      const response = await api.fetchAllBlockedDays();
-      const blocked = response.data.reduce((acc, date) => {
-        acc[date] = { disabled: true, disableTouchEvent: true, marked: true, dotColor: COLORS.error };
-        return acc;
-      }, {});
-      setBlockedDays(blocked);
+      const [blockedDaysResponse, restaurantsResponse] = await Promise.all([
+        api.fetchAllBlockedDays(),
+        api.getRestaurants()
+      ]);
+
+      const allRestaurants = restaurantsResponse.data || [];
+      const totalRestaurants = allRestaurants.length;
+
+      const bookingsByDate = {};
+      blockedDaysResponse.data.forEach((entry) => {
+        const { date } = entry;
+        if (!bookingsByDate[date]) {
+          bookingsByDate[date] = new Set();
+        }
+        bookingsByDate[date].add(entry.restaurantId);
+      });
+
+      const blockedDaysData = {};
+      blockedDaysResponse.data.forEach((entry) => {
+        const { date, restaurantId, restaurantName } = entry;
+        if (!blockedDaysData[date]) {
+          const isFullyBooked = totalRestaurants > 0 && bookingsByDate[date] && bookingsByDate[date].size >= totalRestaurants;
+          blockedDaysData[date] = {
+            marked: true,
+            dots: [],
+            disabled: isFullyBooked,
+            disableTouchEvent: isFullyBooked
+          };
+        }
+        blockedDaysData[date].dots.push({ key: restaurantId.toString(), restaurantId, restaurantName, color: 'red' });
+      });
+
+      setBlockedDays(blockedDaysData);
     } catch (error) {
-      console.error("Ошибка загрузки заблокированных дат:", error);
-      alert("Не удалось загрузить заблокированные даты.");
+      console.error("Ошибка загрузки заблокированных дней:", error.message);
     }
-  };
+  }, []);
+     
+       useEffect(() => {
+         if (token && user?.id) {
+           fetchAllBlockedDays();
+         }
+         const unsubscribe = navigation.addListener('focus', fetchAllBlockedDays);
+         return unsubscribe;
+       }, [token, user, navigation, fetchAllBlockedDays]);
+     
+   console.log('Current blockedDays state (ConferencesEventScreen):', JSON.stringify(blockedDays, null, 2));
+   const calendarMarkedDates = Object.keys(blockedDays).reduce((acc, date) => {
+     acc[date] = { ...blockedDays[date], marked: true };
+     return acc;
+   }, {
+     [eventDate.toISOString().split('T')[0]]: {
+       selected: true,
+       selectedColor: COLORS.primary,
+       disableTouchEvent: true,
+     },
+   });
+   console.log('Passing to Calendar markedDates (ConferencesEventScreen):', JSON.stringify(calendarMarkedDates, null, 2));
+   
+   const calculateTotalCost = useMemo(() => {
+     return filteredData.reduce((sum, item) => {
+       const qtyKey = `${item.type}-${item.id}`;
+       const qty = item.type === "restaurant" ? parseInt(guestCount, 10) || 1 : parseInt(quantities[qtyKey] || "1", 10);
+       const itemCost = item.type === "restaurant" ? (item.averageCost || 0) : (item.cost || 0);
+       return sum + itemCost * qty;
+     }, 0);
+   }, [filteredData, quantities, guestCount]);
 
-  useEffect(() => {
-    if (token && user?.id) {
-      fetchAllBlockedDays();
+   const handleSubmit = async () => {
+    // Валидация полей
+    if (!eventName.trim()) {
+      alert("Пожалуйста, укажите название мероприятия");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
     }
-  }, [token, user?.id]);
+    if (!eventDate) {
+      alert("Пожалуйста, выберите дату мероприятия");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+    if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
+      alert("Пожалуйста, укажите корректный бюджет");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+    if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) {
+      alert("Пожалуйста, укажите корректное количество гостей");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+    if (filteredData.length === 0) {
+      alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
 
-  const calculateTotalCost = useMemo(() => {
-    return filteredData.reduce((sum, item) => {
-      const quantity = parseInt(quantities[`${item.type}-${item.id}`] || "1");
-      const cost = item.type === "restaurant" ? item.averageCost : item.cost;
-      const effectiveQuantity = item.type === "restaurant" ? parseInt(guestCount, 10) || 1 : quantity;
-      return sum + cost * effectiveQuantity;
-    }, 0);
-  }, [filteredData, quantities, guestCount]);
+    const dateString = eventDate.toISOString().split('T')[0];
+    const dayInfo = blockedDays[dateString];
+    const restaurantToBlock = filteredData.find(item => item.type === 'restaurant');
 
-  const handleSubmit = async () => {
-    if (!eventName.trim()) { alert("Пожалуйста, укажите название мероприятия"); return; }
-    if (!eventDate) { alert("Пожалуйста, выберите дату мероприятия"); return; }
-    if (!budget || isNaN(budget) || parseFloat(budget) <= 0) { alert("Пожалуйста, укажите корректный бюджет"); return; }
-    if (!guestCount || isNaN(guestCount) || parseInt(guestCount, 10) <= 0) { alert("Пожалуйста, укажите корректное количество гостей"); return; }
-    if (filteredData.length === 0) { alert("Пожалуйста, добавьте хотя бы один элемент для мероприятия"); return; }
+    if (dayInfo && dayInfo.disabled) {
+        alert(`Дата ${dateString} полностью забронирована. Пожалуйста, выберите другую дату.`);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+    }
+    if (restaurantToBlock && dayInfo && dayInfo.dots) {
+        const isRestaurantBooked = dayInfo.dots.some(dot => dot.restaurantId === restaurantToBlock.id);
+        if (isRestaurantBooked) {
+            alert(`Ресторан "${restaurantToBlock.name}" уже забронирован на ${dateString}. Пожалуйста, выберите другую дату или другой ресторан.`);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            return;
+        }
+    }
 
     setLoading(true);
     try {
-      const categoryResponse = await api.createEventCategory({ name: eventName }, token);
+      const payload = { 
+        name: eventName.trim(), 
+        date: eventDate.toISOString().split('T')[0],
+        budget: parseFloat(budget),
+        guestCount: parseInt(guestCount, 10),
+        type: 'conference'
+      };
+
+      const categoryResponse = await api.createEventCategory(payload, token);
+      
       const categoryId = categoryResponse.data.id;
+      if (!categoryId) {
+        throw new Error('Не получен ID категории от сервера');
+      }
 
-      const totalCost = calculateTotalCost;
-      await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalCost });
-      await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: 0 });
-      await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: totalCost });
+      if (restaurantToBlock) {
+          try {
+              console.log(`Автоматическое бронирование даты для ресторана: ${restaurantToBlock.name}`);
+              await api.addDataBlockToRestaurant(restaurantToBlock.id, eventDate);
+              console.log('Дата для ресторана успешно забронирована.');
+              fetchAllBlockedDays();
+          } catch (bookingError) {
+              console.error('Ошибка автоматического бронирования даты:', bookingError.response?.data || bookingError.message);
+              alert('Мероприятие создано, но произошла ошибка при автоматическом бронировании даты для ресторана. Пожалуйста, забронируйте вручную.');
+          }
+      }
 
+      const totalBudget = parseFloat(budget);
+      const spentAmount = calculateTotalCost;
+      const remaining = remainingBudget;
+
+      await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalBudget });
+      await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: spentAmount });
+      await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: remaining });
+      
       for (const item of filteredData) {
-        const typeMapping = typesMapping.find((mapping) => mapping.type === item.type);
-        if (!typeMapping) { console.error(`Неизвестный тип услуги: ${item.type}`); continue; }
-
         const serviceType = serviceTypeMap[item.type] || item.type;
-        const quantity = item.type === 'restaurant' ? parseInt(guestCount, 10) : parseInt(quantities[`${item.type}-${item.id}`] || '1');
+        const quantity =
+          item.type === 'restaurant'
+            ? parseInt(guestCount, 10)
+            : parseInt(quantities[`${item.type}-${item.id}`] || '1');
 
-        try {
-          await api.addServiceToCategory(categoryId, { serviceId: item.id, serviceType, quantity }, token);
-        } catch (error) {
-          console.error(`Ошибка при добавлении услуги ${serviceType} (ID: ${item.id}, Type: ${item.type}):`, error.response?.data || error.message);
-        }
+        await api.addServiceToCategory(
+          categoryId,
+          { serviceId: item.id, serviceType, quantity },
+          token
+        );
       }
 
       alert('Конференция успешно создана!');
+      
+      // Очищаем форму
       setEventName('');
       setEventDate(new Date());
       setBudget('');
@@ -1493,16 +1602,23 @@ const ConferencesEventScreen = ({ navigation, route }) => {
       setFilteredData([]);
       setQuantities({});
       setRemainingBudget(0);
-      navigation.goBack();
+      
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      navigation.goBack();
     } catch (error) {
       console.error('Ошибка при создании мероприятия:', error.response?.data || error.message);
-      alert('Ошибка: ' + (error.response?.data?.error || error.message));
+      let errorMessage = 'Ошибка при создании мероприятия';
+      if (error.response?.data?.error) {
+        errorMessage += ': ' + error.response.data.error;
+      } else if (error.message) {
+        errorMessage += ': ' + error.message;
+      }
+      alert(errorMessage);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
     }
-  };
+   };
   
   const handleCategoryPress = (category) => {
     const type = categoryToTypeMap[category];
@@ -1840,7 +1956,49 @@ const ConferencesEventScreen = ({ navigation, route }) => {
                   <Modal visible={showDatePicker} transparent animationType="fade" onRequestClose={() => setShowDatePicker(false)}>
                     <View style={styles.modalOverlay}>
                       <View style={styles.calendarContainer}>
-                        <Calendar onDayPress={(day) => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setEventDate(new Date(day.dateString)); setShowDatePicker(false); }} markedDates={{ ...blockedDays, [eventDate.toISOString().split('T')[0]]: { selected: true, selectedColor: COLORS.primary } }} minDate={new Date().toISOString().split('T')[0]} theme={{ backgroundColor: MODAL_COLORS.background, calendarBackground: MODAL_COLORS.background, textSectionTitleColor: MODAL_COLORS.textPrimary, selectedDayBackgroundColor: COLORS.primary, selectedDayTextColor: COLORS.white, todayTextColor: COLORS.accent, dayTextColor: MODAL_COLORS.textPrimary, textDisabledColor: MODAL_COLORS.textSecondary, arrowColor: COLORS.primary }} />
+                        <Calendar
+                          onDayPress={(day) => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            const dateString = day.dateString;
+                            const dayInfo = blockedDays[dateString];
+
+                            if (dayInfo && dayInfo.disabled) {
+                              alert(`Дата ${dateString} полностью забронирована.`);
+                              return;
+                            }
+
+                            const selectedRestaurant = filteredData.find(item => item.type === 'restaurant');
+                            if (selectedRestaurant && dayInfo && dayInfo.dots) {
+                              const isRestaurantBooked = dayInfo.dots.some(dot => dot.restaurantId === selectedRestaurant.id);
+                              if (isRestaurantBooked) {
+                                alert(`Ресторан "${selectedRestaurant.name}" уже забронирован на ${dateString}. Пожалуйста, выберите другую дату или другой ресторан.`);
+                                return;
+                              }
+                            }
+                            
+                            setEventDate(new Date(day.dateString));
+                            setShowDatePicker(false);
+                          }}
+                          markingType={'custom'}
+                          markedDates={{
+                            ...blockedDays,
+                            [eventDate.toISOString().split('T')[0]]: {
+                              selected: true,
+                              disableTouchEvent: true,
+                              customStyles: {
+                                container: {
+                                  backgroundColor: COLORS.primary,
+                                  borderRadius: 5,
+                                },
+                                text: {
+                                  color: COLORS.white,
+                                  fontWeight: 'bold',
+                                },
+                              },
+                            },
+                          }}
+                          minDate={new Date().toISOString().split('T')[0]} 
+                          theme={{ backgroundColor: MODAL_COLORS.background, calendarBackground: MODAL_COLORS.background, textSectionTitleColor: MODAL_COLORS.textPrimary, selectedDayBackgroundColor: COLORS.primary, selectedDayTextColor: COLORS.white, todayTextColor: COLORS.accent, dayTextColor: MODAL_COLORS.textPrimary, textDisabledColor: MODAL_COLORS.textSecondary, arrowColor: COLORS.primary }} />
                         <TouchableOpacity style={styles.closeCalendarButton} onPress={() => setShowDatePicker(false)} accessible accessibilityLabel="Закрыть календарь">
                           <Text style={styles.closeCalendarText}>Закрыть</Text>
                         </TouchableOpacity>
