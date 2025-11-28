@@ -1882,7 +1882,7 @@ console.log('Полученные категории:', selectedCategories);
       throw lastError || new Error('Не удалось создать категорию ни одним из способов');
     }
 
-    const categoryId = categoryResponse.data.id;
+    const categoryId = categoryResponse.data.data?.id || categoryResponse.data.id;
     if (!categoryId) {
       throw new Error('Не получен ID категории от сервера');
     }
@@ -1975,6 +1975,7 @@ console.log('Полученные категории:', selectedCategories);
 
       try {
         console.log(`Добавление: ${serviceType} (ID: ${item.id}, Кол-во: ${quantity})`);
+        console.log(`Payload:`, JSON.stringify({ serviceId: item.id, serviceType, quantity }, null, 2));
         await api.addServiceToCategory(
           categoryId,
           { serviceId: item.id, serviceType, quantity },
@@ -1984,6 +1985,8 @@ console.log('Полученные категории:', selectedCategories);
         successCount++;
       } catch (error) {
         console.error(`✗ Ошибка добавления ${serviceType}:`, error.message);
+        console.error(`Response:`, error.response?.data);
+        console.error(`Status:`, error.response?.status);
         errorCount++;
         // Продолжаем добавление остальных услуг
       }

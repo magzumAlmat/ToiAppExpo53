@@ -1,0 +1,75 @@
+# ---------------------------------------------------
+# ----- Запросы к API Manus через REST Client -----
+# ---------------------------------------------------
+
+# --- Переменные окружения ---
+# @baseUrl - Основной URL API Manus
+# @apiKey - Ваш ключ доступа (Bearer Token )
+# @manusModel - Идентификатор конкретной модели Manus для вызова
+
+
+
+# const url = 'https://api.manus.ai/v1/tasks';
+# const options = {
+#   method: 'POST',
+#   headers: {API_KEY: '<api-key>', 'Content-Type': 'application/json'},
+#   body: '{"prompt":"Write a function to calculate fibonacci numbers","agentProfile":"manus-1.5"}'
+# };
+
+# try {
+#   const response = await fetch(url, options);
+#   const data = await response.json();
+#   console.log(data);
+# } catch (error) {
+#   console.error(error);
+# }
+
+
+
+
+@baseUrl = https://api.manus.ai/v1/tasks
+
+@apiKey = sk-mX5UeHNQcdXsa9s02YySz4Fw5SOnPJ7ENYl15FI0EFILM5JhZO6VBkgmRedKvU8vqM9sEGmd47-xDxDtFLEELkvh98iB
+@manusModel = manus-v2-standard  # <-- Используем корректный идентификатор модели Manus
+
+###
+# @name SimpleChatRequest
+# @description Отправляет простой чат-запрос к основной модели Manus.
+#
+# Просто измените "content" ниже и нажмите "Send Request".
+POST {{baseUrl}}
+
+Content-Type: application/json
+Authorization: {{apiKey}}
+
+{
+    "model": "{{manusModel}}",
+    "messages": [
+        {
+            "role": "user",
+            "content": "Объясни, что такое API, простыми словами для не-программиста."
+        }
+    ],
+    "temperature": 0.7
+}
+
+###
+# @name CreativeTextRequest
+# @description Запрос к другой, возможно, более креативной модели.
+#
+# Предположим, у Manus есть модель для творческих задач.
+# @creativeModel = manus-v2-creative
+
+# POST {{baseUrl}}/chat/completions
+# Content-Type: application/json
+# Authorization: {{apiKey}}
+#
+# {
+#     "model": "{{creativeModel}}",
+#     "messages": [
+#         {
+#             "role": "user",
+#             "content": "Придумай слоган для кофейни, которую часто посещают программисты."
+#         }
+#     ]
+# }

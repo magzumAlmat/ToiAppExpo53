@@ -381,9 +381,10 @@ export default function Item3Screen() {
     }
     try {
       console.log('Adding wishlist items for wedding ID:', selectedWedding.id, 'Goods:', selectedGoodIds);
-      const promises = selectedGoodIds.map((goodId) =>
-        api.createWish({ wedding_id: selectedWedding.id, good_id: goodId })
-      );
+      const promises = selectedGoodIds.map((goodId) => {
+        console.log('Wishlist data being sent:', { event_id: selectedWedding.id, good_id: goodId, event_type: 'wedding' });
+        return api.createWish({ event_id: selectedWedding.id, good_id: goodId, event_type: 'wedding' });
+      });
       await Promise.all(promises);
       Alert.alert('Успех', 'Подарки добавлены');
       setWishlistModalVisible(false);
@@ -411,7 +412,8 @@ export default function Item3Screen() {
       };
       const response = await api.createGood(giftData);
       const newGood = response.data.data;
-      await api.createWish({ wedding_id: selectedWedding.id, good_id: newGood.id });
+      console.log('Wishlist data being sent (custom gift):', { event_id: selectedWedding.id, good_id: newGood.id, event_type: 'wedding' });
+      await api.createWish({ event_id: selectedWedding.id, good_id: newGood.id, event_type: 'wedding' });
       Alert.alert('Успех', 'Собственный подарок добавлен');
       setFormData({ category: '', item_name: '' });
       setWishlistModalVisible(false);

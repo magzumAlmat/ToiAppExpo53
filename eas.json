@@ -9,7 +9,7 @@
       "distribution": "internal",
       "env": {
 
-        "EXPO_PUBLIC_API_baseURL": "https://api.toilab.kz",
+        "EXPO_PUBLIC_API_baseURL": "http://89.207.250.181:3000",
         "EXPO_PUBLIC_TEST_VAR": "hello"
       }
     },
@@ -17,7 +17,7 @@
       "distribution": "internal",
       "env": {
 
-        "EXPO_PUBLIC_API_baseURL": "https://api.toilab.kz",
+        "EXPO_PUBLIC_API_baseURL": "http://89.207.250.181:3000",
         "EXPO_PUBLIC_TEST_VAR": "hello"
       }
     },
@@ -25,7 +25,7 @@
       "autoIncrement": true,
       "env": {
 
-        "EXPO_PUBLIC_API_baseURL": "https://api.toilab.kz",
+        "EXPO_PUBLIC_API_baseURL": "http://89.207.250.181:3000",
         "EXPO_PUBLIC_TEST_VAR": "hello"
       }
     }
