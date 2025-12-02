@@ -333,7 +333,7 @@ function AuthenticatedTabs() {
               ),
             }}
           />
-          <Tab.Screen
+          {/* <Tab.Screen
             name="NewScreen"
             component={NewScreen}
             options={{
@@ -348,7 +348,7 @@ function AuthenticatedTabs() {
                 />
               ),
             }}
-          />
+          /> */}
 
           <Tab.Screen
             name="Item3"

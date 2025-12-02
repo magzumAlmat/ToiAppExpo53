@@ -49,6 +49,7 @@ const { width: screenWidth } = Dimensions.get('window');
 const styles = StyleSheet.create({
   mediaSection: {
     marginBottom: 16,
+
   },
   mediaListContainer: {},
   carouselItem: {
@@ -155,6 +156,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     paddingHorizontal: 16,
+    marginTop:20,
+    marginBottom:30,
   },
   title: {
     fontSize: 24,
@@ -252,6 +255,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   modalContainer: {
+    marginTop:20,
     flex: 1,
     backgroundColor: COLORS.background,
     padding: 16,
@@ -2659,18 +2663,6 @@ const renderServiceDetailsModal = ({
 return (
   <SafeAreaView style={styles.container}>
    <Text style={styles.title}>Мои мероприятия</Text>
-
-      {loadingCategories || loadingWeddings ? (
-        <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
-      ) : (
-        <FlatList
-          data={combinedData}
-          renderItem={renderItem}
-          keyExtractor={item => `${item.type}-${item.data.id}`}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={<Text style={styles.noItems}>Нет мероприятий</Text>}
-        />
-      )}
 
       {/* === УНИВЕРСАЛЬНАЯ МОДАЛКА ПОДАРКОВ === */}
       <Modal visible={wishlistModalVisible} animationType="slide">
