@@ -1543,10 +1543,17 @@ const ConferencesEventScreen = ({ navigation, route }) => {
 
     setLoading(true);
     try {
+      const totalBudget = parseFloat(budget);
+      const spentAmount = calculateTotalCost;
+      const remaining = remainingBudget;
+
       const payload = { 
         name: eventName.trim(), 
         date: eventDate.toISOString().split('T')[0],
-        budget: parseFloat(budget),
+        budget: totalBudget,
+        total_cost: spentAmount,
+        paid_amount: 0, // Assuming paid amount is 0 initially
+        remaining_balance: remaining,
         guestCount: parseInt(guestCount, 10),
         type: 'conference'
       };
@@ -1569,14 +1576,6 @@ const ConferencesEventScreen = ({ navigation, route }) => {
               alert('Мероприятие создано, но произошла ошибка при автоматическом бронировании даты для ресторана. Пожалуйста, забронируйте вручную.');
           }
       }
-
-      const totalBudget = parseFloat(budget);
-      const spentAmount = calculateTotalCost;
-      const remaining = remainingBudget;
-
-      await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalBudget });
-      await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: spentAmount });
-      await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: remaining });
       
       for (const item of filteredData) {
         const serviceType = serviceTypeMap[item.type] || item.type;

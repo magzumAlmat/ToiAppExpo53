@@ -1832,21 +1832,56 @@ console.log('Полученные категории:', selectedCategories);
     console.log('Гостей:', guestCount);
     console.log('Элементов:', filteredData.length);
 
+    const totalBudget = parseFloat(budget);
+    const spentAmount = calculateTotalCost;
+    const remaining = remainingBudget;
+
     // Пробуем разные варианты payload
     const payloadVariants = [
       // Вариант 1: Только название
-      { name: eventName.trim() },
+      { 
+        name: eventName.trim(),
+        budget: totalBudget,
+        total_cost: spentAmount,
+        paid_amount: 0,
+        remaining_balance: remaining
+      },
       // Вариант 2: С датой YYYY-MM-DD
-      { name: eventName.trim(), date: eventDate.toISOString().split('T')[0] },
+      { 
+        name: eventName.trim(), 
+        date: eventDate.toISOString().split('T')[0],
+        budget: totalBudget,
+        total_cost: spentAmount,
+        paid_amount: 0,
+        remaining_balance: remaining
+      },
       // Вариант 3: С eventDate вместо date
-      { name: eventName.trim(), eventDate: eventDate.toISOString().split('T')[0] },
+      { 
+        name: eventName.trim(), 
+        eventDate: eventDate.toISOString().split('T')[0],
+        budget: totalBudget,
+        total_cost: spentAmount,
+        paid_amount: 0,
+        remaining_balance: remaining
+      },
       // Вариант 4: С description
-      { name: eventName.trim(), date: eventDate.toISOString().split('T')[0], description: '' },
+      { 
+        name: eventName.trim(), 
+        date: eventDate.toISOString().split('T')[0], 
+        description: '',
+        budget: totalBudget,
+        total_cost: spentAmount,
+        paid_amount: 0,
+        remaining_balance: remaining
+      },
       // Вариант 5: С budget и guestCount
       { 
         name: eventName.trim(), 
         date: eventDate.toISOString().split('T')[0],
-        budget: parseFloat(budget),
+        budget: totalBudget,
+        total_cost: spentAmount,
+        paid_amount: 0,
+        remaining_balance: remaining,
         guestCount: parseInt(guestCount, 10)
       },
     ];
@@ -1902,21 +1937,12 @@ console.log('Полученные категории:', selectedCategories);
         }
     }
 
-    const totalBudget = parseFloat(budget);
-    const spentAmount = calculateTotalCost;
-    const remaining = remainingBudget;
-
     console.log('=== Обновление бюджета категории ===');
     console.log('Total:', totalBudget, 'Spent:', spentAmount, 'Remaining:', remaining);
 
-    // Обновляем бюджет категории
-    try {
-      await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalBudget });
-      console.log('✓ Total cost обновлен');
-    } catch (error) {
-      console.error('✗ Ошибка обновления total cost:', error.message);
-    }
 
+    // Removed redundant update calls
+    /*
     try {
       await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: spentAmount });
       console.log('✓ Paid amount обновлен');
@@ -1930,6 +1956,7 @@ console.log('Полученные категории:', selectedCategories);
     } catch (error) {
       console.error('✗ Ошибка обновления remaining balance:', error.message);
     }
+    */
 
     console.log('=== Добавление услуг к категории ===');
     let successCount = 0;

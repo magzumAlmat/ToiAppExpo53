@@ -1978,16 +1978,27 @@ useEffect(() => {
       }
     }
 
+    const itemsPayload = filteredData.map((item) => {
+      const quantityVal = parseInt(quantities[`${item.type}-${item.id}`] || "1");
+      const effectiveQuantity = item.type === "restaurant" ? (parseInt(guestCount, 10) || 1) : quantityVal;
+      const costVal = item.type === "restaurant" ? item.averageCost : item.cost;
+      return { id: item.id, type: item.type, quantity: effectiveQuantity, totalCost: costVal * effectiveQuantity };
+    });
+
+    const totalCost = itemsPayload.reduce((sum, item) => sum + item.totalCost, 0);
+    const budgetVal = parseFloat(budget) || 0;
+    const paidAmount = 0;
+    const remainingBalance = budgetVal - totalCost;
+
     const weddingData = {
       name: weddingName.trim(),
       date: dateString,
       host_id: user.id,
-      items: filteredData.map((item) => {
-        const quantityVal = parseInt(quantities[`${item.type}-${item.id}`] || "1");
-        const effectiveQuantity = item.type === "restaurant" ? (parseInt(guestCount, 10) || 1) : quantityVal;
-        const costVal = item.type === "restaurant" ? item.averageCost : item.cost;
-        return { id: item.id, type: item.type, quantity: effectiveQuantity, totalCost: costVal * effectiveQuantity };
-      }),
+      budget: budgetVal,
+      total_cost: totalCost,
+      paid_amount: paidAmount,
+      remaining_balance: remainingBalance,
+      items: itemsPayload,
     };
 
     try {

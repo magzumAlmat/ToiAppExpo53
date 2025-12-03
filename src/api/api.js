@@ -159,6 +159,11 @@ export default {
       throw new Error(`Ошибка обновления остатка категории мероприятия: ${error.response?.data?.message || error.message}`);
     }),
 
+  updateEventCategoryBudget: (id, data) =>
+    api.patch(`/api/event-category/${id}/budget`, data).catch((error) => {
+      throw new Error(`Ошибка обновления бюджета категории мероприятия: ${error.response?.data?.message || error.message}`);
+    }),
+
   addServicesToCategory: (categoryId, data) =>
     api.post(`/api/event-category/${categoryId}/services`, data).catch((error) => handleError(error, 'добавления услуг к категории')),
 
@@ -323,6 +328,11 @@ export default {
   updateWeddingRemainingBalance: (id, data) =>
     api.patch(`/api/weddings/${id}/remaining_balance`, data).catch((error) => {
       throw new Error(`Ошибка обновления остатка свадьбы: ${error.response?.data?.message || error.message}`);
+    }),
+
+  updateWeddingBudget: (id, data) =>
+    api.patch(`/api/weddings/${id}/budget`, data).catch((error) => {
+      throw new Error(`Ошибка обновления бюджета свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
   getWeddingItems: (id) =>

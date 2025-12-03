@@ -1537,10 +1537,16 @@ const CorporateEventScreen = ({ navigation, route }) => {
 
     setLoading(true);
     try {
+      const totalCost = calculateTotalCost;
+      const remaining = remainingBudget;
+
       const payload = { 
         name: eventName.trim(), 
         date: eventDate.toISOString().split('T')[0],
         budget: parseFloat(budget),
+        total_cost: totalCost,
+        paid_amount: 0,
+        remaining_balance: remaining,
         guestCount: parseInt(guestCount, 10),
         type: 'corporate' 
       };
@@ -1560,11 +1566,6 @@ const CorporateEventScreen = ({ navigation, route }) => {
               alert('Мероприятие создано, но произошла ошибка при автоматическом бронировании даты для ресторана. Пожалуйста, забронируйте вручную.');
           }
       }
-
-      const totalCost = calculateTotalCost;
-      await api.updateEventCategoryTotalCost(categoryId, { total_cost: totalCost });
-      await api.updateEventCategoryPaidAmount(categoryId, { paid_amount: 0 });
-      await api.updateEventCategoryRemainingBalance(categoryId, { remaining_balance: totalCost });
 
       for (const item of filteredData) {
         const serviceType = serviceTypeMap[item.type] || item.type;

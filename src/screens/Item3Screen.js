@@ -17,7 +17,16 @@ import {
 import Video from "react-native-video";
 import * as Linking from "expo-linking";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { 
+  setEventCategories, 
+  addEventCategory, 
+  updateEventCategory, 
+  deleteEventCategory as deleteEventCategoryAction,
+  updateEventCategoryTotalCost,
+  updateEventCategoryPaidAmount,
+  updateEventCategoryRemainingBalance
+} from "../store/eventsSlice";
 import api from "../api/api";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
@@ -521,6 +530,51 @@ const styles = StyleSheet.create({
     maxHeight: "90%", // Ограничиваем высоту области прокрутки
     marginBottom: 20,
   },
+  budgetContainer: {
+    backgroundColor: COLORS.white,
+    padding: 12,
+    marginTop: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  budgetRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  budgetLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: COLORS.text,
+  },
+  budgetValue: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: COLORS.primary,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  iconButtonPrimary: {
+    backgroundColor: COLORS.primary,
+  },
+  iconButtonSecondary: {
+    backgroundColor: COLORS.secondary,
+  },
+  iconButtonAccent: {
+    backgroundColor: COLORS.accent,
+  },
+  iconButtonError: {
+    backgroundColor: COLORS.error,
+  },
 });
 
 const determineCategory = (data) => {
@@ -624,11 +678,11 @@ export default function Item3Screen() {
 
   const route = useRoute();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { token, userId } = useSelector((state) => state.auth);
+  const eventsState = useSelector((state) => state.events);
 
   const [selectedItems, setSelectedItems] = useState([]);
-
-  const userId = useSelector((state) => state.auth.user?.id);
-  const token = useSelector((state) => state.auth.token);
  
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
@@ -640,10 +694,12 @@ export default function Item3Screen() {
   const [serviceDetailsModalVisible, setServiceDetailsModalVisible] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [categoryName, setCategoryName] = useState("");
+  const [categoryBudget, setCategoryBudget] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
   const [categoryStatus, setCategoryStatus] = useState("active");
   const [weddingName, setWeddingName] = useState("");
   const [weddingDate, setWeddingDate] = useState("");
+  const [weddingBudget, setWeddingBudget] = useState("");
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedWedding, setSelectedWedding] = useState(null);
@@ -694,6 +750,19 @@ export default function Item3Screen() {
   const [giftTargetType, setGiftTargetType] = useState(null); // 'wedding' | 'eventCategory'
   const [giftTargetId, setGiftTargetId] = useState(null);
 
+  // Financial editing modal states
+  const [financialModalVisible, setFinancialModalVisible] = useState(false);
+  const [financialTargetType, setFinancialTargetType] = useState(null); // 'wedding' | 'eventCategory'
+  const [financialTargetId, setFinancialTargetId] = useState(null);
+  const [editTotalCost, setEditTotalCost] = useState("");
+  const [editPaidAmount, setEditPaidAmount] = useState("");
+  const [editRemainingBalance, setEditRemainingBalance] = useState("");
+
+  // Creation financial fields state
+  const [createTotalCost, setCreateTotalCost] = useState("");
+  const [createPaidAmount, setCreatePaidAmount] = useState("");
+  const [createRemainingBalance, setCreateRemainingBalance] = useState("");
+
   const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
 
 
@@ -714,6 +783,70 @@ export default function Item3Screen() {
     setIsCustomGift(false);
     setFormData({ item_name: "" });
   }, []);
+
+  const openFinancialModal = useCallback((type, id, currentData) => {
+    setFinancialTargetType(type);
+    setFinancialTargetId(id);
+    setEditTotalCost(currentData.total_cost?.toString() || "0");
+    setEditPaidAmount(currentData.paid_amount?.toString() || "0");
+    setEditRemainingBalance(currentData.remaining_balance?.toString() || "0");
+    setFinancialModalVisible(true);
+  }, []);
+
+  const closeFinancialModal = useCallback(() => {
+    setFinancialModalVisible(false);
+    setFinancialTargetType(null);
+    setFinancialTargetId(null);
+    setEditTotalCost("");
+    setEditPaidAmount("");
+    setEditRemainingBalance("");
+  }, []);
+
+  const handleSaveFinancialData = async () => {
+    if (!financialTargetId || !financialTargetType) {
+      Alert.alert("Ошибка", "Не выбран объект для обновления");
+      return;
+    }
+
+    try {
+      const totalCost = parseFloat(editTotalCost) || 0;
+      const paidAmount = parseFloat(editPaidAmount) || 0;
+      const remainingBalance = parseFloat(editRemainingBalance) || 0;
+
+      if (financialTargetType === 'eventCategory') {
+        // Update EventCategory financial fields
+        await api.updateEventCategoryTotalCost(financialTargetId, { total_cost: totalCost });
+        await api.updateEventCategoryPaidAmount(financialTargetId, { paid_amount: paidAmount });
+        await api.updateEventCategoryRemainingBalance(financialTargetId, { remaining_balance: remainingBalance });
+
+        // Update Redux store
+        dispatch(updateEventCategoryTotalCost({ id: financialTargetId, total_cost: totalCost }));
+        dispatch(updateEventCategoryPaidAmount({ id: financialTargetId, paid_amount: paidAmount }));
+        dispatch(updateEventCategoryRemainingBalance({ id: financialTargetId, remaining_balance: remainingBalance }));
+
+        Alert.alert("Успех", "Финансовые данные категории обновлены");
+      } else if (financialTargetType === 'wedding') {
+        // Update Wedding financial fields
+        await api.updateWeddingTotalCost(financialTargetId, { total_cost: totalCost });
+        await api.updateWeddingPaidAmount(financialTargetId, { paid_amount: paidAmount });
+        await api.updateWeddingRemainingBalance(financialTargetId, { remaining_balance: remainingBalance });
+
+        // Update local state
+        setWeddings(prev => prev.map(w => 
+          w.id === financialTargetId 
+            ? { ...w, total_cost: totalCost, paid_amount: paidAmount, remaining_balance: remainingBalance }
+            : w
+        ));
+
+        Alert.alert("Успех", "Финансовые данные свадьбы обновлены");
+      }
+
+      closeFinancialModal();
+    } catch (error) {
+      console.error("Error saving financial data:", error);
+      Alert.alert("Ошибка", `Не удалось сохранить данные: ${error.message}`);
+    }
+  };
   
   const categoryMap = {
     restaurant: "Рестораны",
@@ -759,7 +892,11 @@ export default function Item3Screen() {
       const categories = Array.isArray(response.data)
         ? response.data
         : response.data.data || [];
+      
+      // Sync with Redux
+      dispatch(setEventCategories(categories));
       console.log('Raw Event Categories API response:', JSON.stringify(response.data, null, 2));
+      console.log('Processed categories for Redux:', JSON.stringify(categories, null, 2));
 
       const servicesPromises = categories.map(async (category) => {
         const apiServices = await api.getEventCategoryWithServices(category.id, { page: 1, limit: 100 }).then((res) => {
@@ -794,17 +931,56 @@ export default function Item3Screen() {
       });
 
       const servicesResults = await Promise.all(servicesPromises);
-      const newCache = servicesResults.reduce((acc, { categoryId, services }) => {
-        acc[categoryId] = services;
-        console.log(`Services for category ${categoryId}:`, JSON.stringify(services, null, 2));
-        return acc;
-      }, {});
-      setCategoryServicesCache(newCache);
+      const servicesMap = {};
+      
+      servicesResults.forEach((result) => {
+        servicesMap[result.categoryId] = result.services;
+        
+        // Calculate totals
+        const totalCost = result.services.reduce((sum, service) => {
+          const cost = parseFloat(service.cost || service.price || 0);
+          return sum + (isNaN(cost) ? 0 : cost);
+        }, 0);
+        
+        // TEMPORARILY DISABLED: Redux dispatches causing "undefined action" errors
+        // These will be re-enabled once the import issue is resolved
+        /*
+        // Update Redux state synchronously with error handling
+        try {
+          if (updateEventCategoryTotalCost) {
+            dispatch(updateEventCategoryTotalCost({ id: result.categoryId, total_cost: totalCost }));
+          } else {
+            console.error('updateEventCategoryTotalCost is undefined!');
+          }
+        } catch (dispatchError) {
+          console.error('Error dispatching updateEventCategoryTotalCost:', dispatchError);
+        }
+        
+        // Calculate remaining balance if budget exists
+        const category = categories.find(c => c.id === result.categoryId);
+        if (category && category.budget) {
+          const budget = parseFloat(category.budget);
+          const remaining = budget - totalCost;
+          try {
+            if (updateEventCategoryRemainingBalance) {
+              dispatch(updateEventCategoryRemainingBalance({ id: result.categoryId, remaining_balance: remaining }));
+            } else {
+              console.error('updateEventCategoryRemainingBalance is undefined!');
+            }
+          } catch (dispatchError) {
+            console.error('Error dispatching updateEventCategoryRemainingBalance:', dispatchError);
+          }
+        }
+        */
+      });
+
+      setCategoryServicesCache(servicesMap);
       setEventCategories(categories);
       return categories;
     } catch (error) {
       console.error('Error fetching event categories:', error);
       Alert.alert('Ошибка', 'Не удалось загрузить категории мероприятий');
+      // Still set empty arrays to prevent UI from breaking
       setEventCategories([]);
       setCategoryServicesCache({});
       return [];
@@ -858,6 +1034,7 @@ export default function Item3Screen() {
         ? response.data
         : response.data.data || [];
       setWeddings(weddingData);
+      console.log('Processed weddingData for state:', JSON.stringify(weddingData, null, 2));
       const itemsPromises = weddingData.map((wedding) =>
         api.getWeddingItems(wedding.id, token).then((res) => ({
           weddingId: wedding.id,
@@ -880,6 +1057,23 @@ export default function Item3Screen() {
     } finally {
       setLoadingWeddings(false);
     }
+  };
+
+  // Helper functions for calculating totals
+  const calculateEventCategoryTotal = (categoryId) => {
+    const services = categoryServicesCache[categoryId] || [];
+    return services.reduce((total, service) => {
+      const cost = parseFloat(service.cost) || 0;
+      return total + cost;
+    }, 0);
+  };
+
+  const calculateWeddingTotal = (weddingId) => {
+    const items = weddingItemsCache[weddingId] || [];
+    return items.reduce((total, item) => {
+      const cost = parseFloat(item.total_cost) || 0;
+      return total + cost;
+    }, 0);
   };
 
   const fetchGoods = async () => {
@@ -1043,9 +1237,16 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
         name: categoryName,
         description: categoryDescription,
         status: categoryStatus,
+        budget: categoryBudget ? parseFloat(categoryBudget) : null,
+        total_cost: createTotalCost ? parseFloat(createTotalCost) : 0,
+        paid_amount: createPaidAmount ? parseFloat(createPaidAmount) : 0,
+        remaining_balance: createRemainingBalance ? parseFloat(createRemainingBalance) : 0,
       });
       const newCategory = response.data.data || response.data;
       setEventCategories((prev) => [...prev, newCategory]);
+      
+      // Add to Redux
+      dispatch(addEventCategory(newCategory));
       if (categoryServices.length > 0) {
         await api.addServicesToCategory(newCategory.id, {
           service_ids: categoryServices.map((s) => ({
@@ -1061,6 +1262,10 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       Alert.alert("Успех", "Категория мероприятия создана");
       setCategoryName("");
       setCategoryDescription("");
+      setCategoryBudget("");
+      setCreateTotalCost("");
+      setCreatePaidAmount("");
+      setCreateRemainingBalance("");
       setCategoryStatus("active");
       setCategoryServices([]);
       setCategoryModalVisible(false);
@@ -1080,6 +1285,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
         name: categoryName,
         description: categoryDescription,
         status: categoryStatus,
+        budget: categoryBudget ? parseFloat(categoryBudget) : null,
       });
       setEventCategories((prev) =>
         prev.map((cat) =>
@@ -1088,6 +1294,9 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
             : cat
         )
       );
+      
+      // Update Redux
+      dispatch(updateEventCategory(response.data.data || response.data));
       await api.updateServicesForCategory(selectedCategory.id, {
         service_ids: categoryServices.map((s) => ({
           serviceId: s.id,
@@ -1122,13 +1331,17 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
           onPress: async () => {
             try {
               await api.deleteEventCategory(id);
-              setEventCategories((prev) => prev.filter((cat) => cat.id !== id));
+              setEventCategories((prev) => prev.filter((c) => c.id !== id));
               setCategoryServicesCache((prev) => {
                 const newCache = { ...prev };
                 delete newCache[id];
                 return newCache;
               });
-              Alert.alert("Успех", "Категория мероприятия удалена");
+              
+              // Delete from Redux
+              dispatch(deleteEventCategoryAction(id));
+              
+              Alert.alert("Успех", "Категория удалена");
             } catch (error) {
               console.error("Error deleting event category:", error);
               Alert.alert(
@@ -1276,40 +1489,71 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       const weddingData = {
         name: weddingName,
         date: weddingDate,
+        budget: weddingBudget ? parseFloat(weddingBudget) : 0, // Include budget
+        total_cost: createTotalCost ? parseFloat(createTotalCost) : 0,
+        paid_amount: createPaidAmount ? parseFloat(createPaidAmount) : 0,
+        remaining_balance: createRemainingBalance ? parseFloat(createRemainingBalance) : 0,
         items,
       };
       const response = await api.createWedding(weddingData, token);
       const newWedding = response.data.data;
+      console.log('API response newWedding:', JSON.stringify(newWedding, null, 2));
 
       if (newWedding && newWedding.id) {
-        const totalBudget = parseFloat(budget); // Use the budget from state
-        const spentAmount = newWedding.total_cost || 0; // This is the total cost of items
-        const remaining = totalBudget - spentAmount;
+        // Fetch items immediately to get accurate costs
+        const itemsResponse = await api.getWeddingItems(newWedding.id, token);
+        const fetchedItems = itemsResponse.data.data || [];
+        setWeddingItemsCache((prev) => ({
+          ...prev,
+          [newWedding.id]: fetchedItems,
+        }));
 
-        await api.updateWeddingTotalCost(newWedding.id, { total_cost: totalBudget });
-        await api.updateWeddingPaidAmount(newWedding.id, { paid_amount: spentAmount });
-        await api.updateWeddingRemainingBalance(newWedding.id, { remaining_balance: remaining });
+        // Ensure newWedding has initial financial fields from API or defaults
+        const initialBudget = newWedding.budget || (weddingBudget ? parseFloat(weddingBudget) : 0);
+        
+        // Calculate total cost from FETCHED items
+        let initialTotalCost = createTotalCost ? parseFloat(createTotalCost) : 0;
+        if (fetchedItems.length > 0 && initialTotalCost === 0) {
+          initialTotalCost = fetchedItems.reduce((sum, item) => {
+            return sum + (parseFloat(item.total_cost) || 0);
+          }, 0);
+        }
 
+        const initialPaidAmount = createPaidAmount ? parseFloat(createPaidAmount) : (parseFloat(newWedding.paid_amount) || 0);
+        const initialRemainingBalance = createRemainingBalance ? parseFloat(createRemainingBalance) : (initialBudget - initialTotalCost);
+
+        // Update financial fields via direct API calls
+        try {
+          await api.updateWeddingBudget(newWedding.id, { budget: initialBudget });
+          await api.updateWeddingTotalCost(newWedding.id, { total_cost: initialTotalCost });
+          await api.updateWeddingPaidAmount(newWedding.id, { paid_amount: initialPaidAmount });
+          await api.updateWeddingRemainingBalance(newWedding.id, { remaining_balance: initialRemainingBalance });
+        } catch (error) {
+          console.error('Error updating wedding financial fields:', error);
+        }
+
+        // Construct the updated wedding object with all financial details
         const updatedWedding = {
             ...newWedding,
-            paid_amount: spentAmount.toString(),
-            remaining_balance: remaining.toString()
+            budget: initialBudget,
+            total_cost: initialTotalCost,
+            paid_amount: initialPaidAmount,
+            remaining_balance: initialRemainingBalance,
         };
+        console.log('Updated wedding object before setting state:', JSON.stringify(updatedWedding, null, 2));
         setWeddings((prev) => [...prev, updatedWedding]);
-        dispatch(setEventCosts({ totalCost: totalBudget, paidAmount: spentAmount, remainingBalance: remaining }));
       } else {
         setWeddings((prev) => [...prev, newWedding]);
       }
 
-      const itemsResponse = await api.getWeddingItems(newWedding.id, token);
-      setWeddingItemsCache((prev) => ({
-        ...prev,
-        [newWedding.id]: itemsResponse.data.data || [],
-      }));
       Alert.alert("Успех", "Свадьба создана");
       setWeddingModalVisible(false);
       setWeddingName("");
       setWeddingDate("");
+      setWeddingBudget(""); // Reset wedding budget
+      setCreateTotalCost("");
+      setCreatePaidAmount("");
+      setCreateRemainingBalance("");
       setHasShownNoWeddingsAlert(false);
       setActiveWeddingId(newWedding.id);
     } catch (error) {
@@ -1580,6 +1824,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     setSelectedCategory(category);
     setCategoryName(category.name);
     setCategoryDescription(category.description || "");
+    setCategoryBudget(category.budget ? String(category.budget) : "");
     setCategoryStatus(category.status || "active");
     const details = await fetchEventCategoryDetails(category.id);
     setCategoryServices(
@@ -1882,6 +2127,42 @@ const handleDetailsPress = () => {
         onChangeText={setCategoryName}
       />
       <TextInput
+        style={styles.input}
+        placeholder="Бюджет (тг)"
+        placeholderTextColor={COLORS.muted}
+        value={categoryBudget}
+        onChangeText={(text) => setCategoryBudget(text.replace(/[^0-9.]/g, ''))}
+        keyboardType="numeric"
+      />
+      {!selectedCategory && (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Общая сумма (тг)"
+            placeholderTextColor={COLORS.muted}
+            value={createTotalCost}
+            onChangeText={(text) => setCreateTotalCost(text.replace(/[^0-9.]/g, ''))}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Оплачено (тг)"
+            placeholderTextColor={COLORS.muted}
+            value={createPaidAmount}
+            onChangeText={(text) => setCreatePaidAmount(text.replace(/[^0-9.]/g, ''))}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Остаток (тг)"
+            placeholderTextColor={COLORS.muted}
+            value={createRemainingBalance}
+            onChangeText={(text) => setCreateRemainingBalance(text.replace(/[^0-9.]/g, ''))}
+            keyboardType="numeric"
+          />
+        </>
+      )}
+      <TextInput
         style={[styles.input, styles.multilineInput]}
         placeholder="Описание категории"
         placeholderTextColor={COLORS.muted}
@@ -2011,10 +2292,10 @@ const handleDetailsPress = () => {
                       </Text>
                       <View style={styles.itemActions}>
                         <TouchableOpacity
-                          style={styles.detailsButton}
+                          style={[styles.iconButton, styles.iconButtonPrimary]}
                           onPress={() => openServiceDetailsModal(service)}
                         >
-                          <Text style={styles.detailsButtonText}>Подробнее</Text>
+                          <Icon name="info" size={24} color={COLORS.white} />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -2040,24 +2321,67 @@ const handleDetailsPress = () => {
             </TouchableOpacity>
           </View>
         )}
+        
+        {/* Budget Display */}
+        <View style={styles.budgetContainer}>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>Общая сумма:</Text>
+            <Text style={styles.budgetValue}>
+              {(parseFloat(item.total_cost) || 0).toLocaleString()} тг
+            </Text>
+          </View>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>Бюджет:</Text>
+            <Text style={styles.budgetValue}>
+              {(parseFloat(item.budget) || 0).toLocaleString()} тг
+            </Text>
+          </View>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>Оплачено:</Text>
+            <Text style={styles.budgetValue}>
+              {(parseFloat(item.paid_amount) || 0).toLocaleString()} тг
+            </Text>
+          </View>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>Остаток:</Text>
+            <Text style={[styles.budgetValue, {
+              color: (parseFloat(item.remaining_balance) || 0) >= 0
+                ? COLORS.secondary
+                : COLORS.error
+            }]}>
+              {(parseFloat(item.remaining_balance) || 0).toLocaleString()} тг
+            </Text>
+          </View>
+        </View>
+
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            style={styles.actionButtonSecondary}
+            style={[styles.iconButton, styles.iconButtonPrimary]}
+            onPress={() => openFinancialModal('eventCategory', item.id, {
+              total_cost: parseFloat(item.total_cost) || 0,
+              paid_amount: parseFloat(item.paid_amount) || 0,
+              remaining_balance: parseFloat(item.remaining_balance) || 0
+            })}
+          >
+            <Icon name="edit" size={24} color={COLORS.white} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.iconButton, styles.iconButtonSecondary]}
             onPress={() => openAddGiftModal('eventCategory', item.id)}
           >
-            <Text style={styles.actionButtonText}>Добавить подарок</Text>
+            <Icon name="card-giftcard" size={24} color={COLORS.white} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.actionButtonAccent}
+            style={[styles.iconButton, styles.iconButtonAccent]}
             onPress={() => fetchWishlistItems('eventCategory', item.id)}
           >
-            <Text style={styles.actionButtonText}>Просмотреть подарки</Text>
+            <Icon name="visibility" size={24} color={COLORS.white} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.actionButtonError}
+            style={[styles.iconButton, styles.iconButtonError]}
             onPress={() => handleDeleteEventCategory(item.id)}
           >
-            <Text style={styles.actionButtonText}>Удалить</Text>
+            <Icon name="delete" size={24} color={COLORS.white} />
           </TouchableOpacity>
         </View>
       </View>
@@ -2065,6 +2389,7 @@ const handleDetailsPress = () => {
   };
 
   const renderWeddingItem = ({ item }) => {
+    console.log('Rendering Wedding Item:', JSON.stringify(item, null, 2));
     const filteredItems = weddingItemsCache[item.id] || [];
     const groupedItems = groupItemsByCategory(filteredItems);
     return (
@@ -2144,16 +2469,16 @@ const handleDetailsPress = () => {
                     </Text>
                     <View style={styles.itemActions}>
                       <TouchableOpacity
-                        style={styles.detailsButton}
+                        style={[styles.iconButton, styles.iconButtonPrimary]}
                         onPress={() => openDetailsModal(weddingItem)}
                       >
-                        <Text style={styles.detailsButtonText}>Подробнее</Text>
+                        <Icon name="info" size={24} color={COLORS.white} />
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={styles.deleteButton}
+                        style={[styles.iconButton, styles.iconButtonError]}
                         onPress={() => handleDeleteWeddingItem(weddingItem.id)}
                       >
-                        <Text style={styles.deleteButtonText}>Удалить</Text>
+                        <Icon name="delete" size={24} color={COLORS.white} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -2176,35 +2501,78 @@ const handleDetailsPress = () => {
             </TouchableOpacity>
           </View>
         )}
+        
+        {/* Budget Display */}
+        <View style={styles.budgetContainer}>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>Бюджет:</Text>
+            <Text style={styles.budgetValue}>
+              {(item.budget || 0).toLocaleString()} тг
+            </Text>
+          </View>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>Общая сумма:</Text>
+            <Text style={styles.budgetValue}>
+              {(item.total_cost || 0).toLocaleString()} тг
+            </Text>
+          </View>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>Оплачено:</Text>
+            <Text style={styles.budgetValue}>
+              {(item.paid_amount || 0).toLocaleString()} тг
+            </Text>
+          </View>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>Остаток:</Text>
+            <Text style={[styles.budgetValue, {
+              color: (item.remaining_balance || 0) >= 0
+                ? COLORS.secondary
+                : COLORS.error
+            }]}>
+              {(item.remaining_balance || 0).toLocaleString()} тг
+            </Text>
+          </View>
+        </View>
+
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            style={styles.actionButtonSecondary}
+            style={[styles.iconButton, styles.iconButtonPrimary]}
+            onPress={() => openFinancialModal('wedding', item.id, {
+              total_cost: item.total_cost || 0,
+              paid_amount: item.paid_amount || 0,
+              remaining_balance: item.remaining_balance || 0
+            })}
+          >
+            <Icon name="edit" size={24} color={COLORS.white} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.iconButton, styles.iconButtonSecondary]}
             onPress={() => {
               openAddGiftModal('wedding', item.id);
             }}
           >
-            <Text style={styles.actionButtonText}>Добавить подарок</Text>
+            <Icon name="card-giftcard" size={24} color={COLORS.white} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.actionButtonAccent}
+            style={[styles.iconButton, styles.iconButtonAccent]}
             onPress={() => {
               setSelectedWedding(item);
               fetchWishlistItems('wedding', item.id);
             }}
           >
-            <Text style={styles.actionButtonText}>Просмотреть подарки</Text>
+            <Icon name="visibility" size={24} color={COLORS.white} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.actionButtonError}
+            style={[styles.iconButton, styles.iconButtonError]}
             onPress={() => handleDeleteWedding(item.id)}
           >
-            <Text style={styles.actionButtonText}>Удалить</Text>
+            <Icon name="delete" size={24} color={COLORS.white} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.actionButtonPrimary}
+            style={[styles.iconButton, styles.iconButtonPrimary]}
             onPress={() => handleShareWeddingLink(item.id)}
           >
-            <Text style={styles.actionButtonText}>Поделиться</Text>
+            <Icon name="share" size={24} color={COLORS.white} />
           </TouchableOpacity>
         </View>
       </View>
@@ -2364,12 +2732,16 @@ const handleDetailsPress = () => {
 
 
   const combinedData = [
-    ...eventCategories.map((cat) => ({ type: "category", data: cat })),
-    ...weddings.map((wed) => ({ type: "wedding", data: wed })),
+    ...weddings.map((wedding) => ({ type: "wedding", data: wedding })),
+    // Use local state instead of Redux state to avoid action errors
+    ...(eventCategories || []).map((category) => ({
+      type: "eventCategory",
+      data: category,
+    })),
   ];
 
   const renderItem = ({ item }) => {
-    if (item.type === "category") {
+    if (item.type === "eventCategory") {
       return renderEventCategoryItem({ item: item.data });
     } else if (item.type === "wedding") {
       return renderWeddingItem({ item: item.data });
@@ -2715,6 +3087,51 @@ return (
         </SafeAreaView>
       </Modal>
 
+      {/* === FINANCIAL EDITING MODAL === */}
+      <Modal visible={financialModalVisible} animationType="slide">
+        <SafeAreaView style={styles.modalContainer}>
+          <Text style={styles.subtitle}>
+            Редактировать финансы — {financialTargetType === "wedding" ? "Свадьба" : "Мероприятие"}
+          </Text>
+
+          <Text style={styles.pickerLabel}>Общая сумма (тг)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Общая сумма"
+            value={editTotalCost}
+            onChangeText={setEditTotalCost}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.pickerLabel}>Оплачено (тг)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Оплачено"
+            value={editPaidAmount}
+            onChangeText={setEditPaidAmount}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.pickerLabel}>Остаток (тг)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Остаток"
+            value={editRemainingBalance}
+            onChangeText={setEditRemainingBalance}
+            keyboardType="numeric"
+          />
+
+          <View style={styles.buttonRowModal}>
+            <Button
+              title="Сохранить"
+              onPress={handleSaveFinancialData}
+              color={COLORS.primary}
+            />
+            <Button title="Отмена" onPress={closeFinancialModal} color={COLORS.error} />
+          </View>
+        </SafeAreaView>
+      </Modal>
+
       
     <View style={styles.buttonRow}></View>
     {loadingCategories || loadingWeddings ? (
@@ -2870,6 +3287,34 @@ return (
           placeholder="Название свадьбы"
           value={weddingName}
           onChangeText={setWeddingName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Бюджет свадьбы (тг)"
+          value={weddingBudget}
+          onChangeText={(text) => setWeddingBudget(text.replace(/[^0-9.]/g, ''))}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Общая сумма (тг)"
+          value={createTotalCost}
+          onChangeText={(text) => setCreateTotalCost(text.replace(/[^0-9.]/g, ''))}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Оплачено (тг)"
+          value={createPaidAmount}
+          onChangeText={(text) => setCreatePaidAmount(text.replace(/[^0-9.]/g, ''))}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Остаток (тг)"
+          value={createRemainingBalance}
+          onChangeText={(text) => setCreateRemainingBalance(text.replace(/[^0-9.]/g, ''))}
+          keyboardType="numeric"
         />
         <TouchableOpacity onPress={() => setShowCalendar(true)}>
           <Text style={styles.input}>{weddingDate || "Выберите дату"}</Text>
