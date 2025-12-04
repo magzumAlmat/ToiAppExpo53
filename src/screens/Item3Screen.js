@@ -19,7 +19,7 @@ import * as Linking from "expo-linking";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useSelector, useDispatch } from "react-redux";
 import { 
-  setEventCategories, 
+  setEventCategories as setEventCategoriesAction, 
   addEventCategory, 
   updateEventCategory, 
   deleteEventCategory as deleteEventCategoryAction,
@@ -679,6 +679,8 @@ export default function Item3Screen() {
   const route = useRoute();
   const navigation = useNavigation();
   const dispatch = useDispatch();
+
+
   const { token, userId } = useSelector((state) => state.auth);
   const eventsState = useSelector((state) => state.events);
 
@@ -819,10 +821,21 @@ export default function Item3Screen() {
         await api.updateEventCategoryPaidAmount(financialTargetId, { paid_amount: paidAmount });
         await api.updateEventCategoryRemainingBalance(financialTargetId, { remaining_balance: remainingBalance });
 
-        // Update Redux store
-        dispatch(updateEventCategoryTotalCost({ id: financialTargetId, total_cost: totalCost }));
-        dispatch(updateEventCategoryPaidAmount({ id: financialTargetId, paid_amount: paidAmount }));
-        dispatch(updateEventCategoryRemainingBalance({ id: financialTargetId, remaining_balance: remainingBalance }));
+
+        // Update Redux store with error handling
+        try {
+          if (updateEventCategoryTotalCost) {
+            dispatch(updateEventCategoryTotalCost({ id: financialTargetId, total_cost: totalCost }));
+          }
+          if (updateEventCategoryPaidAmount) {
+            dispatch(updateEventCategoryPaidAmount({ id: financialTargetId, paid_amount: paidAmount }));
+          }
+          if (updateEventCategoryRemainingBalance) {
+            dispatch(updateEventCategoryRemainingBalance({ id: financialTargetId, remaining_balance: remainingBalance }));
+          }
+        } catch (dispatchError) {
+          console.error('Error dispatching financial updates:', dispatchError);
+        }
 
         Alert.alert("Успех", "Финансовые данные категории обновлены");
       } else if (financialTargetType === 'wedding') {
@@ -894,7 +907,13 @@ export default function Item3Screen() {
         : response.data.data || [];
       
       // Sync with Redux
-      dispatch(setEventCategories(categories));
+      try {
+        if (setEventCategoriesAction) {
+          dispatch(setEventCategoriesAction(categories));
+        }
+      } catch (dispatchError) {
+        console.error('Error dispatching setEventCategories:', dispatchError);
+      }
       console.log('Raw Event Categories API response:', JSON.stringify(response.data, null, 2));
       console.log('Processed categories for Redux:', JSON.stringify(categories, null, 2));
 
@@ -1112,9 +1131,13 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
   setLoadingFiles(true);
   let normalizedServiceType = serviceType ? serviceType.toLowerCase() : "";
   try {
-    if (normalizedServiceType === 'flower') {
+    // Special handling for exceptions
+    if (normalizedServiceType === 'flower' || normalizedServiceType === 'flowers') {
       normalizedServiceType = 'flowers';
+    } else if (normalizedServiceType === 'goods' || normalizedServiceType === 'good') {
+      normalizedServiceType = 'good';
     } else {
+      // Default behavior: remove trailing 's' to singularize (e.g. restaurants -> restaurant)
       normalizedServiceType = normalizedServiceType.replace(/s$/, '');
     }
     const methodMap = {
@@ -1131,6 +1154,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       wedding: 'getWeddingById',
       eventcategory: 'getEventCategoryById',
       wishlist: 'getWishlistById',
+      good: 'getGoodById', // Added missing mapping
     };
     const methodName = methodMap[normalizedServiceType];
     if (!methodName || !api[methodName]) {
@@ -1246,7 +1270,13 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       setEventCategories((prev) => [...prev, newCategory]);
       
       // Add to Redux
-      dispatch(addEventCategory(newCategory));
+      try {
+        if (addEventCategory) {
+          dispatch(addEventCategory(newCategory));
+        }
+      } catch (dispatchError) {
+        console.error('Error dispatching addEventCategory:', dispatchError);
+      }
       if (categoryServices.length > 0) {
         await api.addServicesToCategory(newCategory.id, {
           service_ids: categoryServices.map((s) => ({
@@ -1295,8 +1325,14 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
         )
       );
       
-      // Update Redux
-      dispatch(updateEventCategory(response.data.data || response.data));
+      // Update Redux with error handling
+      try {
+        if (updateEventCategory) {
+          dispatch(updateEventCategory(response.data.data || response.data));
+        }
+      } catch (dispatchError) {
+        console.error('Error dispatching updateEventCategory:', dispatchError);
+      }
       await api.updateServicesForCategory(selectedCategory.id, {
         service_ids: categoryServices.map((s) => ({
           serviceId: s.id,
@@ -1339,7 +1375,13 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
               });
               
               // Delete from Redux
-              dispatch(deleteEventCategoryAction(id));
+              try {
+                if (deleteEventCategoryAction) {
+                  dispatch(deleteEventCategoryAction(id));
+                }
+              } catch (dispatchError) {
+                console.error('Error dispatching deleteEventCategoryAction:', dispatchError);
+              }
               
               Alert.alert("Успех", "Категория удалена");
             } catch (error) {
@@ -1747,16 +1789,21 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
   };
 
   const fetchWishlistItems = async (type, id) => {
+    console.log(`[fetchWishlistItems] type=${type}, id=${id}, token=${token ? 'present' : 'missing'}`);
     try {
       let response;
       if (type === 'wedding') {
+        console.log(`[fetchWishlistItems] Calling getWishlistByWeddingId with id=${id}`);
         response = await api.getWishlistByWeddingId(id, token);
       } else if (type === 'eventCategory') {
-        response = await api.getWishlistByEventCategoryId(id);
+        console.log(`[fetchWishlistItems] Calling getWishlistByEventCategoryId with id=${id}`);
+        response = await api.getWishlistByEventCategoryId(id, token);
       } else {
           // Fallback for legacy calls (if any)
+          console.log(`[fetchWishlistItems] Fallback: Calling getWishlistByWeddingId with id=${id}`);
           response = await api.getWishlistByWeddingId(id, token);
       }
+      console.log(`[fetchWishlistItems] Response received:`, response.data);
       const items = response.data.data;
       setWishlistItems(items);
       const filesPromises = items

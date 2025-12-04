@@ -211,14 +211,18 @@ export default {
   createWish: (wishlistData) =>
     api.post('/api/wishlist', wishlistData).catch((error) => handleError(error, 'создания желания')),
 
-  getWishlistByWeddingId: (weddingId) =>
-    api.get(`/api/wishlist/wedding/${weddingId}`).catch((error) => handleError(error, 'получения списка желаний')),
+  getWishlistByWeddingId: (weddingId, token) =>
+    api.get(`/api/wishlist/wedding/${weddingId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    }).catch((error) => handleError(error, 'получения списка желаний')),
 
   getWishlistByWeddingIdWithoutToken: (weddingId) =>
     api.get(`/api/wishlist/${weddingId}`).catch((error) => handleError(error, 'получения списка желаний без токена')),
 
-  getWishlistByEventCategoryId: (categoryId) =>
-    api.get(`/api/wishlist/eventcategory/${categoryId}`).catch((error) => handleError(error, 'получения списка желаний категории')),
+  getWishlistByEventCategoryId: (categoryId, token) =>
+    api.get(`/api/wishlist/eventcategory/${categoryId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    }).catch((error) => handleError(error, 'получения списка желаний категории')),
 
   reserveWishlistItem: (id) =>
     api.patch(`/api/wishlist/${id}/reserve`, {}).catch((error) => handleError(error, 'резервирования желания')),
@@ -346,30 +350,8 @@ export default {
     }),
 
   // Список желаний
-  createWish: (wishlistData) =>
-    api.post('/api/wishlist', wishlistData).catch((error) => {
-      throw new Error(`Ошибка создания желания: ${error.response?.data?.message || error.message}`);
-    }),
-
-  getWishlistByWeddingId: (weddingId) =>
-    api.get(`/api/wishlist/wedding/${weddingId}`).catch((error) => {
-      throw new Error(`Ошибка получения списка желаний: ${error.response?.data?.message || error.message}`);
-    }),
-
-  getWishlistByWeddingIdWithoutToken: (weddingId) =>
-    api.get(`/api/wishlist/${weddingId}`).catch((error) => {
-      throw new Error(`Ошибка получения списка желаний без токена: ${error.response?.data?.message || error.message}`);
-    }),
-
-  reserveWishlistItem: (id) =>
-    api.patch(`/api/wishlist/${id}/reserve`, {}).catch((error) => {
-      throw new Error(`Ошибка резервирования желания: ${error.response?.data?.message || error.message}`);
-    }),
-
-  reserveWishlistItemWithoutToken: (id, data) =>
-    api.patch(`/api/wishlist/${id}/reservebyunknown`, { data }).catch((error) => {
-      throw new Error(`Ошибка резервирования желания без токена: ${error.response?.data?.message || error.message}`);
-    }),
+  // Another duplicate wishlist methods block removed (lines 349-372)
+  // Correct definitions are at lines 210-228
 
   // Блокировка дат
   addDataBlockToRestaurant: (restaurantId, date) =>
@@ -443,31 +425,8 @@ export default {
       throw new Error(`Ошибка удаления элемента свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
-  // Список желаний
-  createWish: (wishlistData) =>
-    api.post('/api/wishlist', wishlistData).catch((error) => {
-      throw new Error(`Ошибка создания желания: ${error.response?.data?.message || error.message}`);
-    }),
-
-  getWishlistByWeddingId: (weddingId) =>
-    api.get(`/api/wishlist/${weddingId}`).catch((error) => {
-      throw new Error(`Ошибка получения списка желаний: ${error.response?.data?.message || error.message}`);
-    }),
-
-  getWishlistByWeddingIdWithoutToken: (weddingId) =>
-    api.get(`/api/wishlist/${weddingId}`).catch((error) => {
-      throw new Error(`Ошибка получения списка желаний без токена: ${error.response?.data?.message || error.message}`);
-    }),
-
-  reserveWishlistItem: (id) =>
-    api.patch(`/api/wishlist/${id}/reserve`, {}).catch((error) => {
-      throw new Error(`Ошибка резервирования желания: ${error.response?.data?.message || error.message}`);
-    }),
-
-  reserveWishlistItemWithoutToken: (id, data) =>
-    api.patch(`/api/wishlist/${id}/reservebyunknown`, { data }).catch((error) => {
-      throw new Error(`Ошибка резервирования желания без токена: ${error.response?.data?.message || error.message}`);
-    }),
+  // Duplicate wishlist methods removed (lines 446-470)
+  // Correct definitions are at lines 210-228
 
   createTraditionalGift: (data) =>
     api.post('/api/traditional-gift', data).catch((error) => {

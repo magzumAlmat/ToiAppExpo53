@@ -1,5 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+console.log('eventsSlice.js loaded!');
+
 const initialState = {
   eventCategories: [],
   budgets: {}, // { [categoryId]: budgetValue }
