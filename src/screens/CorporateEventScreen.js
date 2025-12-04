@@ -1491,7 +1491,7 @@ const CorporateEventScreen = ({ navigation, route }) => {
   // Duplicate fetchAllBlockedDays and associated effect removed because the function and listener
   // are already declared and handled earlier in the file; reuse the original implementation.
 
-  console.log('Current blockedDays state (CorporateEventScreen):', JSON.stringify(blockedDays, null, 2));
+  // console.log('Current blockedDays state (CorporateEventScreen):', JSON.stringify(blockedDays, null, 2));
   const calendarMarkedDates = Object.keys(blockedDays).reduce((acc, date) => {
     acc[date] = { ...blockedDays[date], marked: true };
     return acc;
@@ -1502,7 +1502,7 @@ const CorporateEventScreen = ({ navigation, route }) => {
       disableTouchEvent: true,
     },
   });
-  console.log('Passing to Calendar markedDates (CorporateEventScreen):', JSON.stringify(calendarMarkedDates, null, 2));
+
 
   const calculateTotalCost = useMemo(() => {
     return filteredData.reduce((sum, item) => {
