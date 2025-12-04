@@ -2516,12 +2516,12 @@ const handleDetailsPress = () => {
               {(item.total_cost || 0).toLocaleString()} тг
             </Text>
           </View>
-          <View style={styles.budgetRow}>
+          {/* <View style={styles.budgetRow}>
             <Text style={styles.budgetLabel}>Оплачено:</Text>
             <Text style={styles.budgetValue}>
               {(item.paid_amount || 0).toLocaleString()} тг
             </Text>
-          </View>
+          </View> */}
           <View style={styles.budgetRow}>
             <Text style={styles.budgetLabel}>Остаток:</Text>
             <Text style={[styles.budgetValue, {
@@ -2535,7 +2535,7 @@ const handleDetailsPress = () => {
         </View>
 
         <View style={styles.buttonRow}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[styles.iconButton, styles.iconButtonPrimary]}
             onPress={() => openFinancialModal('wedding', item.id, {
               total_cost: item.total_cost || 0,
@@ -2544,7 +2544,7 @@ const handleDetailsPress = () => {
             })}
           >
             <Icon name="edit" size={24} color={COLORS.white} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={[styles.iconButton, styles.iconButtonSecondary]}
             onPress={() => {
