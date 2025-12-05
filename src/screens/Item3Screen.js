@@ -899,6 +899,7 @@ export default function Item3Screen() {
 
 
   const fetchEventCategories = async () => {
+    console.log('[fetchEventCategories] START - fetching event categories...');
     setLoadingCategories(true);
     try {
       const response = await api.getEventCategories();
@@ -918,35 +919,65 @@ export default function Item3Screen() {
       console.log('Processed categories for Redux:', JSON.stringify(categories, null, 2));
 
       const servicesPromises = categories.map(async (category) => {
-        const apiServices = await api.getEventCategoryWithServices(category.id, { page: 1, limit: 100 }).then((res) => {
-          console.log(`Raw services response for category ${category.id}:`, JSON.stringify(res.data, null, 2));
-          return res.data.data.services || [];
-        });
-        const eventServices = category.EventServices || [];
+        try {
+          const apiServices = await api.getEventCategoryWithServices(category.id, { page: 1, limit: 100 })
+            .then((res) => {
+              console.log(`Raw services response for category ${category.id}:`, JSON.stringify(res.data, null, 2));
+              return res.data.data.services || [];
+            })
+            .catch((err) => {
+              console.error(`Error fetching services for category ${category.id}:`, err);
+              return [];
+            });
 
-        const allServices = await Promise.all(
-          eventServices.map(async (es) => {
-            const existingService = apiServices.find(
-              (as) => as.serviceId === es.serviceId && as.serviceType === es.serviceType
-            );
-            if (existingService) {
-              return existingService;
-            }
-            const details = await fetchServiceDetails(es.serviceId, es.serviceType);
-            return details ? { ...details, id: es.serviceId, serviceId: es.serviceId, serviceType: es.serviceType } : {
-              id: es.serviceId,
-              name: `Service ${es.serviceId}`,
-              serviceType: es.serviceType,
-              serviceId: es.serviceId,
-              cost: details?.cost || 0,
-            };
-          })
-        );
+          const eventServices = category.EventServices || [];
 
-        return {
-          categoryId: category.id,
-          services: allServices.filter((s) => s !== null),
-        };
+          const allServices = await Promise.all(
+            eventServices.map(async (es) => {
+              const existingService = apiServices.find(
+                (as) => as.serviceId === es.serviceId && as.serviceType === es.serviceType
+              );
+              
+              // If existing service has cost, use it. Otherwise, fetch details.
+              if (existingService && (existingService.cost !== undefined && existingService.cost !== null)) {
+                return existingService;
+              }
+
+              try {
+                const details = await getServiceDetailsData(es.serviceId, es.serviceType);
+                return details ? { ...details, id: es.serviceId, serviceId: es.serviceId, serviceType: es.serviceType, quantity: es.quantity || 1 } : {
+                  id: es.serviceId,
+                  name: `Service ${es.serviceId}`,
+                  serviceType: es.serviceType,
+                  serviceId: es.serviceId,
+                  cost: 0,
+                  quantity: es.quantity || 1,
+                };
+              } catch (err) {
+                console.error(`Failed to fetch details for ${es.serviceType}/${es.serviceId}`, err);
+                return existingService || {
+                  id: es.serviceId,
+                  name: `Service ${es.serviceId}`,
+                  serviceType: es.serviceType,
+                  serviceId: es.serviceId,
+                  cost: 0,
+                  quantity: es.quantity || 1,
+                };
+              }
+            })
+          );
+
+          return {
+            categoryId: category.id,
+            services: allServices.filter((s) => s !== null),
+          };
+        } catch (catError) {
+          console.error(`Error processing category ${category.id}:`, catError);
+          return {
+            categoryId: category.id,
+            services: []
+          };
+        }
       });
 
       const servicesResults = await Promise.all(servicesPromises);
@@ -954,6 +985,7 @@ export default function Item3Screen() {
       
       servicesResults.forEach((result) => {
         servicesMap[result.categoryId] = result.services;
+        console.log(`[fetchEventCategories] Cache for category ${result.categoryId}:`, JSON.stringify(result.services, null, 2));
         
         // Calculate totals
         const totalCost = result.services.reduce((sum, service) => {
@@ -993,11 +1025,14 @@ export default function Item3Screen() {
         */
       });
 
+      console.log('[fetchEventCategories] Setting cache with servicesMap:', Object.keys(servicesMap));
       setCategoryServicesCache(servicesMap);
       setEventCategories(categories);
+      console.log('[fetchEventCategories] COMPLETE - categories and cache set successfully');
       return categories;
     } catch (error) {
-      console.error('Error fetching event categories:', error);
+      console.error('[fetchEventCategories] ERROR:', error);
+      console.error('[fetchEventCategories] Error stack:', error.stack);
       Alert.alert('Ошибка', 'Не удалось загрузить категории мероприятий');
       // Still set empty arrays to prevent UI from breaking
       setEventCategories([]);
@@ -1126,75 +1161,90 @@ export default function Item3Screen() {
   }
 };
 
+const getServiceDetailsData = async (serviceId, serviceType) => {
+  let normalizedServiceType = serviceType ? serviceType.toLowerCase() : "";
+  // Special handling for exceptions
+  if (normalizedServiceType === 'flower' || normalizedServiceType === 'flowers') {
+    normalizedServiceType = 'flowers';
+  } else if (normalizedServiceType === 'goods' || normalizedServiceType === 'good') {
+    normalizedServiceType = 'good';
+  } else {
+    // Default behavior: remove trailing 's' to singularize (e.g. restaurants -> restaurant)
+    normalizedServiceType = normalizedServiceType.replace(/s$/, '');
+  }
+  const methodMap = {
+    restaurant: 'getRestaurantById',
+    clothing: 'getClothingById',
+    tamada: 'getTamadaById',
+    program: 'getProgramById',
+    traditionalgift: 'getTraditionalGiftById',
+    flowers: 'getFlowersById',
+    cake: 'getCakeById',
+    alcohol: 'getAlcoholById',
+    transport: 'getTransportById',
+    jewelry: 'getJewelryById',
+    wedding: 'getWeddingById',
+    eventcategory: 'getEventCategoryById',
+    wishlist: 'getWishlistById',
+    good: 'getGoodById',
+  };
+  const methodName = methodMap[normalizedServiceType];
+  if (!methodName || !api[methodName]) {
+    throw new Error(`Неизвестный тип сервиса: ${normalizedServiceType}`);
+  }
+  const response = await api[methodName](serviceId);
+  let data = response.data.data || response.data;
+
+  if (normalizedServiceType === 'restaurant' && Array.isArray(data)) {
+    data = data.length > 0 ? data[0] : { name: 'Ресторан не найден', cost: null };
+  }
+
+  // Normalize name and cost fields based on service type
+  let normalizedName = data.name || data.itemName || data.companyName || data.teamName || data.carName || data.flowerName || data.alcoholName || data.cakeName || `Service ${serviceId}`;
+  let normalizedCost = data.cost || data.averageCost || data.price || 0;
+
+  // Specific overrides if needed
+  if (normalizedServiceType === 'restaurant') {
+     normalizedCost = data.averageCost || data.cost || 0;
+  }
+
+  const result = {
+    serviceId,
+    serviceType: normalizedServiceType,
+    ...data,
+    name: normalizedName,
+    cost: normalizedCost,
+  };
+
+  console.log(`[getServiceDetailsData] ${normalizedServiceType}/${serviceId} -> name: "${normalizedName}", cost: ${normalizedCost}`);
+  return result;
+};
+
 const fetchServiceDetails = async (serviceId, serviceType) => {
   setLoadingServiceDetails(true);
   setLoadingFiles(true);
-  let normalizedServiceType = serviceType ? serviceType.toLowerCase() : "";
   try {
-    // Special handling for exceptions
-    if (normalizedServiceType === 'flower' || normalizedServiceType === 'flowers') {
-      normalizedServiceType = 'flowers';
-    } else if (normalizedServiceType === 'goods' || normalizedServiceType === 'good') {
-      normalizedServiceType = 'good';
-    } else {
-      // Default behavior: remove trailing 's' to singularize (e.g. restaurants -> restaurant)
-      normalizedServiceType = normalizedServiceType.replace(/s$/, '');
-    }
-    const methodMap = {
-      restaurant: 'getRestaurantById',
-      clothing: 'getClothingById',
-      tamada: 'getTamadaById',
-      program: 'getProgramById',
-      traditionalgift: 'getTraditionalGiftById',
-      flowers: 'getFlowersById',
-      cake: 'getCakeById',
-      alcohol: 'getAlcoholById',
-      transport: 'getTransportById',
-      jewelry: 'getJewelryById',
-      wedding: 'getWeddingById',
-      eventcategory: 'getEventCategoryById',
-      wishlist: 'getWishlistById',
-      good: 'getGoodById', // Added missing mapping
-    };
-    const methodName = methodMap[normalizedServiceType];
-    if (!methodName || !api[methodName]) {
-      throw new Error(`Неизвестный тип сервиса: ${normalizedServiceType}`);
-    }
-    const response = await api[methodName](serviceId);
-    let data = response.data.data || response.data;
-
-    if (normalizedServiceType === 'restaurant' && Array.isArray(data)) {
-      data = data.length > 0 ? data[0] : { name: 'Ресторан не найден', cost: null };
-    }
-
+    const data = await getServiceDetailsData(serviceId, serviceType);
+    
     try {
       const filesResponse = await axios.get(
-        `${BASE_URL}/api/${normalizedServiceType}/${serviceId}/files`
+        `${BASE_URL}/api/${data.serviceType}/${serviceId}/files`
       );
       console.log('FILE response=', filesResponse);
       setFiles(filesResponse.data || []);
       setErrorFiles(null);
     } catch (fileError) {
-      console.error(`Error fetching files for ${normalizedServiceType}/${serviceId}:`, fileError);
+      console.error(`Error fetching files for ${data.serviceType}/${serviceId}:`, fileError);
       setErrorFiles('Ошибка загрузки медиафайлов: ' + fileError.message);
       setFiles([]);
     }
 
-    console.log(`Service Details for ${normalizedServiceType}/${serviceId}:`, JSON.stringify(data, null, 2));
-    return {
-      serviceId,
-      serviceType: normalizedServiceType,
-      ...data,
-    };
+    console.log(`Service Details for ${data.serviceType}/${serviceId}:`, JSON.stringify(data, null, 2));
+    return data;
   } catch (error) {
     console.error(`Error fetching service details for ${serviceType}/${serviceId}:`, error);
     Alert.alert('Ошибка', `Не удалось загрузить детали услуги: ${error.message}`);
-    return {
-      serviceId,
-      serviceType: normalizedServiceType || (serviceType ? serviceType.toLowerCase().replace(/s$/, '') : ""),
-      name: 'Неизвестная услуга',
-      cost: null,
-    };
+    return null;
   } finally {
     setLoadingServiceDetails(false);
     setLoadingFiles(false);
@@ -1984,17 +2034,20 @@ const handleDetailsPress = () => {
       setLoadingCategories(true);
       setLoadingWeddings(true);
       try {
-        const [categoriesResponse, weddingsResponse, goodsResponse] = await Promise.all([
-          api.getEventCategories(),
-          api.getWedding(token),
-          api.getGoods(token),
+        // Call fetchEventCategories instead of api.getEventCategories directly
+        // This ensures service details are fetched and cache is populated
+        const categoriesPromise = fetchEventCategories();
+        const weddingsPromise = api.getWedding(token);
+        const goodsPromise = api.getGoods(token);
+
+        const [categories, weddingsResponse, goodsResponse] = await Promise.all([
+          categoriesPromise,
+          weddingsPromise,
+          goodsPromise,
         ]);
-        let categories = Array.isArray(categoriesResponse.data)
-          ? categoriesResponse.data
-          : categoriesResponse.data.data || [];
 
+        // Handle route params for selected categories
         if (route.params?.selectedCategories) {
-
           setSelectedItems(route.params.selectedCategories);
 
           const existingCategoryNames = categories.map((cat) => cat.name);
@@ -2070,12 +2123,37 @@ const handleDetailsPress = () => {
           : goodsResponse.data.data || []);
 
         if (weddingsData.length > 0) {
-          const itemsPromises = weddingsData.map((wedding) =>
-            api.getWeddingItems(wedding.id, token).then((res) => ({
+          const itemsPromises = weddingsData.map(async (wedding) => {
+            const res = await api.getWeddingItems(wedding.id, token);
+            const items = res.data.data || [];
+            
+            // Fetch details for each item
+            const itemsWithDetails = await Promise.all(
+              items.map(async (item) => {
+                try {
+                  const details = await getServiceDetailsData(item.item_id, item.item_type);
+                  return {
+                    ...item,
+                    serviceName: details?.name || `Service ${item.item_id}`,
+                    serviceCost: details?.cost || item.total_cost || 0,
+                  };
+                } catch (err) {
+                  console.error(`Failed to fetch details for wedding item ${item.item_type}/${item.item_id}`, err);
+                  return {
+                    ...item,
+                    serviceName: `Service ${item.item_id}`,
+                    serviceCost: item.total_cost || 0,
+                  };
+                }
+              })
+            );
+
+            return {
               weddingId: wedding.id,
-              items: res.data.data || [],
-            }))
-          );
+              items: itemsWithDetails,
+            };
+          });
+
           const itemsResults = await Promise.all(itemsPromises);
           const newWeddingCache = itemsResults.reduce(
             (acc, { weddingId, items }) => {
@@ -2296,6 +2374,9 @@ const handleDetailsPress = () => {
   const renderEventCategoryItem = ({ item }) => {
     const filteredServices = categoryServicesCache[item.id] || [];
     const eventServices = item.EventServices || [];
+    console.log(`[renderEventCategoryItem] Category ${item.id} (${item.name}):`);
+    console.log(`  - filteredServices (from cache):`, filteredServices.length, filteredServices.map(s => `${s.name}:${s.cost}`));
+    console.log(`  - eventServices (from API):`, eventServices.length);
 
     const allServices = [
       ...filteredServices,
@@ -2323,39 +2404,47 @@ const handleDetailsPress = () => {
         </Text>
         {groupedServices.length > 0 ? (
           <View style={styles.weddingItemsContainer}>
-            {groupedServices.map((group) => (
-              console.log('group- ',group),
-              <View key={group.name} style={styles.categorySection}>
-             
-                <FlatList
-                  data={group.items}
-                  renderItem={({ item: service }) => (
-                    <View
-                      key={`${service.serviceType}-${service.serviceId}`}
-                      style={styles.weddingItem}
-                    >
-                      <Text style={styles.subItemText}>
-                        {group.name}
-                      </Text>
-                      <View style={styles.itemActions}>
-                        <TouchableOpacity
-                          style={[styles.iconButton, styles.iconButtonPrimary]}
-                          onPress={() => openServiceDetailsModal(service)}
-                        >
-                          <Icon name="info" size={24} color={COLORS.white} />
-                        </TouchableOpacity>
+            {groupedServices.map((group) => {
+              const groupTotal = group.items.reduce((sum, s) => sum + (parseFloat(s.cost) || 0), 0);
+              console.log(`Render Group ${group.name}:`, JSON.stringify(group.items, null, 2));
+              return (
+                <View key={group.name} style={styles.categorySection}>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}>
+                    <Text style={styles.categoryTitle}>{group.name}</Text>
+                    <Text style={[styles.categoryTitle, {color: COLORS.primary, fontSize: 14}]}>
+                      {groupTotal.toLocaleString()} тг
+                    </Text>
+                  </View>
+                  <FlatList
+                    data={group.items}
+                    renderItem={({ item: service }) => (
+                      <View
+                        key={`${service.serviceType}-${service.serviceId}`}
+                        style={styles.weddingItem}
+                      >
+                        <Text style={styles.subItemText}>
+                          {service.name || group.name} {service.quantity && service.quantity > 1 ? `(x${service.quantity})` : ''} - {(parseFloat(service.cost) || 0).toLocaleString()} тг
+                        </Text>
+                        <View style={styles.itemActions}>
+                          <TouchableOpacity
+                            style={[styles.iconButton, styles.iconButtonPrimary]}
+                            onPress={() => openServiceDetailsModal(service)}
+                          >
+                            <Icon name="info" size={24} color={COLORS.white} />
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                    </View>
-                  )}
-                  keyExtractor={(service, index) =>
-                    `${service.serviceType}-${service.serviceId}-${index}`
-                  }
-                  contentContainerStyle={{ paddingBottom: 8 }}
-                  initialNumToRender={20}
-                  windowSize={10}
-                />
-              </View>
-            ))}
+                    )}
+                    keyExtractor={(service, index) =>
+                      `${service.serviceType}-${service.serviceId}-${index}`
+                    }
+                    contentContainerStyle={{ paddingBottom: 8 }}
+                    initialNumToRender={20}
+                    windowSize={10}
+                  />
+                </View>
+              );
+            })}
           </View>
         ) : (
           <View style={styles.emptyItemsContainer}>
@@ -2458,57 +2547,67 @@ const handleDetailsPress = () => {
                       {(() => {
                         const actualWeddingItem =
                           weddingItem.dataValues || weddingItem;
+                        const quantityText = actualWeddingItem.quantity && actualWeddingItem.quantity > 1 
+                          ? ` (x${actualWeddingItem.quantity})` 
+                          : '';
+                        const costText = (parseFloat(actualWeddingItem.total_cost) || 0).toLocaleString();
+                        
+                        // Use serviceName if available, otherwise fall back to type-based label
+                        if (actualWeddingItem.serviceName) {
+                          return `${actualWeddingItem.serviceName}${quantityText} - ${costText} тг`;
+                        }
+                        // Fallback to old logic if serviceName is not available
                         switch (actualWeddingItem.item_type) {
                           case "restaurants":
                           case "restaurant":
-                            return `Ресторан - ${
+                            return `Ресторан${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "clothing":
-                            return `Одежда - ${
+                            return `Одежда${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "tamada":
-                            return `Тамада - ${
+                            return `Тамада${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "program":
-                            return `Программа - ${
+                            return `Программа${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "traditionalGift":
-                            return `Традиционный подарок - ${
+                            return `Традиционный подарок${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "flowers":
                           case "flower":
-                            return `Цветы - ${
+                            return `Цветы${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "cakes":
                           case "cake":
-                            return `Торт - ${
+                            return `Торт${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "alcohol":
-                            return `Алкоголь - ${
+                            return `Алкоголь${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "transport":
-                            return `Транспорт - ${
+                            return `Транспорт${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "goods":
                           case "good":
-                            return `Товар - ${
+                            return `Товар${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           case "jewelry":
-                            return `Ювелирные изделия - ${
+                            return `Ювелирные изделия${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                           default:
-                            return `Неизвестный элемент - ${
+                            return `Неизвестный элемент${quantityText} - ${
                               actualWeddingItem.total_cost || 0
                             } тг`;
                         }
