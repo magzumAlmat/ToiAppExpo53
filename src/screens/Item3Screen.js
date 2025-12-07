@@ -937,10 +937,14 @@ export default function Item3Screen() {
               const existingService = apiServices.find(
                 (as) => as.serviceId === es.serviceId && as.serviceType === es.serviceType
               );
+
+              console.log(`Processing service ${es.serviceType}/${es.serviceId}:`);
+              console.log(`  - es.quantity:`, es.quantity);
+              console.log(`  - existingService.quantity:`, existingService?.quantity);
               
               // If existing service has cost, use it. Otherwise, fetch details.
               if (existingService && (existingService.cost !== undefined && existingService.cost !== null)) {
-                return existingService;
+                return { ...existingService, quantity: es.quantity || existingService.quantity || 1 };
               }
 
               try {
@@ -1332,11 +1336,12 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
           service_ids: categoryServices.map((s) => ({
             serviceId: s.id,
             serviceType: s.serviceType,
+            quantity: s.quantity || 1,
           })),
         });
         setCategoryServicesCache((prev) => ({
           ...prev,
-          [newCategory.id]: categoryServices,
+          [newCategory.id]: categoryServices.map(s => ({ ...s, serviceId: s.id })),
         }));
       }
       Alert.alert("Успех", "Категория мероприятия создана");
@@ -1361,12 +1366,21 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       return;
     }
     try {
+      // Calculate new total cost
+      const newTotalCost = categoryServices.reduce((sum, service) => {
+        const cost = parseFloat(service.cost || service.price || 0);
+        const quantity = parseInt(service.quantity || 1);
+        return sum + (cost * quantity);
+      }, 0);
+
       const response = await api.updateEventCategory(selectedCategory.id, {
         name: categoryName,
         description: categoryDescription,
         status: categoryStatus,
         budget: categoryBudget ? parseFloat(categoryBudget) : null,
+        total_cost: newTotalCost, // Send updated total cost
       });
+      
       setEventCategories((prev) =>
         prev.map((cat) =>
           cat.id === selectedCategory.id
@@ -1387,11 +1401,12 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
         service_ids: categoryServices.map((s) => ({
           serviceId: s.id,
           serviceType: s.serviceType,
+          quantity: s.quantity || 1, // Fix: Include quantity
         })),
       });
       setCategoryServicesCache((prev) => ({
         ...prev,
-        [selectedCategory.id]: categoryServices,
+        [selectedCategory.id]: categoryServices.map(s => ({ ...s, serviceId: s.id })),
       }));
       Alert.alert("Успех", "Категория мероприятия обновлена");
       setCategoryName("");
@@ -1550,6 +1565,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
                 service_ids: matchingServices.map((s) => ({
                   serviceId: s.id,
                   serviceType: s.serviceType,
+                  quantity: 1,
                 })),
               });
               setCategoryServicesCache((prev) => ({
@@ -1929,6 +1945,8 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
         id: s.serviceId,
         serviceType: s.serviceType,
         name: s.name,
+        cost: s.cost || s.price || 0,
+        quantity: s.quantity || 1, // Fix: Include quantity from details
       })) || []
     );
     setCategoryModalVisible(true);
@@ -2082,6 +2100,7 @@ const handleDetailsPress = () => {
                     service_ids: matchingServices.map((s) => ({
                       serviceId: s.id,
                       serviceType: s.serviceType,
+                      quantity: 1,
                     })),
                   });
                   setCategoryServicesCache((prev) => ({
@@ -2375,8 +2394,8 @@ const handleDetailsPress = () => {
     const filteredServices = categoryServicesCache[item.id] || [];
     const eventServices = item.EventServices || [];
     console.log(`[renderEventCategoryItem] Category ${item.id} (${item.name}):`);
-    console.log(`  - filteredServices (from cache):`, filteredServices.length, filteredServices.map(s => `${s.name}:${s.cost}`));
-    console.log(`  - eventServices (from API):`, eventServices.length);
+    console.log(`  - filteredServices (from cache):`, filteredServices.length, filteredServices.map(s => `${s.name}: qty=${s.quantity}, cost=${s.cost}`));
+    console.log(`  - eventServices (from API):`, eventServices.length, eventServices.map(s => `qty=${s.quantity}`));
 
     const allServices = [
       ...filteredServices,
@@ -2390,6 +2409,7 @@ const handleDetailsPress = () => {
           serviceType: es.serviceType,
           serviceId: es.serviceId,
           cost: null,
+          quantity: es.quantity || 1, // Fix: Include quantity
         })),
     ];
 
@@ -2405,8 +2425,8 @@ const handleDetailsPress = () => {
         {groupedServices.length > 0 ? (
           <View style={styles.weddingItemsContainer}>
             {groupedServices.map((group) => {
-              const groupTotal = group.items.reduce((sum, s) => sum + (parseFloat(s.cost) || 0), 0);
-              console.log(`Render Group ${group.name}:`, JSON.stringify(group.items, null, 2));
+              const groupTotal = group.items.reduce((sum, s) => sum + ((parseFloat(s.cost) || 0) * (s.quantity || 1)), 0);
+              // console.log(`Render Group ${group.name}:`, JSON.stringify(group.items, null, 2));
               return (
                 <View key={group.name} style={styles.categorySection}>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}>
@@ -2422,9 +2442,11 @@ const handleDetailsPress = () => {
                         key={`${service.serviceType}-${service.serviceId}`}
                         style={styles.weddingItem}
                       >
-                        <Text style={styles.subItemText}>
-                          {service.name || group.name} {service.quantity && service.quantity > 1 ? `(x${service.quantity})` : ''} - {(parseFloat(service.cost) || 0).toLocaleString()} тг
-                        </Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.subItemText}>
+                             {service.name || group.name} - {(parseFloat(service.cost) || 0).toLocaleString()} x {service.quantity || 1} = {((parseFloat(service.cost) || 0) * (service.quantity || 1)).toLocaleString()} тг
+                          </Text>
+                        </View>
                         <View style={styles.itemActions}>
                           <TouchableOpacity
                             style={[styles.iconButton, styles.iconButtonPrimary]}
@@ -2543,76 +2565,77 @@ const handleDetailsPress = () => {
                     key={`${weddingItem.item_type}-${weddingItem.id}`}
                     style={styles.weddingItem}
                   >
-                    <Text style={styles.subItemText}>
+                    <View style={{ flex: 1 }}>
                       {(() => {
                         const actualWeddingItem =
                           weddingItem.dataValues || weddingItem;
-                        const quantityText = actualWeddingItem.quantity && actualWeddingItem.quantity > 1 
-                          ? ` (x${actualWeddingItem.quantity})` 
-                          : '';
-                        const costText = (parseFloat(actualWeddingItem.total_cost) || 0).toLocaleString();
-                        
-                        // Use serviceName if available, otherwise fall back to type-based label
+                        const quantity = actualWeddingItem.quantity || 1;
+                        const totalCost = parseFloat(actualWeddingItem.total_cost) || 0;
+                        let unitCost = parseFloat(actualWeddingItem.cost);
+                        if (isNaN(unitCost) || unitCost === 0) {
+                           if (totalCost > 0 && quantity > 0) {
+                               unitCost = totalCost / quantity;
+                           } else {
+                               unitCost = 0;
+                           }
+                        }
+
+                        let name = "";
                         if (actualWeddingItem.serviceName) {
-                          return `${actualWeddingItem.serviceName}${quantityText} - ${costText} тг`;
+                          name = actualWeddingItem.serviceName;
+                        } else {
+                          switch (actualWeddingItem.item_type) {
+                            case "restaurants":
+                            case "restaurant":
+                              name = "Ресторан";
+                              break;
+                            case "clothing":
+                              name = "Одежда";
+                              break;
+                            case "tamada":
+                              name = "Тамада";
+                              break;
+                            case "program":
+                              name = "Программа";
+                              break;
+                            case "traditionalGift":
+                              name = "Традиционный подарок";
+                              break;
+                            case "flowers":
+                            case "flower":
+                              name = "Цветы";
+                              break;
+                            case "cakes":
+                            case "cake":
+                              name = "Торт";
+                              break;
+                            case "alcohol":
+                              name = "Алкоголь";
+                              break;
+                            case "transport":
+                              name = "Транспорт";
+                              break;
+                            case "goods":
+                            case "good":
+                              name = "Товар";
+                              break;
+                            case "jewelry":
+                              name = "Ювелирные изделия";
+                              break;
+                            default:
+                              name = "Неизвестный элемент";
+                          }
                         }
-                        // Fallback to old logic if serviceName is not available
-                        switch (actualWeddingItem.item_type) {
-                          case "restaurants":
-                          case "restaurant":
-                            return `Ресторан${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "clothing":
-                            return `Одежда${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "tamada":
-                            return `Тамада${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "program":
-                            return `Программа${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "traditionalGift":
-                            return `Традиционный подарок${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "flowers":
-                          case "flower":
-                            return `Цветы${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "cakes":
-                          case "cake":
-                            return `Торт${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "alcohol":
-                            return `Алкоголь${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "transport":
-                            return `Транспорт${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "goods":
-                          case "good":
-                            return `Товар${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          case "jewelry":
-                            return `Ювелирные изделия${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                          default:
-                            return `Неизвестный элемент${quantityText} - ${
-                              actualWeddingItem.total_cost || 0
-                            } тг`;
-                        }
+
+                        return (
+                          <View>
+                             <Text style={styles.subItemText}>
+                               {name} - {unitCost.toLocaleString()} x {quantity} = {totalCost.toLocaleString()} тг
+                             </Text>
+                          </View>
+                        );
                       })()}
-                    </Text>
+                    </View>
                     <View style={styles.itemActions}>
                       <TouchableOpacity
                         style={[styles.iconButton, styles.iconButtonPrimary]}
@@ -2792,43 +2815,58 @@ const handleDetailsPress = () => {
     );
   };
 
-  const renderServiceInCategory = ({ item }) => (
-    <View style={styles.serviceCard}>
-      <Text style={styles.serviceCardTitle}>{item.name}</Text>
-      <Text style={styles.serviceCardDescription}>
-        {item.description || "Нет описания"}
-      </Text>
-      <Text style={styles.serviceCardType}>Тип: {item.serviceType}</Text>
-      <TouchableOpacity
-        style={styles.detailsButton}
-        onPress={() => openServiceDetailsModal(item)}
-      >
-        <Text style={styles.detailsButtonText}>Подробнее</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const renderServiceInCategory = ({ item }) => {
+    // console.log("Rendering item:", JSON.stringify(item));
+    const cost = item.cost || item.total_cost || item.price || 0;
+    const quantity = item.quantity || 1; 
+    const total = cost * quantity;
 
-  const renderServiceItem = ({ item }) => (
+    return (
+      <View style={styles.serviceCard}>
+        <Text style={styles.serviceCardTitle}>
+          {item.name}{" "}
+          {item.item_name ? `(${item.item_name})` : ""}{" "}
+          - {cost} x {quantity} = {total} тг
+        </Text>
+        {item.description ? (
+            <Text style={styles.serviceCardDescription}>
+             {item.description}
+            </Text>
+        ) : null}
+
+        <Text style={styles.serviceCardType}>Тип: {item.serviceType}</Text>
+        <TouchableOpacity
+          style={styles.detailsButton}
+          onPress={() => openServiceDetailsModal(item)}
+        >
+          <Text style={styles.detailsButtonText}>Подробнее</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderServiceItem = ({ item }) => {
+    const currentService = categoryServices.find(
+       (s) => s.id === item.id && s.serviceType === item.serviceType
+    );
+     const isSelected = !!currentService;
+
+    return (
     <TouchableOpacity
       style={[
         styles.serviceCard,
-        categoryServices.some(
-          (s) => s.id === item.id && s.serviceType === item.serviceType
-        ) && styles.selectedServiceCard,
+        isSelected && styles.selectedServiceCard,
       ]}
       onPress={() => {
         setCategoryServices((prev) => {
-          const exists = prev.some(
-            (s) => s.id === item.id && s.serviceType === item.serviceType
-          );
-          if (exists) {
+          if (isSelected) {
             return prev.filter(
               (s) => !(s.id === item.id && s.serviceType === item.serviceType)
             );
           }
           return [
             ...prev,
-            { id: item.id, serviceType: item.serviceType, name: item.name },
+            { id: item.id, serviceType: item.serviceType, name: item.name, cost: item.cost, quantity: 1 },
           ];
         });
       }}
@@ -2838,11 +2876,33 @@ const handleDetailsPress = () => {
         {item.description || "Нет описания"}
       </Text>
       <Text style={styles.serviceCardType}>Тип: {item.serviceType}</Text>
-      {categoryServices.some(
-        (s) => s.id === item.id && s.serviceType === item.serviceType
-      ) && <Text style={styles.selectedIndicator}>✓</Text>}
+      {isSelected && (
+        <View style={{ marginTop: 8 }}>
+          <Text style={styles.selectedIndicator}>✓</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+            <Text style={{ marginRight: 8 }}>Количество:</Text>
+            <TextInput
+              style={[styles.input, { width: 60, padding: 4, marginVertical: 0 }]}
+              keyboardType="numeric"
+              value={String(currentService.quantity || 1)}
+              onChangeText={(text) => {
+                const qty = parseInt(text) || 0;
+                setCategoryServices((prev) =>
+                  prev.map((s) =>
+                    s.id === item.id && s.serviceType === item.serviceType
+                      ? { ...s, quantity: qty }
+                      : s
+                  )
+                );
+              }}
+              onPressIn={(e) => e.stopPropagation()} // Prevent card press
+            />
+          </View>
+        </View>
+      )}
     </TouchableOpacity>
   );
+  };
 
   const renderCategoryDetailsHeader = () => (
   <View>
