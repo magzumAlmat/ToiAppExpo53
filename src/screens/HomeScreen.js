@@ -2788,7 +2788,11 @@ const styles = StyleSheet.create({
     height: 80, // Reduced from 120 to 80
   },
   potIcon2: { width: 50, height: 50 },
+  
   potIcon3: { width: 70, height: 70, zIndex: 3 },
+
+
+
   listContainer: {
     flex: 1,
     paddingHorizontal: 20,

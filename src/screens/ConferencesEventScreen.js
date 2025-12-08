@@ -1881,37 +1881,40 @@ const ConferencesEventScreen = ({ navigation, route }) => {
         <TouchableOpacity style={styles.backButtonTop} onPress={() => navigation.goBack()} accessible accessibilityLabel="Вернуться назад">
           <AntDesign name="left" size={24} color="black" />
         </TouchableOpacity>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-          <View style={styles.logoContainer}>
-            <Image source={require("../../assets/kazanRevert.png")} style={styles.potIcon} resizeMode="contain" />
-          </View>
-          
-          <View style={styles.headerContainer}>
-            <View style={styles.budgetContainer}>
-              <View style={styles.categoryItemAdd}>
-                <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddItemModalVisible(true); }} accessible accessibilityLabel="Добавить элемент">
-                  <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
-                    <Text style={styles.categoryPlusText}>+</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-              <TextInput style={styles.budgetInput} placeholder="Бюджет (т)" value={formatBudget(budget)} onChangeText={handleBudgetChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={18} accessible accessibilityLabel="Бюджет мероприятия" />
-              <TextInput style={styles.guestInput} placeholder="Гостей" value={guestCount} onChangeText={handleGuestCountChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={5} accessible accessibilityLabel="Количество гостей" />
-            </View>
-            <Modal animationType="fade" transparent={true} visible={isLoading}>
-              <View style={styles.loaderOverlay}>
-                <View style={styles.loaderContainer}>
-                  <ActivityIndicator size="large" color={COLORS.primary} />
-                  <Text style={styles.loaderText}>Подбираем...</Text>
-                </View>
-              </View>
-            </Modal>
-          </View>
+        {/* Fixed Header Content */}
+        <View style={styles.logoContainer}>
+          <Image source={require("../../assets/kazanRevert.png")} style={styles.potIcon} resizeMode="contain" />
+        </View>
 
-          <View style={styles.listContainer}>
-            {loading ? (
-              <ActivityIndicator size="large" color={COLORS.primary} />
-            ) : (
+
+        <View style={styles.headerContainer}>
+          <View style={styles.budgetContainer}>
+            <View style={styles.categoryItemAdd}>
+              <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddItemModalVisible(true); }} accessible accessibilityLabel="Добавить элемент">
+                <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
+                  <Text style={styles.categoryPlusText}>+</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+            <TextInput style={styles.budgetInput} placeholder="Бюджет (т)" value={formatBudget(budget)} onChangeText={handleBudgetChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={18} accessible accessibilityLabel="Бюджет мероприятия" />
+            <TextInput style={styles.guestInput} placeholder="Гостей" value={guestCount} onChangeText={handleGuestCountChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={5} accessible accessibilityLabel="Количество гостей" />
+          </View>
+          <Modal animationType="fade" transparent={true} visible={isLoading}>
+            <View style={styles.loaderOverlay}>
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={styles.loaderText}>Подбираем...</Text>
+              </View>
+            </View>
+          </Modal>
+        </View>
+
+        {/* Scrollable List Content */}
+        <View style={[styles.listContainer, { flex: 1, marginBottom: 100 }]}> 
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          ) : (
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 200 }}>
               <View style={styles.categoryGrid}>
                 {[...categories, 'Добавить'].map((item, index) => (
                   <View key={index} style={styles.categoryItem}>
@@ -1919,15 +1922,39 @@ const ConferencesEventScreen = ({ navigation, route }) => {
                   </View>
                 ))}
               </View>
-            )}
-          </View>
+              {/* Add some bottom padding inside scrollview if needed */}
+            </ScrollView>
+          )}
+        </View>
 
-          <View style={styles.bottomContainer}>
-            <TouchableOpacity style={styles.nextButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setEventDetailsModalVisible(true); }} disabled={loading} accessible accessibilityLabel="Далее">
-              <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
+        {/* Custom Footer */}
+        <View style={styles.customFooterContainer}>
+          <Image source={require("../../assets/footer.png")} style={styles.footerBackground} resizeMode="cover" />
+          
+          <View style={styles.footerContent}>
+            <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Home")}>
+              <Icon name="home" size={24} color="#5A4032" />
+              <Text style={styles.navText}>Главная</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("MyEvents")}>
+              <Icon name="event" size={24} color="#5A4032" />
+              <Text style={styles.navText}>Мои мероприятия</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Profile")}>
+              <Icon name="person" size={24} color="#5A4032" />
+              <Text style={styles.navText}>Профиль</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
+
+          <View style={styles.floatingButtonContainer}>
+             <TouchableOpacity style={styles.nextButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setEventDetailsModalVisible(true); }} disabled={loading} accessible accessibilityLabel="Далее">
+              <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
+
+            </TouchableOpacity>
+          </View>
+        </View>
         <AddItemModal visible={addItemModalVisible} onClose={() => setAddItemModalVisible(false)} filteredItems={combinedData} filteredData={filteredData} handleAddItem={handleAddItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} updateCategories={updateCategories} />
         <CategoryItemsModal visible={categoryModalVisible} onClose={() => setCategoryModalVisible(false)} categoryItems={selectedCategoryItems} categoryLabel={selectedCategoryLabel} categoryType={selectedCategoryType} filteredData={filteredData} handleAddItem={handleAddItem} handleRemoveItem={handleRemoveItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} setQuantities={setQuantities} budget={budget} setFilteredData={setFilteredData} setRemainingBudget={setRemainingBudget} updateCategories={updateCategories} guestCount={guestCount} setGuestCount={setGuestCount} />
         <DetailsModal visible={detailsModalVisible} onClose={() => setDetailsModalVisible(false)} item={selectedItem} />
@@ -2063,15 +2090,24 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
   },
-  topPatternContainer: {
+ topPatternContainer: {
     position: "absolute",
     bottom: 0,
     width: "100%",
-    height: "15%",
+    height: "5%", // Reduced from 20% to 15% to save vertical space
     zIndex: -1,
     resizeMode: "cover",
     opacity: 0.8,
+    marginBottom: "1%", // Reduced from 10% to 5%
   },
+
+  footerContainer: {
+    // alignItems: 'center',
+ // Add some top margin to separate it from categories
+    paddingBottom: 40, // Add bottom margin for spacing
+    // backgroundColor: 'transparent',
+  },
+
   headerContainer: {
     paddingHorizontal: 20,
     marginBottom: 10,
@@ -2122,8 +2158,8 @@ const styles = StyleSheet.create({
 
   bottomContainer: {
     alignItems: 'center',
-    marginTop: 20, // Add some top margin to separate it from categories
-    marginBottom: 40, // Add bottom margin for spacing
+    marginTop: 150, // Add some top margin to separate it from categories
+    marginBottom: 0, // Add bottom margin for spacing
     backgroundColor: 'transparent',
   },
   nextButton: {
@@ -2611,6 +2647,73 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  customFooterContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+    justifyContent: 'flex-end',
+    backgroundColor: 'transparent',
+    zIndex: 100,
+  },
+  footerBackground: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    paddingBottom: 25, 
+    height:190,
+    backgroundColor: 'white',
+    opacity:0.3,
+  },
+
+  footerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingBottom: 25, 
+    paddingHorizontal: 20,
+    height: 80,
+  },
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navText: {
+    fontSize: 10,
+    color: '#5A4032',
+    marginTop: 4,
+    fontFamily: 'System', 
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: "10%", // Matches bottomContainer marginBottom: "10%" from HomeScreen
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 101,
+    paddingBottom: 70, // Matches bottomContainer paddingBottom: 40
+  },
+
+
+
+
+  nextButton: {
+    borderRadius: 25, // Matches nextButton borderRadius: 25
+    overflow: "hidden", // Matches nextButton overflow: "hidden"
+    marginVertical: 5, // Matches nextButton marginVertical: 5
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nextButtonText: {
+    position: 'absolute',
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+    zIndex: 10, 
   },
 });
 
