@@ -2500,12 +2500,12 @@ const handleDetailsPress = () => {
             {formatCurrency(item.budget)} тг
           </Text>
         </View>
-        <View style={styles.budgetRow}>
+        {/* <View style={styles.budgetRow}>
           <Text style={styles.budgetLabel}>Оплачено:</Text>
           <Text style={styles.budgetValue}>
             {formatCurrency(item.paid_amount)} тг
           </Text>
-        </View>
+        </View> */}
         <View style={styles.budgetRow}>
           <Text style={styles.budgetLabel}>Остаток:</Text>
           <Text style={[
@@ -2518,7 +2518,7 @@ const handleDetailsPress = () => {
       </View>
 
         <View style={styles.buttonRow}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[styles.iconButton, styles.iconButtonPrimary]}
             onPress={() => openFinancialModal('eventCategory', item.id, {
               total_cost: parseFloat(item.total_cost) || 0,
@@ -2527,7 +2527,7 @@ const handleDetailsPress = () => {
             })}
           >
             <Icon name="edit" size={24} color={COLORS.white} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={[styles.iconButton, styles.iconButtonSecondary]}
             onPress={() => openAddGiftModal('eventCategory', item.id)}
