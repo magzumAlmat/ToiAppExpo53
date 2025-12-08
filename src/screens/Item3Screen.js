@@ -1926,15 +1926,25 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     ]);
   };
 
-  const handleShareWeddingLink = async (weddingId) => {
+  const handleShareEventLink = async (id, type) => {
+    let webLink = "";
+    let title = "Поделиться ссылкой";
+
+    if (type === 'wedding') {
+      webLink = `${BASE_URL}/api/weddingwishes/${id}`;
+      title = "Приглашение на свадьбу";
+    } else if (type === 'eventCategory') {
+      webLink = `${BASE_URL}/api/eventcategorywishes/${id}`;
+      title = "Список желаний категории";
+    }
+
     try {
-      const webLink = `${BASE_URL}/api/weddingwishes/${weddingId}`;
       await Share.share({
         message: webLink,
-        title: "Приглашение на свадьбу",
+        title: title,
       });
     } catch (error) {
-      console.error("Error sharing wedding link:", error);
+      console.error("Error sharing link:", error);
       Alert.alert("Ошибка", "Не удалось поделиться ссылкой");
     }
   };
@@ -2546,6 +2556,12 @@ const handleDetailsPress = () => {
           >
             <Icon name="delete" size={24} color={COLORS.white} />
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.iconButton, styles.iconButtonPrimary]}
+            onPress={() => handleShareEventLink(item.id, 'eventCategory')}
+          >
+            <Icon name="share" size={24} color={COLORS.white} />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -2744,7 +2760,7 @@ const handleDetailsPress = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconButton, styles.iconButtonPrimary]}
-            onPress={() => handleShareWeddingLink(item.id)}
+            onPress={() => handleShareEventLink(item.id, 'wedding')}
           >
             <Icon name="share" size={24} color={COLORS.white} />
           </TouchableOpacity>
