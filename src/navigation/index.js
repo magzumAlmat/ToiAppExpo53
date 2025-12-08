@@ -689,7 +689,7 @@ export default function Navigation() {
   }, [token, user]);
 
   const linking = {
-    prefixes: ['myapp://', 'exp://172.20.10.7:8081'],
+    prefixes: ['myapp://', 'toilab://', 'exp://172.20.10.7:8081'],
     config: {
       screens: {
         Wishlist: 'wishlist/:id',

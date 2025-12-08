@@ -840,7 +840,14 @@ export default function Item3Screen() {
   const [goods, setGoods] = useState([]);
   const [selectedGoodIds, setSelectedGoodIds] = useState([]);
   const [isCustomGift, setIsCustomGift] = useState(false);
-  const [formData, setFormData] = useState({ item_name: "" });
+  const [formData, setFormData] = useState({ 
+    item_name: "", 
+    description: "", 
+    cost: "", 
+    address: "", 
+    phone: "", 
+    storeName: "" 
+  });
 
   // Новые состояния — обязательно должны быть здесь!
   const [giftTargetType, setGiftTargetType] = useState(null); // 'wedding' | 'eventCategory'
@@ -1921,7 +1928,13 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       const giftData = {
         category: "Miscellaneous",
         item_name: formData.item_name,
-        cost: "0",
+        description: formData.description,
+        cost: formData.cost || "0",
+        specs: {
+          storeName: formData.storeName,
+          address: formData.address,
+          phone: formData.phone
+        },
         supplier_id: userId,
       };
       const response = await api.createGood(giftData);
@@ -1939,7 +1952,14 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       await api.createWish(payload, token);
       
       Alert.alert("Успех", "Собственный подарок добавлен");
-      setFormData({ ...formData, item_name: "" });
+      setFormData({ 
+        item_name: "", 
+        description: "", 
+        cost: "", 
+        address: "", 
+        phone: "", 
+        storeName: "" 
+      });
       setWishlistModalVisible(false);
       await fetchWishlistItems(giftTargetType, giftTargetId || selectedWedding.id);
     } catch (error) {
@@ -3442,13 +3462,48 @@ return (
 
           {isCustomGift ? (
             <>
+              <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
               <TextInput
                 style={styles.input}
                 placeholder="Название подарка"
                 value={formData.item_name}
-                onChangeText={t => setFormData({ item_name: t })}
+                onChangeText={t => setFormData({ ...formData, item_name: t })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Описание"
+                value={formData.description}
+                onChangeText={t => setFormData({ ...formData, description: t })}
+                multiline
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Стоимость (тг)"
+                value={formData.cost}
+                onChangeText={t => setFormData({ ...formData, cost: t.replace(/[^0-9]/g, '') })}
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Название магазина"
+                value={formData.storeName}
+                onChangeText={t => setFormData({ ...formData, storeName: t })}
+              />
+               <TextInput
+                style={styles.input}
+                placeholder="Адрес магазина"
+                value={formData.address}
+                onChangeText={t => setFormData({ ...formData, address: t })}
+              />
+               <TextInput
+                style={styles.input}
+                placeholder="Телефон"
+                value={formData.phone}
+                onChangeText={t => setFormData({ ...formData, phone: t })}
+                keyboardType="phone-pad"
               />
               <Button title="Добавить свой" onPress={handleAddCustomGift} color={COLORS.primary} />
+              </ScrollView>
             </>
           ) : (
             <FlatList

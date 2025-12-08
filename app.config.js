@@ -3,6 +3,7 @@ export default ({ config }) => ({
   ...config,
   name: "Toilab",
   slug: "toilab",
+  scheme: "toilab",
   version: "1.2.7",
   orientation: "portrait",
   icon: "./assets/icon.png",

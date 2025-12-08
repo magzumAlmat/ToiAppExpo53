@@ -374,34 +374,55 @@ export default function WeddingWishlistScreen() {
 
   // Fetch wedding details and wishlist items
   const fetchWeddingAndWishlist = useCallback(async () => {
-    if (!token || !userId) {
-      Alert.alert('Ошибка', 'Пожалуйста, авторизуйтесь для просмотра деталей свадьбы');
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       console.log('Token:', token);
-      const response = await api.getWeddingsById(weddingId, token);
-      const wedding = response.data.data;
-      console.log('api.getWeddingsById worked:', wedding);
-      if (wedding) {
-        setWeddingDetails({ name: wedding.name, date: wedding.date });
-      } else {
-        Alert.alert('Ошибка', 'Не удалось найти данные о свадьбе');
+
+      let eventDetails = null;
+      let eventType = 'wedding'; // default
+
+      // 1. Try fetching as Wedding
+      try {
+        const response = await api.getPublicWeddingById(weddingId);
+        eventDetails = response.data.data;
+        console.log('api.getPublicWeddingById worked:', eventDetails);
+      } catch (weddingError) {
+        console.log('Not a wedding, trying event category...', weddingError.message);
+        
+        // 2. Fallback: Try fetching as Event Category
+        try {
+          const catResponse = await api.getEventCategoryById(weddingId);
+          eventDetails = catResponse.data;
+          eventType = 'eventcategory';
+          console.log('api.getEventCategoryById worked:', eventDetails);
+        } catch (catError) {
+          console.error('Failed to fetch as Event Category too:', catError.message);
+          throw new Error('Event not found'); // Rethrow if both fail
+        }
       }
 
-      const wishlistResponse = await api.getWishlistByWeddingIdWithoutToken(weddingId);
+      if (eventDetails) {
+        setWeddingDetails({ name: eventDetails.name, date: eventDetails.date || '' });
+      }
+
+      // 3. Fetch Wishlist based on type
+      let wishlistResponse;
+      if (eventType === 'wedding') {
+        wishlistResponse = await api.getWishlistByWeddingIdWithoutToken(weddingId);
+      } else {
+        wishlistResponse = await api.getWishlistByEventCategoryIdWithoutToken(weddingId);
+      }
+      
       setWishlistItems(wishlistResponse.data.data || []);
+
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);
       if (error.response?.status === 403) {
-        Alert.alert('Ошибка', 'У вас нет доступа к данным этой свадьбы', [
+        Alert.alert('Ошибка', 'У вас нет доступа к данным этого мероприятия', [
           { text: 'OK', onPress: () => navigation.navigate('Login') },
         ]);
       } else {
-        Alert.alert('Ошибка', 'Не удалось загрузить данные свадьбы');
+        Alert.alert('Ошибка', 'Не удалось загрузить данные мероприятия');
       }
     } finally {
       setLoading(false);
@@ -443,6 +464,7 @@ export default function WeddingWishlistScreen() {
     return () => subscription.remove();
   }, [navigation, weddingId]);
 
+
   // Set up the header
   useEffect(() => {
     navigation.setOptions({
@@ -463,6 +485,7 @@ export default function WeddingWishlistScreen() {
     });
   }, [navigation]);
 
+  
   // Fetch item details
   const handleViewDetails = async (goodId) => {
     triggerVibration();
@@ -565,28 +588,32 @@ export default function WeddingWishlistScreen() {
     <SafeAreaView style={styles.container}>
       {loading ? (
         <Text style={styles.noItems}>Загрузка...</Text>
-      ) : !token || !userId ? (
-        <View style={styles.authMessageContainer}>
-          <Text style={styles.authMessage}>Пожалуйста, авторизуйтесь для просмотра деталей свадьбы</Text>
-        </View>
       ) : (
+        // !token || !userId ? (
+        // <View style={styles.authMessageContainer}>
+        //   <Text style={styles.authMessage}>Пожалуйста, авторизуйтесь для просмотра деталей свадьбы</Text>
+        // </View>
+        // ) : (
         <>
-          <View style={styles.invitationContainer}>
-            <Text style={styles.invitationTitle}>Приглашение на свадьбу</Text>
-            <Text style={styles.invitationText}>Присоединяйтесь к празднованию свадьбы</Text>
-            <Text style={styles.weddingName}>{weddingDetails.name || 'Название свадьбы'}</Text>
-            <Text style={styles.weddingDate}>Дата: {weddingDetails.date || 'Не указана'}</Text>
-            <Text style={styles.invitationFooter}>
-              Выберите подарок из списка ниже, чтобы порадовать молодоженов!
-            </Text>
-          </View>
           <FlatList
             data={wishlistItems}
             renderItem={renderWishlistItem}
             keyExtractor={(item) => item.id.toString()}
+            ListHeaderComponent={
+              <View style={styles.invitationContainer}>
+                <Text style={styles.invitationTitle}>Приглашение на Мероприятие</Text>
+                <Text style={styles.invitationText}>Присоединяйтесь к празднованию мероприятия</Text>
+                <Text style={styles.weddingName}>{weddingDetails.name || 'Название свадьбы'}</Text>
+                <Text style={styles.weddingDate}>Дата: {weddingDetails.date || 'Не указана'}</Text>
+                <Text style={styles.invitationFooter}>
+                  Выберите подарок из списка ниже, чтобы порадовать молодоженов!
+                </Text>
+              </View>
+            }
             ListEmptyComponent={<Text style={styles.noItems}>Подарков пока нет</Text>}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
+
         </>
       )}
     </SafeAreaView>

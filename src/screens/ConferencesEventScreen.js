@@ -1881,36 +1881,37 @@ const ConferencesEventScreen = ({ navigation, route }) => {
         <TouchableOpacity style={styles.backButtonTop} onPress={() => navigation.goBack()} accessible accessibilityLabel="Вернуться назад">
           <AntDesign name="left" size={24} color="black" />
         </TouchableOpacity>
-        <View style={styles.logoContainer}>
-          <Image source={require("../../assets/kazanRevert.png")} style={styles.potIcon} resizeMode="contain" />
-        </View>
-        <Image source={require("../../assets/footer.png")} style={styles.topPatternContainer} />
-        <View style={styles.headerContainer}>
-          <View style={styles.budgetContainer}>
-            <View style={styles.categoryItemAdd}>
-              <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddItemModalVisible(true); }} accessible accessibilityLabel="Добавить элемент">
-                <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
-                  <Text style={styles.categoryPlusText}>+</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </View>
-            <TextInput style={styles.budgetInput} placeholder="Бюджет (т)" value={formatBudget(budget)} onChangeText={handleBudgetChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={18} accessible accessibilityLabel="Бюджет мероприятия" />
-            <TextInput style={styles.guestInput} placeholder="Гостей" value={guestCount} onChangeText={handleGuestCountChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={5} accessible accessibilityLabel="Количество гостей" />
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+          <View style={styles.logoContainer}>
+            <Image source={require("../../assets/kazanRevert.png")} style={styles.potIcon} resizeMode="contain" />
           </View>
-          <Modal animationType="fade" transparent={true} visible={isLoading}>
-            <View style={styles.loaderOverlay}>
-              <View style={styles.loaderContainer}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={styles.loaderText}>Подбираем...</Text>
+          
+          <View style={styles.headerContainer}>
+            <View style={styles.budgetContainer}>
+              <View style={styles.categoryItemAdd}>
+                <TouchableOpacity style={styles.categoryButtonAdd} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setAddItemModalVisible(true); }} accessible accessibilityLabel="Добавить элемент">
+                  <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.categoryButtonGradient}>
+                    <Text style={styles.categoryPlusText}>+</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
+              <TextInput style={styles.budgetInput} placeholder="Бюджет (т)" value={formatBudget(budget)} onChangeText={handleBudgetChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={18} accessible accessibilityLabel="Бюджет мероприятия" />
+              <TextInput style={styles.guestInput} placeholder="Гостей" value={guestCount} onChangeText={handleGuestCountChange} placeholderTextColor={COLORS.placeholder} keyboardType="numeric" maxLength={5} accessible accessibilityLabel="Количество гостей" />
             </View>
-          </Modal>
-        </View>
-        <View style={styles.listContainer}>
-          {loading ? (
-            <ActivityIndicator size="large" color={COLORS.primary} />
-          ) : (
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+            <Modal animationType="fade" transparent={true} visible={isLoading}>
+              <View style={styles.loaderOverlay}>
+                <View style={styles.loaderContainer}>
+                  <ActivityIndicator size="large" color={COLORS.primary} />
+                  <Text style={styles.loaderText}>Подбираем...</Text>
+                </View>
+              </View>
+            </Modal>
+          </View>
+
+          <View style={styles.listContainer}>
+            {loading ? (
+              <ActivityIndicator size="large" color={COLORS.primary} />
+            ) : (
               <View style={styles.categoryGrid}>
                 {[...categories, 'Добавить'].map((item, index) => (
                   <View key={index} style={styles.categoryItem}>
@@ -1918,15 +1919,15 @@ const ConferencesEventScreen = ({ navigation, route }) => {
                   </View>
                 ))}
               </View>
+            )}
+          </View>
 
-            </ScrollView>
-          )}
-        </View>
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity style={styles.nextButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setEventDetailsModalVisible(true); }} disabled={loading} accessible accessibilityLabel="Далее">
-            <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
-          </TouchableOpacity>
-        </View>
+          <View style={styles.bottomContainer}>
+            <TouchableOpacity style={styles.nextButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setEventDetailsModalVisible(true); }} disabled={loading} accessible accessibilityLabel="Далее">
+              <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
         <AddItemModal visible={addItemModalVisible} onClose={() => setAddItemModalVisible(false)} filteredItems={combinedData} filteredData={filteredData} handleAddItem={handleAddItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} updateCategories={updateCategories} />
         <CategoryItemsModal visible={categoryModalVisible} onClose={() => setCategoryModalVisible(false)} categoryItems={selectedCategoryItems} categoryLabel={selectedCategoryLabel} categoryType={selectedCategoryType} filteredData={filteredData} handleAddItem={handleAddItem} handleRemoveItem={handleRemoveItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} setQuantities={setQuantities} budget={budget} setFilteredData={setFilteredData} setRemainingBudget={setRemainingBudget} updateCategories={updateCategories} guestCount={guestCount} setGuestCount={setGuestCount} />
         <DetailsModal visible={detailsModalVisible} onClose={() => setDetailsModalVisible(false)} item={selectedItem} />

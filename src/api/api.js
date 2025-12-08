@@ -193,6 +193,11 @@ export default {
       throw new Error(`Ошибка получения товара: ${error.response?.data?.message || error.message}`);
     }),
 
+  getGoodDetailsInfo: (id) =>
+    api.get(`/api/goodbyid/${id}`).catch((error) => {
+      throw new Error(`Ошибка получения деталей товара: ${error.response?.data?.message || error.message}`);
+    }),
+
   updateGoodById: (id, data) =>
     api.put(`/api/updategoodbyid/${id}`, data).catch((error) => {
       throw new Error(`Ошибка обновления товара: ${error.response?.data?.message || error.message}`);
@@ -217,12 +222,15 @@ export default {
     }).catch((error) => handleError(error, 'получения списка желаний')),
 
   getWishlistByWeddingIdWithoutToken: (weddingId) =>
-    api.get(`/api/wishlist/${weddingId}`).catch((error) => handleError(error, 'получения списка желаний без токена')),
+    api.get(`/api/wishlist/public/wedding/${weddingId}`).catch((error) => handleError(error, 'получения списка желаний без токена')),
 
   getWishlistByEventCategoryId: (categoryId, token) =>
     api.get(`/api/wishlist/eventcategory/${categoryId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     }).catch((error) => handleError(error, 'получения списка желаний категории')),
+
+  getWishlistByEventCategoryIdWithoutToken: (categoryId) =>
+    api.get(`/api/wishlist/public/eventcategory/${categoryId}`).catch((error) => handleError(error, 'получения списка желаний категории без токена')),
 
   reserveWishlistItem: (id) =>
     api.patch(`/api/wishlist/${id}/reserve`, {}).catch((error) => handleError(error, 'резервирования желания')),
@@ -301,6 +309,11 @@ export default {
 
   getWeddingById: (id) =>
     api.get(`/api/weddings/${id}`).catch((error) => {
+      throw new Error(`Ошибка получения свадьбы: ${error.response?.data?.message || error.message}`);
+    }),
+
+  getPublicWeddingById: (id) =>
+    api.get(`/api/weddings/public/${id}`).catch((error) => {
       throw new Error(`Ошибка получения свадьбы: ${error.response?.data?.message || error.message}`);
     }),
 
