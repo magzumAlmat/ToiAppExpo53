@@ -33,12 +33,12 @@ export const COLORS = {
   card: '#FDFBF5',
   textPrimary: '#5A4032',
   textSecondary: '#718096',
-  accent: '#D3C5B7',
-  shadow: 'rgba(45, 55, 72, 0.15)',
+ accent: "#FBBF24",
+  shadow: "rgba(0, 0, 0, 0.3)",
   error: '#FF0000',
   white: '#FFFFFF',
   buttonGradientStart: '#D3C5B7',
-  buttonGradientEnd: '#A68A6E',
+ buttonGradientEnd: "#A68A6E",
   border: '#B0A092',
   placeholder: 'rgba(255, 255, 255, 0.7)',
 }
@@ -1752,7 +1752,11 @@ const ConferencesEventScreen = ({ navigation, route }) => {
           const fetchedFiles = response.data || [];
           setFiles(fetchedFiles);
         } catch (err) {
-          console.error("Ошибка загрузки файлов:", err);
+          if (err.response && err.response.status === 400) {
+            console.log("Файлы для данного элемента не найдены или запрос некорректен (400).");
+          } else {
+            console.error("Ошибка загрузки файлов:", err);
+          }
           setFiles([]);
         } finally {
           setLoadingFiles(false);
@@ -1910,7 +1914,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
         </View>
 
         {/* Scrollable List Content */}
-        <View style={[styles.listContainer, { flex: 1, marginBottom: 100 }]}> 
+        <View style={[styles.listContainer, { flex: 1 }]}> 
           {loading ? (
             <ActivityIndicator size="large" color={COLORS.primary} />
           ) : (
@@ -1922,12 +1926,11 @@ const ConferencesEventScreen = ({ navigation, route }) => {
                   </View>
                 ))}
               </View>
-              {/* Add some bottom padding inside scrollview if needed */}
             </ScrollView>
           )}
         </View>
 
-        {/* Custom Footer */}
+        {/* Custom Footer - Fixed at bottom */}
         <View style={styles.customFooterContainer}>
           <Image source={require("../../assets/footer.png")} style={styles.footerBackground} resizeMode="cover" />
           
@@ -1949,9 +1952,8 @@ const ConferencesEventScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.floatingButtonContainer}>
-             <TouchableOpacity style={styles.nextButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setEventDetailsModalVisible(true); }} disabled={loading} accessible accessibilityLabel="Далее">
+            <TouchableOpacity style={styles.nextButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setEventDetailsModalVisible(true); }} disabled={loading} accessible accessibilityLabel="Далее">
               <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
-
             </TouchableOpacity>
           </View>
         </View>
@@ -2162,12 +2164,12 @@ const styles = StyleSheet.create({
     marginBottom: 0, // Add bottom margin for spacing
     backgroundColor: 'transparent',
   },
-  nextButton: {
-    width: 80,
-    height: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  // nextButton: {
+  //   width: 80,
+  //   height: 80,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
   potIcon3: { 
     width: 70, 
     height: 70, 
@@ -2649,71 +2651,69 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   customFooterContainer: {
-    position: 'absolute',
+    position: 'absolute', 
     bottom: 0,
     left: 0,
     right: 0,
-    height: 100,
+    height: 170, 
     justifyContent: 'flex-end',
-    backgroundColor: 'transparent',
     zIndex: 100,
   },
   footerBackground: {
-    position: 'absolute',
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    paddingBottom: 25, 
-    height:190,
-    backgroundColor: 'white',
-    opacity:0.3,
+    backgroundColor: '#d3c5b722', 
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
   },
-
   footerContent: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingBottom: 25, 
-    paddingHorizontal: 20,
-    height: 80,
+    alignItems: 'flex-end',
+    paddingBottom: 30, 
+    height: '100%',
+    zIndex: 102,
   },
   navItem: {
     alignItems: 'center',
     justifyContent: 'center',
+    height: 60,
+    width: 80,
   },
   navText: {
     fontSize: 10,
     color: '#5A4032',
     marginTop: 4,
     fontFamily: 'System', 
+    fontWeight: '500',
   },
   floatingButtonContainer: {
     position: 'absolute',
-    bottom: "10%", // Matches bottomContainer marginBottom: "10%" from HomeScreen
+    top: 0, 
     left: 0,
     right: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 101,
-    paddingBottom: 70, // Matches bottomContainer paddingBottom: 40
+    zIndex: 105,
   },
-
-
-
-
   nextButton: {
-    borderRadius: 25, // Matches nextButton borderRadius: 25
-    overflow: "hidden", // Matches nextButton overflow: "hidden"
-    marginVertical: 5, // Matches nextButton marginVertical: 5
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: '#fff', 
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.30,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   nextButtonText: {
-    position: 'absolute',
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-    zIndex: 10, 
   },
 });
 

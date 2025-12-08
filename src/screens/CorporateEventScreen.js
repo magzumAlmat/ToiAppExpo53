@@ -1926,6 +1926,7 @@ const CorporateEventScreen = ({ navigation, route }) => {
             <ScrollView 
               style={styles.scrollView} 
               showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
             >
               <View style={styles.categoryGrid}>
                 {[...categories, 'Добавить'].map((item, index) => (
@@ -1934,27 +1935,47 @@ const CorporateEventScreen = ({ navigation, route }) => {
                   </View>
                 ))}
               </View>
+              
+              {/* Custom Footer moved inside ScrollView for common scrolling */}
+              <View style={styles.customFooterContainer}>
+                <View style={styles.footerBackground} />
+                
+                <View style={styles.footerContent}>
+                  {/* <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Home")}>
+                    <Icon name="home" size={24} color="#5A4032" />
+                    <Text style={styles.navText}>Главная</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("MyEvents")}>
+                    <Icon name="event" size={24} color="#5A4032" />
+                    <Text style={styles.navText}>Мои мероприятия</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Profile")}>
+                    <Icon name="person" size={24} color="#5A4032" />
+                    <Text style={styles.navText}>Профиль</Text>
+                  </TouchableOpacity> */}
+                </View>
+
+                <View style={styles.floatingButtonContainer}>
+                  <TouchableOpacity 
+                    style={styles.nextButton} 
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      setEventDetailsModalVisible(true);
+                    }}
+                    disabled={loading}
+                    accessible 
+                    accessibilityLabel="Далее"
+                  >
+                    <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
               <View style={styles.bottomPadding} />
             </ScrollView>
           )}
-        </View>
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity 
-            style={styles.nextButton} 
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setEventDetailsModalVisible(true);
-            }}
-            disabled={loading}
-            accessible
-            accessibilityLabel="Далее"
-          >
-            <Image 
-              source={require("../../assets/next.png")} 
-              style={styles.potIcon3} 
-              resizeMode="contain" 
-            />
-          </TouchableOpacity>
         </View>
         <AddItemModal
           visible={addItemModalVisible}
@@ -2743,6 +2764,71 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  customFooterContainer: {
+    // position: 'absolute',  <-- Removed for common scrolling
+    // bottom: 0,
+    marginTop: 20, // Add some spacing from the list
+    width: '100%', 
+    height: 170, 
+    justifyContent: 'flex-end',
+    // zIndex: 100, // Not strictly needed if in flow, but keeps stacking context
+  },
+  footerBackground: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#d3c5b722', 
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+  },
+  footerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+    paddingBottom: 30, 
+    height: '100%',
+    zIndex: 102,
+  },
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60,
+    width: 80,
+  },
+  navText: {
+    fontSize: 10,
+    color: '#5A4032',
+    marginTop: 4,
+    fontFamily: 'System', 
+    fontWeight: '500',
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    top: 0, 
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 105,
+  },
+  nextButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: '#fff', 
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.30,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  nextButtonText: {
   },
 });
 
