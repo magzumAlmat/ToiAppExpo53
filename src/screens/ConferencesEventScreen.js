@@ -1961,88 +1961,160 @@ const ConferencesEventScreen = ({ navigation, route }) => {
         <CategoryItemsModal visible={categoryModalVisible} onClose={() => setCategoryModalVisible(false)} categoryItems={selectedCategoryItems} categoryLabel={selectedCategoryLabel} categoryType={selectedCategoryType} filteredData={filteredData} handleAddItem={handleAddItem} handleRemoveItem={handleRemoveItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} setQuantities={setQuantities} budget={budget} setFilteredData={setFilteredData} setRemainingBudget={setRemainingBudget} updateCategories={updateCategories} guestCount={guestCount} setGuestCount={setGuestCount} />
         <DetailsModal visible={detailsModalVisible} onClose={() => setDetailsModalVisible(false)} item={selectedItem} />
         <Modal visible={eventDetailsModalVisible} transparent animationType="slide" onRequestClose={() => setEventDetailsModalVisible(false)}>
-          <View style={styles.modalOverlay}>
+          <SafeAreaView style={[styles.modalOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
             <View style={styles.eventDetailsModalContainer}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Данные конференции</Text>
-                <TouchableOpacity style={styles.modalCloseButton} onPress={() => setEventDetailsModalVisible(false)} accessible accessibilityLabel="Закрыть">
-                  <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.modalContent}>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Название конференции</Text>
-                  <TextInput style={styles.input} value={eventName} onChangeText={setEventName} placeholder="Введите название..." placeholderTextColor={MODAL_COLORS.textSecondary} accessible accessibilityLabel="Название мероприятия" />
-                </View>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Дата конференции</Text>
-                  <TouchableOpacity style={styles.datePickerButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowDatePicker(true); }} accessible accessibilityLabel="Выбрать дату">
-                    <Text style={styles.datePickerText}>{eventDate ? eventDate.toLocaleDateString('ru-RU') : 'Выберите дату'}</Text>
-                    <Icon name="calendar-today" size={20} color={MODAL_COLORS.icon} />
+              <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { textAlign: 'center'}]}>Создание мероприятия "Конференция"</Text>
+                  <TouchableOpacity style={styles.modalCloseButton} onPress={() => setEventDetailsModalVisible(false)} accessible accessibilityLabel="Закрыть">
+                    <Icon name="close" size={30} color={MODAL_COLORS.closeButtonColor} />
                   </TouchableOpacity>
                 </View>
-                {showDatePicker && (
-                  <Modal visible={showDatePicker} transparent animationType="fade" onRequestClose={() => setShowDatePicker(false)}>
-                    <View style={styles.modalOverlay}>
-                      <View style={styles.calendarContainer}>
-                        <Calendar
-                          onDayPress={(day) => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            const dateString = day.dateString;
-                            const dayInfo = blockedDays[dateString];
 
-                            if (dayInfo && dayInfo.disabled) {
-                              alert(`Дата ${dateString} полностью забронирована.`);
-                              return;
-                            }
+                <View style={styles.inputContainer}>
+                  {/* <Icon name="event-note" size={20} color={MODAL_COLORS.icon} style={styles.inputIcon} /> */}
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Название конференции"
+                    value={eventName}
+                    onChangeText={setEventName}
+                    placeholderTextColor={MODAL_COLORS.textSecondary}
+                  />
+                </View>
 
-                            const selectedRestaurant = filteredData.find(item => item.type === 'restaurant');
-                            if (selectedRestaurant && dayInfo && dayInfo.dots) {
-                              const isRestaurantBooked = dayInfo.dots.some(dot => dot.restaurantId === selectedRestaurant.id);
-                              if (isRestaurantBooked) {
-                                alert(`Ресторан "${selectedRestaurant.name}" уже забронирован на ${dateString}. Пожалуйста, выберите другую дату или другой ресторан.`);
-                                return;
-                              }
-                            }
-                            
-                            setEventDate(new Date(day.dateString));
-                            setShowDatePicker(false);
-                          }}
-                          markingType={'custom'}
-                          markedDates={{
-                            ...blockedDays,
-                            [eventDate.toISOString().split('T')[0]]: {
-                              selected: true,
-                              disableTouchEvent: true,
-                              customStyles: {
-                                container: {
-                                  backgroundColor: COLORS.primary,
-                                  borderRadius: 5,
-                                },
-                                text: {
-                                  color: COLORS.white,
-                                  fontWeight: 'bold',
-                                },
-                              },
-                            },
-                          }}
-                          minDate={new Date().toISOString().split('T')[0]} 
-                          theme={{ backgroundColor: MODAL_COLORS.background, calendarBackground: MODAL_COLORS.background, textSectionTitleColor: MODAL_COLORS.textPrimary, selectedDayBackgroundColor: COLORS.primary, selectedDayTextColor: COLORS.white, todayTextColor: COLORS.accent, dayTextColor: MODAL_COLORS.textPrimary, textDisabledColor: MODAL_COLORS.textSecondary, arrowColor: COLORS.primary }} />
-                        <TouchableOpacity style={styles.closeCalendarButton} onPress={() => setShowDatePicker(false)} accessible accessibilityLabel="Закрыть календарь">
-                          <Text style={styles.closeCalendarText}>Закрыть</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </Modal>
-                )}
-                <TouchableOpacity style={[styles.submitButton, loading && styles.submitButtonDisabled]} onPress={() => { setEventDetailsModalVisible(false); handleSubmit(); }} disabled={loading} accessible accessibilityLabel="Создать конференцию">
-                  <LinearGradient colors={[COLORS.buttonGradientStart, COLORS.buttonGradientEnd]} style={styles.submitButtonGradient}>
-                    {loading ? <ActivityIndicator size="small" color={COLORS.white} /> : <Text style={styles.submitButtonText}>Создать конференцию</Text>}
-                  </LinearGradient>
+                <TouchableOpacity style={styles.datePickerButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowDatePicker(true); }}>
+                  <Icon name="calendar-today" size={20} color={MODAL_COLORS.activeFilter} style={styles.buttonIcon} />
+                  <Text style={styles.datePickerText}>{eventDate.toLocaleDateString("ru-RU")}</Text>
                 </TouchableOpacity>
-              </View>
+
+                {showDatePicker && (
+                  <Calendar
+                    style={styles.calendar}
+                    current={eventDate.toISOString().split("T")[0]}
+                    onDayPress={(day) => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      const dateString = day.dateString;
+                      const dayInfo = blockedDays[dateString];
+
+                      if (dayInfo && dayInfo.disabled) {
+                        alert(`Дата ${dateString} полностью забронирована.`);
+                        return;
+                      }
+
+                      const selectedRestaurant = filteredData.find(item => item.type === 'restaurant');
+                      if (selectedRestaurant && dayInfo && dayInfo.dots) {
+                        const isRestaurantBooked = dayInfo.dots.some(dot => dot.restaurantId === selectedRestaurant.id);
+                        if (isRestaurantBooked) {
+                          alert(`Ресторан "${selectedRestaurant.name}" уже забронирован на ${dateString}. Пожалуйста, выберите другую дату или другой ресторан.`);
+                          return;
+                        }
+                      }
+                      
+                      setEventDate(new Date(day.dateString));
+                      setShowDatePicker(false);
+                    }}
+                    markingType={'custom'}
+                    markedDates={{
+                      ...blockedDays,
+                      [eventDate.toISOString().split('T')[0]]: {
+                        selected: true,
+                        disableTouchEvent: true,
+                        customStyles: {
+                          container: {
+                            backgroundColor: COLORS.primary,
+                            borderRadius: 5,
+                          },
+                          text: {
+                            color: COLORS.white,
+                            fontWeight: 'bold',
+                          },
+                        },
+                      },
+                    }}
+                    minDate={new Date().toISOString().split("T")[0]}
+                    theme={{
+                        arrowColor: MODAL_COLORS.activeFilter,
+                        selectedDayBackgroundColor: MODAL_COLORS.activeFilter,
+                        selectedDayTextColor: MODAL_COLORS.activeFilterText,
+                        todayTextColor: MODAL_COLORS.activeFilter,
+                        dotColor: MODAL_COLORS.activeFilter,
+                        disabledArrowColor: MODAL_COLORS.separator,
+                        textDisabledColor: MODAL_COLORS.separator,
+                        'stylesheet.calendar.header': {
+                            week: { marginTop: 5, flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderColor: MODAL_COLORS.separator, },
+                        },
+                        dayTextColor: MODAL_COLORS.textPrimary,
+                        monthTextColor: MODAL_COLORS.textPrimary,
+                        textSectionTitleColor: MODAL_COLORS.textSecondary,
+                    }}
+                  />
+                )}
+
+                <Text style={styles.subtitle}>Выбранные элементы:</Text>
+                <View style={styles.itemsContainer}>
+                  {filteredData.length > 0 ? (
+                    Object.entries(
+                      filteredData.reduce((acc, item) => {
+                        const type = item.type;
+                        if (!acc[type]) acc[type] = [];
+                        acc[type].push(item);
+                        return acc;
+                      }, {})
+                    ).sort(([typeA], [typeB]) => (typeOrder[typeA] || 13) - (typeOrder[typeB] || 13))
+                    .map(([type, items]) => (
+                      <View key={type} style={{marginBottom:10}}>
+                        <Text style={styles.categoryHeaderSummary}>
+                          {typesMapping.find((t) => t.type === type)?.label || type} ({items.length})
+                        </Text>
+                        {items.map((item) => {
+                          const quantity = parseInt(quantities[`${item.type}-${item.id}`] || "1");
+                          const cost = item.type === "restaurant" ? item.averageCost : item.cost;
+                          const effectiveQuantity = item.type === "restaurant" ? (parseInt(guestCount, 10) || 1) : quantity;
+                          const totalItemCost = cost * effectiveQuantity;
+                          let itemTitle = "";
+                          switch (item.type) {
+                            case "restaurant": itemTitle = `${item.name} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            case "tamada": itemTitle = `${item.name} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            case "program": itemTitle = `${item.teamName} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            case "alcohol": itemTitle = `${item.alcoholName} (${item.salonName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            case "transport": itemTitle = `${item.carName} (${item.salonName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            case "jewelry": itemTitle = `${item.itemName} (${item.storeName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            case "flowers": itemTitle = `${item.flowerName} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            case "cake": itemTitle = `${item.name} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            case "technical-equipment-rental": itemTitle = `${item.name} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                            default: itemTitle = `${item.name || item.itemName || item.teamName} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`;
+                          }
+                          return (
+                            <View key={`${item.type}-${item.id}`} style={styles.itemContainer}>
+                              <Text style={styles.itemText}>{itemTitle}</Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    ))
+                  ) : ( <Text style={styles.noItems}>Нет выбранных элементов</Text> )}
+                </View>
+
+                <View style={styles.totalContainer}>
+                  <Text style={styles.totalText}>Общая стоимость: {calculateTotalCost.toLocaleString("ru-RU")} тг</Text>
+                  {budget && <Text style={styles.totalText}>Ваш бюджет: {parseFloat(budget).toLocaleString("ru-RU")} ₸</Text> }
+                {budget && (
+                  <Text style={[styles.budgetInfo, remainingBudget < 0 && styles.budgetError]}>
+                    Остаток: {remainingBudget.toLocaleString("ru-RU")} ₸ {remainingBudget < 0 && "(превышение)"}
+                  </Text>
+                )}
+                </View>
+                
+
+                <View style={styles.modalButtonContainer}>
+                  <TouchableOpacity style={[styles.modalButton, styles.confirmButton]} onPress={() => { setEventDetailsModalVisible(false); handleSubmit(); }} disabled={loading}>
+                    <Icon name="check" size={20} color={MODAL_COLORS.activeFilterText} style={styles.buttonIcon} />
+                    <Text style={styles.modalButtonText}>Создать конференцию</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
-          </View>
+          </SafeAreaView>
         </Modal>
       </LinearGradient>
     </>
@@ -2360,18 +2432,24 @@ const styles = StyleSheet.create({
     paddingTop: 18,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: MODAL_COLORS.separator,
   },
   modalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: "600",
     color: MODAL_COLORS.textPrimary,
+    flexShrink: 1,
+    marginRight: 10,
   },
   modalCloseButton: {
-    padding: 10,
+    padding: 8,
   },
   addModalSearchContainer: {
     flexDirection: 'row',
@@ -2714,6 +2792,89 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   nextButtonText: {
+  },
+  subtitle: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: MODAL_COLORS.textPrimary,
+    marginBottom: 10,
+    marginTop: 15,
+    paddingHorizontal: 20,
+  },
+  itemsContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 15,
+  },
+  itemContainer: {
+    // backgroundColor: MODAL_COLORS.inactiveFilter,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+
+  },
+  itemText: {
+    fontSize: 14,
+    color: MODAL_COLORS.textPrimary,
+    lineHeight: 20,
+  },
+  noItems: {
+    fontSize: 15,
+    color: MODAL_COLORS.textSecondary,
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  categoryHeaderSummary: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: MODAL_COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  totalContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: MODAL_COLORS.separator,
+  },
+  totalText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: MODAL_COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  budgetInfo: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: MODAL_COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  budgetError: {
+    color: COLORS.error,
+  },
+  modalButtonContainer: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  modalButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  confirmButton: {
+    backgroundColor: MODAL_COLORS.activeFilter,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: MODAL_COLORS.activeFilterText,
+    marginLeft: 8,
+  },
+  calendar: {
+    marginBottom: 15,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
 });
 
