@@ -281,7 +281,7 @@ const renderAddItem = useCallback(
           title = `Тех. оборудование: ${item.name} (${cost} ₸)`;
           break;
         case "jewelry":
-          title = `Ювелирные изделия: ${item.name} (${cost} ₸)`;
+          title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
           break;
         case "flowers":
           title = `Цветы: ${item.flowerName} (${cost} ₸)`;

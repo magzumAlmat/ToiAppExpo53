@@ -281,7 +281,7 @@ const AddItemModal = ({
           title = `${item.name} (${cost} ₸)`;
           break;
           case "jewelry":
-        title = `${item.itemName || 'Без названия'} (${cost} ₸)`;
+        title = `Ювелирные изделия: ${item.storeName} - ${item.itemName} (${cost} ₸)`;
         break;
       case "flowers":
         title = `${item.flowerName || 'Без названия'} (${cost} ₸)`;
