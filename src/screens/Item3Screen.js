@@ -53,6 +53,12 @@ const COLORS = {
   shadow: "#0000001A",
 };
 
+const formatCurrency = (value) => {
+  const num = parseFloat(value);
+  if (isNaN(num)) return '0';
+  return num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+};
+
 const { width: screenWidth } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
@@ -2432,7 +2438,7 @@ const handleDetailsPress = () => {
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}>
                     <Text style={styles.categoryTitle}>{group.name}</Text>
                     <Text style={[styles.categoryTitle, {color: COLORS.primary, fontSize: 14}]}>
-                      {groupTotal.toLocaleString()} тг
+                      {formatCurrency(groupTotal)} тг
                     </Text>
                   </View>
                   <FlatList
@@ -2444,7 +2450,7 @@ const handleDetailsPress = () => {
                       >
                         <View style={{ flex: 1 }}>
                           <Text style={styles.subItemText}>
-                             {service.name || group.name} - {(parseFloat(service.cost) || 0).toLocaleString()} x {service.quantity || 1} = {((parseFloat(service.cost) || 0) * (service.quantity || 1)).toLocaleString()} тг
+                             {service.name || group.name} - {formatCurrency(service.cost || 0)} x {service.quantity || 1} = {formatCurrency((parseFloat(service.cost) || 0) * (service.quantity || 1))} тг
                           </Text>
                         </View>
                         <View style={styles.itemActions}>
@@ -2481,36 +2487,35 @@ const handleDetailsPress = () => {
         )}
         
         {/* Budget Display */}
-        <View style={styles.budgetContainer}>
-          <View style={styles.budgetRow}>
-            <Text style={styles.budgetLabel}>Общая сумма:</Text>
-            <Text style={styles.budgetValue}>
-              {(parseFloat(item.total_cost) || 0).toLocaleString()} тг
-            </Text>
-          </View>
-          <View style={styles.budgetRow}>
-            <Text style={styles.budgetLabel}>Бюджет:</Text>
-            <Text style={styles.budgetValue}>
-              {(parseFloat(item.budget) || 0).toLocaleString()} тг
-            </Text>
-          </View>
-          <View style={styles.budgetRow}>
-            <Text style={styles.budgetLabel}>Оплачено:</Text>
-            <Text style={styles.budgetValue}>
-              {(parseFloat(item.paid_amount) || 0).toLocaleString()} тг
-            </Text>
-          </View>
-          <View style={styles.budgetRow}>
-            <Text style={styles.budgetLabel}>Остаток:</Text>
-            <Text style={[styles.budgetValue, {
-              color: (parseFloat(item.remaining_balance) || 0) >= 0
-                ? COLORS.secondary
-                : COLORS.error
-            }]}>
-              {(parseFloat(item.remaining_balance) || 0).toLocaleString()} тг
-            </Text>
-          </View>
+      <View style={styles.budgetContainer}>
+        <View style={styles.budgetRow}>
+          <Text style={styles.budgetLabel}>Общая сумма:</Text>
+          <Text style={styles.budgetValue}>
+            {formatCurrency(item.total_cost)} тг
+          </Text>
         </View>
+        <View style={styles.budgetRow}>
+          <Text style={styles.budgetLabel}>Бюджет:</Text>
+          <Text style={styles.budgetValue}>
+            {formatCurrency(item.budget)} тг
+          </Text>
+        </View>
+        <View style={styles.budgetRow}>
+          <Text style={styles.budgetLabel}>Оплачено:</Text>
+          <Text style={styles.budgetValue}>
+            {formatCurrency(item.paid_amount)} тг
+          </Text>
+        </View>
+        <View style={styles.budgetRow}>
+          <Text style={styles.budgetLabel}>Остаток:</Text>
+          <Text style={[
+            styles.budgetValue, 
+            parseFloat(item.remaining_balance) < 0 && { color: COLORS.error }
+          ]}>
+            {formatCurrency(item.remaining_balance)} тг
+          </Text>
+        </View>
+      </View>
 
         <View style={styles.buttonRow}>
           <TouchableOpacity
@@ -2630,7 +2635,7 @@ const handleDetailsPress = () => {
                         return (
                           <View>
                              <Text style={styles.subItemText}>
-                               {name} - {unitCost.toLocaleString()} x {quantity} = {totalCost.toLocaleString()} тг
+                               {name} - {formatCurrency(unitCost)} x {quantity} = {formatCurrency(totalCost)} тг
                              </Text>
                           </View>
                         );
@@ -2676,19 +2681,19 @@ const handleDetailsPress = () => {
           <View style={styles.budgetRow}>
             <Text style={styles.budgetLabel}>Бюджет:</Text>
             <Text style={styles.budgetValue}>
-              {(item.budget || 0).toLocaleString()} тг
+              {formatCurrency(item.budget)} тг
             </Text>
           </View>
           <View style={styles.budgetRow}>
             <Text style={styles.budgetLabel}>Общая сумма:</Text>
             <Text style={styles.budgetValue}>
-              {(item.total_cost || 0).toLocaleString()} тг
+              {formatCurrency(item.total_cost)} тг
             </Text>
           </View>
           {/* <View style={styles.budgetRow}>
             <Text style={styles.budgetLabel}>Оплачено:</Text>
             <Text style={styles.budgetValue}>
-              {(item.paid_amount || 0).toLocaleString()} тг
+              {formatCurrency(item.paid_amount)} тг
             </Text>
           </View> */}
           <View style={styles.budgetRow}>
@@ -2698,7 +2703,7 @@ const handleDetailsPress = () => {
                 ? COLORS.secondary
                 : COLORS.error
             }]}>
-              {(item.remaining_balance || 0).toLocaleString()} тг
+              {formatCurrency(item.remaining_balance)} тг
             </Text>
           </View>
         </View>
@@ -2826,7 +2831,7 @@ const handleDetailsPress = () => {
         <Text style={styles.serviceCardTitle}>
           {item.name}{" "}
           {item.item_name ? `(${item.item_name})` : ""}{" "}
-          - {cost} x {quantity} = {total} тг
+          - {formatCurrency(cost)} x {quantity} = {formatCurrency(total)} тг
         </Text>
         {item.description ? (
             <Text style={styles.serviceCardDescription}>
