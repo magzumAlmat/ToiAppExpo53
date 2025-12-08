@@ -489,6 +489,94 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginVertical: 4,
   },
+  muiCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    marginBottom: 12,
+    marginHorizontal: 4,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    overflow: 'hidden',
+  },
+  muiCardSelected: {
+    backgroundColor: '#E3F2FD', // Light blue surface
+    borderColor: COLORS.primary,
+  },
+  muiCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    paddingBottom: 8,
+  },
+  muiAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  muiCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  muiCardSubtitle: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  muiCardContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  muiChipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+    gap: 8,
+  },
+  muiChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  muiChipText: {
+    fontSize: 12,
+    color: COLORS.text,
+    fontWeight: '500',
+  },
+  muiCardDescription: {
+    fontSize: 14,
+    color: COLORS.muted,
+    lineHeight: 20,
+  },
+  muiCardActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+  },
+  muiActionButton: {
+    padding: 8,
+    borderRadius: 4,
+  },
+  muiActionButtonText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
   serviceDetailsModalContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
@@ -1836,7 +1924,7 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
         cost: "0",
         supplier_id: userId,
       };
-      const response = await api.postGoodsData(giftData);
+      const response = await api.createGood(giftData);
       const newGood = response.data.data;
       
       const payload = { good_id: newGood.id };
@@ -2799,6 +2887,78 @@ const handleDetailsPress = () => {
     </TouchableOpacity>
   );
 
+  const renderGoodListItem = ({ item }) => {
+    const isSelected = selectedGoodIds.includes(item.id);
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.muiCard,
+          isSelected && styles.muiCardSelected
+        ]}
+        activeOpacity={0.7}
+        onPress={() => {
+          setSelectedGoodIds((prev) =>
+            prev.includes(item.id)
+              ? prev.filter((id) => id !== item.id)
+              : [...prev, item.id]
+          );
+        }}
+      >
+        <View style={styles.muiCardHeader}>
+          <View style={styles.muiAvatar}>
+            <Icon name="card-giftcard" size={24} color={COLORS.white} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.muiCardTitle}>{item.item_name}</Text>
+            <Text style={styles.muiCardSubtitle}>
+              {item.cost ? `${formatCurrency(item.cost)} тг` : "Цена не указана"}
+            </Text>
+          </View>
+          <View style={{ justifyContent: 'center' }}>
+             {isSelected ? (
+               <Icon name="check-circle" size={24} color={COLORS.primary} />
+             ) : (
+               <Icon name="radio-button-unchecked" size={24} color={COLORS.muted} />
+             )}
+          </View>
+        </View>
+
+        <View style={styles.muiCardContent}>
+          <View style={styles.muiChipContainer}>
+            <View style={styles.muiChip}>
+              <Icon name="local-offer" size={14} color={COLORS.text} style={{marginRight: 4}} />
+              <Text style={styles.muiChipText}>{item.category}</Text>
+            </View>
+            {item.specs?.storeName && (
+              <View style={styles.muiChip}>
+                <Icon name="store" size={14} color={COLORS.text} style={{marginRight: 4}} />
+                <Text style={styles.muiChipText}>{item.specs.storeName}</Text>
+              </View>
+            )}
+          </View>
+          
+          {item.description ? (
+            <Text numberOfLines={2} style={styles.muiCardDescription}>
+              {item.description}
+            </Text>
+          ) : null}
+        </View>
+
+        {item.specs?.goodLink && (
+          <View style={styles.muiCardActions}>
+            <TouchableOpacity 
+              style={styles.muiActionButton}
+              onPress={() => Linking.openURL(item.specs.goodLink)}
+            >
+              <Text style={styles.muiActionButtonText}>ОТКРЫТЬ ССЫЛКУ</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   const renderWishlistItem = ({ item }) => {
     const files = wishlistFiles[item.good_id] || [];
     return (
@@ -3293,10 +3453,9 @@ return (
           ) : (
             <FlatList
               data={goods}
-              renderItem={renderGoodCard}
+              renderItem={renderGoodListItem}
               keyExtractor={item => item.id.toString()}
-              numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between" }}
+              contentContainerStyle={styles.listContentContainer}
             />
           )}
 
