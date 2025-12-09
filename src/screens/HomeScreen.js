@@ -2315,7 +2315,7 @@ const openDetailsModal = (item) => {
                   `Вместимость: ${item.capacity || "Не указано"}`,
                   `Средний чек: ${item.averageCost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
-                  `Телефон: ${item.phone || "Не указано"}`,
+                  `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "clothing":
@@ -2357,6 +2357,7 @@ const openDetailsModal = (item) => {
                   `Название команды: ${item.teamName || "Не указано"}`,
                   `Тип программы: ${item.type || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
+                  `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "tamada":
@@ -2366,6 +2367,7 @@ const openDetailsModal = (item) => {
                     ? `Портфолио: ${item.portfolio.substring(0, 50)}...`
                     : "Портфолио не указано",
                   `Стоимость: ${item.cost} ₸`,
+                  `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
                 ];
                 if (
                   item.portfolio &&

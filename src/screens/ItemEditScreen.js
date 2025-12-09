@@ -125,6 +125,7 @@ export default function ItemEditScreen() {
     'Медеуский', 'Бостандыкский', 'Алмалинский', 'Ауэзовский', 'Наурызбайский',
     'Алатауский', 'Жетысуйский', 'За пределами Алматы',
   ];
+  const cityOptions = ['Алматы', 'Астана', 'Шымкент'];
   const genderOptions = ['мужской', 'женский'];
   const categoryOptions = [
     'Деньги',
@@ -510,6 +511,46 @@ export default function ItemEditScreen() {
                 </View>
               </Modal>
             </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Город:</Text>
+              <TouchableOpacity
+                style={styles.cuisineButton}
+                onPress={() => setModalVisible({ ...modalVisible, city: true })}
+              >
+                <Text style={styles.cuisineText}>{form.city || 'Выберите город'}</Text>
+              </TouchableOpacity>
+              <Modal
+                visible={modalVisible.city}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setModalVisible({ ...modalVisible, city: false })}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Выберите город</Text>
+                    <Picker
+                      selectedValue={form.city}
+                      onValueChange={(value) => {
+                        handleChange('city', value);
+                        setModalVisible({ ...modalVisible, city: false });
+                      }}
+                      style={styles.modalPicker}
+                    >
+                      <Picker.Item label="Выберите город" value="" />
+                      {cityOptions.map((option) => (
+                        <Picker.Item key={option} label={option} value={option} />
+                      ))}
+                    </Picker>
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setModalVisible({ ...modalVisible, city: false })}
+                    >
+                      <Text style={styles.closeButtonText}>Закрыть</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            </View>
           </>
         );
       case 'clothing':
@@ -788,6 +829,57 @@ export default function ItemEditScreen() {
                 placeholder="Стоимость"
               />
             </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Телефон:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.phone}
+                onChangeText={(text) => handleChange('phone', formatPhoneNumber(text))}
+                keyboardType="phone-pad"
+                maxLength={18}
+                placeholder="+7 (XXX) XXX-XX-XX"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Город:</Text>
+              <TouchableOpacity
+                style={styles.cuisineButton}
+                onPress={() => setModalVisible({ ...modalVisible, city: true })}
+              >
+                <Text style={styles.cuisineText}>{form.city || 'Выберите город'}</Text>
+              </TouchableOpacity>
+              <Modal
+                visible={modalVisible.city}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setModalVisible({ ...modalVisible, city: false })}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Выберите город</Text>
+                    <Picker
+                      selectedValue={form.city}
+                      onValueChange={(value) => {
+                        handleChange('city', value);
+                        setModalVisible({ ...modalVisible, city: false });
+                      }}
+                      style={styles.modalPicker}
+                    >
+                      <Picker.Item label="Выберите город" value="" />
+                      {cityOptions.map((option) => (
+                        <Picker.Item key={option} label={option} value={option} />
+                      ))}
+                    </Picker>
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setModalVisible({ ...modalVisible, city: false })}
+                    >
+                      <Text style={styles.closeButtonText}>Закрыть</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            </View>
           </>
         );
       case 'program':
@@ -820,6 +912,57 @@ export default function ItemEditScreen() {
                 onChangeText={(text) => handleChange('type', text)}
                 placeholder="Вид"
               />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Телефон:</Text>
+              <TextInput
+                style={styles.input}
+                value={form.phone}
+                onChangeText={(text) => handleChange('phone', formatPhoneNumber(text))}
+                keyboardType="phone-pad"
+                maxLength={18}
+                placeholder="+7 (XXX) XXX-XX-XX"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Город:</Text>
+              <TouchableOpacity
+                style={styles.cuisineButton}
+                onPress={() => setModalVisible({ ...modalVisible, city: true })}
+              >
+                <Text style={styles.cuisineText}>{form.city || 'Выберите город'}</Text>
+              </TouchableOpacity>
+              <Modal
+                visible={modalVisible.city}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setModalVisible({ ...modalVisible, city: false })}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Выберите город</Text>
+                    <Picker
+                      selectedValue={form.city}
+                      onValueChange={(value) => {
+                        handleChange('city', value);
+                        setModalVisible({ ...modalVisible, city: false });
+                      }}
+                      style={styles.modalPicker}
+                    >
+                      <Picker.Item label="Выберите город" value="" />
+                      {cityOptions.map((option) => (
+                        <Picker.Item key={option} label={option} value={option} />
+                      ))}
+                    </Picker>
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setModalVisible({ ...modalVisible, city: false })}
+                    >
+                      <Text style={styles.closeButtonText}>Закрыть</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
             </View>
           </>
         );

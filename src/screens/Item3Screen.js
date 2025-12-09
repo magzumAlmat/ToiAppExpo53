@@ -695,6 +695,8 @@ const fieldLabelsByCategory = {
     teamName: 'Название команды',
     type: 'Тип',
     cost: 'Стоимость',
+    phone: 'Телефон',
+    city: 'Город',
   },
   restaurant: {
   
@@ -705,12 +707,15 @@ const fieldLabelsByCategory = {
     address: 'Адрес',
     district: 'Район',
     phone: 'Телефон',
+    city: 'Город',
 
   },
   host: {
     name: 'Имя ведущего',
     portfolio: 'Портфолио',
     cost: 'Стоимость',
+    phone: 'Телефон',
+    city: 'Город',
   },
   cake: {
     name: 'Название кондитерской',
@@ -719,6 +724,7 @@ const fieldLabelsByCategory = {
     address: 'Адрес',
     district: 'Район',
     phone: 'Телефон',
+    city: 'Город',
   },
   car: {
     salonName: 'Название салона',
@@ -729,6 +735,7 @@ const fieldLabelsByCategory = {
     address: 'Адрес',
     district: 'Район',
     phone: 'Телефон',
+    city: 'Город',
   },
   flower: {
     salonName: 'Название салона',
@@ -738,6 +745,7 @@ const fieldLabelsByCategory = {
     address: 'Адрес',
     district: 'Район',
     phone: 'Телефон',
+    city: 'Город',
   },
   jewelry: {
     storeName: 'Название магазина',
@@ -748,6 +756,7 @@ const fieldLabelsByCategory = {
     address: 'Адрес',
     district: 'Район',
     phone: 'Телефон',
+    city: 'Город',
   },
   alcohol: {
     alcoholName: 'Название напитка',
@@ -757,6 +766,7 @@ const fieldLabelsByCategory = {
       district: 'Район',
     address:'Адрес',
        phone: 'Телефон',
+    city: 'Город',
 
   },
 

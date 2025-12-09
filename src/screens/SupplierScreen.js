@@ -806,6 +806,8 @@ export default function SupplierScreen({ navigation }) {
             <Text style={styles.cardTitle}>{item.teamName}</Text>
             <Text style={styles.cardDetail}>Тип: {item.type}</Text>
             <Text style={styles.cardDetail}>Стоимость: {item.cost} ₸</Text>
+            <Text style={styles.cardDetail}>Телефон: {item.phone || 'Не указан'}</Text>
+            <Text style={styles.cardDetail}>Город: {item.city || 'Не указан'}</Text>
           </View>
         );
         break;
@@ -822,6 +824,8 @@ export default function SupplierScreen({ navigation }) {
                                                      <Text>Открыть ссылку</Text>
                                          </TouchableOpacity>
             <Text style={styles.cardDetail}>Стоимость: {item.cost} ₸</Text>
+            <Text style={styles.cardDetail}>Телефон: {item.phone || 'Не указан'}</Text>
+            <Text style={styles.cardDetail}>Город: {item.city || 'Не указан'}</Text>
           </View>
         );
         break;
@@ -846,6 +850,7 @@ export default function SupplierScreen({ navigation }) {
             <Text style={styles.cardDetail}>Марка: {item.brand}</Text>
             <Text style={styles.cardDetail}>Цвет: {item.color}</Text>
             <Text style={styles.cardDetail}>Телефон: {item.phone}</Text>
+            <Text style={styles.cardDetail}>Город: {item.city || 'Не указан'}</Text>
             <Text style={styles.cardDetail}>Район: {item.district}</Text>
             <Text style={styles.cardDetail}>Стоимость: {item.cost} ₸</Text>
             <Text style={styles.cardDetail}>Адрес: {item.address}</Text>

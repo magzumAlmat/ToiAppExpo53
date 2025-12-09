@@ -156,6 +156,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Средний чек" value={item.averageCost ? `${item.averageCost} ₸` : null} />
             <DetailField label="Адрес" value={item.address} />
             <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
             <DetailField label="Район" value={item.district} />
           </>
         );
@@ -177,6 +178,8 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Тип" value="Ведущий / Тамада" />
             <LinkField label="Портфолио / О себе" url={item.portfolio} text="Открыть ссылку на портфолио" />
             <DetailField label="Стоимость услуг" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'flowers':
@@ -191,6 +194,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Адрес" value={item.address} />
             <DetailField label="Район" value={item.district} />
             <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'cake':
@@ -204,6 +208,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Адрес" value={item.address} />
             <DetailField label="Район" value={item.district} />
             <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'alcohol':
@@ -217,6 +222,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Адрес" value={item.address} />
             <DetailField label="Район" value={item.district} />
             <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'program':
@@ -228,6 +234,8 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Тип" value="Программа" />
             <DetailField label="Тип программы" value={item.type} />
             <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'transport':
@@ -243,6 +251,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Адрес" value={item.address} />
             <DetailField label="Район" value={item.district} />
             <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'jewelry':
@@ -256,6 +265,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Адрес" value={item.address} />
             <DetailField label="Район" value={item.district} />
             <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'traditionalGift':
@@ -269,6 +279,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Адрес" value={item.address} />
             <DetailField label="Район" value={item.district} />
             <DetailField label="Телефон" value={item.phone} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'goods':
