@@ -161,12 +161,13 @@
 
 
 // screens/LoginScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { startLoading, loginSuccess, setError } from '../store/authSlice';
 import api from '../api/api';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { env } from '../config/env';
@@ -182,25 +183,41 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [city, setCity] = useState('\u0410\u043b\u043c\u0430\u0442\u044b'); // Default city
   const dispatch = useDispatch();
   const { loading, error } = useSelector(s => s.auth);
 
+  useEffect(() => {
+    // Load saved city from AsyncStorage
+    const loadCity = async () => {
+      try {
+        const savedCity = await AsyncStorage.getItem('@user_selected_city');
+        if (savedCity) {
+          setCity(savedCity);
+        }
+      } catch (error) {
+        console.log('Error loading city:', error);
+      }
+    };
+    loadCity();
+  }, []);
+
   const handleLogin = async () => {
-    console.log('email=', email, 'password=', password);
+    console.log('email=', email, 'password=', password, 'city=', city);
     dispatch(startLoading());
     try {
-      const loginResponse = await api.login({ email, password });
+      const loginResponse = await api.login({ email, password, city });
       const authToken = loginResponse.data.token;
 
       await SecureStore.setItemAsync('token', authToken);
       api.setToken(authToken);
 
       const userResponse = await api.getUser();
-      dispatch(loginSuccess({ user: userResponse.data, token: authToken }));
+      dispatch(loginSuccess({ user: { ...userResponse.data, city }, token: authToken }));
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
-      dispatch(setError(error.response?.data?.error || 'Ошибка входа'));
-      Alert.alert('Ошибка', error.response?.data?.error || 'Не удалось войти');
+      dispatch(setError(error.response?.data?.error || '\u041e\u0448\u0438\u0431\u043a\u0430 \u0432\u0445\u043e\u0434\u0430'));
+      Alert.alert('\u041e\u0448\u0438\u0431\u043a\u0430', error.response?.data?.error || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0432\u043e\u0439\u0442\u0438');
     }
   };
 

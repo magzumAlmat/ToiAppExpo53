@@ -1860,6 +1860,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
               {renderField('Адрес', item.address)}
               {renderField('Телефон', item.phone)}
               {renderField('Район', item.district)}
+              {renderField('Город', item.city)}
               {renderField('Email', item.email)}
               {renderField('Описание', item.description)}
               {renderField('Категория', item.category)}

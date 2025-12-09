@@ -2325,6 +2325,7 @@ const openDetailsModal = (item) => {
                   `Пол: ${item.gender || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
+                  `Город: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "flowers":
@@ -2333,6 +2334,7 @@ const openDetailsModal = (item) => {
                   `Тип: ${item.flowerType || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
+                  `Город: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "cake":
@@ -2341,6 +2343,7 @@ const openDetailsModal = (item) => {
                   `Тип торта: ${item.cakeType || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
+                  `Город: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "alcohol":
@@ -2349,6 +2352,7 @@ const openDetailsModal = (item) => {
                   `Категория: ${item.category || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
+                  `Город: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "program":
@@ -2398,6 +2402,7 @@ const openDetailsModal = (item) => {
                   `Тип: ${item.type || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
+                  `Город: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "transport":
@@ -2407,6 +2412,7 @@ const openDetailsModal = (item) => {
                   `Цвет: ${item.color || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
+                  `Город: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "jewelry":
@@ -2415,6 +2421,7 @@ const openDetailsModal = (item) => {
                   `Материал: ${item.material || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
+                  `Город: ${item.city || "Не указан"}`,
                 ];
                 break;
               case "goods":
@@ -2422,6 +2429,7 @@ const openDetailsModal = (item) => {
                 details = [
                   item.description || "Описание не указано",
                   `Стоимость: ${item.cost} ₸`,
+                  `Город: ${item.city || "Не указан"}`,
                 ];
                 break;
               default:

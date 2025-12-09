@@ -3,6 +3,7 @@
 // api.js (Frontend API Client)
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { env } from '../config/env';
 import Constants from 'expo-constants';
@@ -37,13 +38,21 @@ const api = axios.create({
 //   },
 // });
 
-// Интерцептор запроса для добавления токена
+// Интерцептор запроса для добавления токена и города
 api.interceptors.request.use(
   async (config) => {
     const token = await SecureStore.getItemAsync('token');
+    const city = await AsyncStorage.getItem('@user_selected_city');
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    if (city) {
+      // Encode city to handle Cyrillic characters safely in headers
+      config.headers['x-city'] = encodeURIComponent(city);
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

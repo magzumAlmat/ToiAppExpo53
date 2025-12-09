@@ -12,6 +12,7 @@ import Item4Screen from '../screens/Item4Screen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import { View, Image, StyleSheet, TouchableOpacity, ImageBackground, FlatList, SafeAreaView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import DetailsScreen from '../screens/DetailsScreen';
 import WeddingWishlistScreen from '../screens/WeddingWishlistScreen';
 import * as Linking from 'expo-linking';
@@ -80,6 +81,8 @@ const SplashScreen = ({ navigation }) => {
       end={{ x: 0, y: 0 }}
       style={styles.splashContainer}
     >
+
+
       <View style={styles.buttonContainer}>
         {!showSecondButton ? (
           <TouchableOpacity style={styles.button} onPress={handlePress}>
@@ -88,6 +91,7 @@ const SplashScreen = ({ navigation }) => {
               style={styles.splashImage}
               resizeMode="contain"
             />
+            
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.button} disabled>
@@ -104,6 +108,30 @@ const SplashScreen = ({ navigation }) => {
 };
 
 const NewScreen = ({ navigation }) => {
+  const [selectedCity, setSelectedCity] = useState('Алматы');
+  const cities = ['Алматы', 'Астана', 'Шымкент'];
+
+  useEffect(() => {
+    const loadCity = async () => {
+      try {
+        const savedCity = await AsyncStorage.getItem('@user_selected_city');
+        if (savedCity) setSelectedCity(savedCity);
+      } catch (error) {
+        console.log('Error loading city:', error);
+      }
+    };
+    loadCity();
+  }, []);
+
+  const handleCitySelect = async (city) => {
+    setSelectedCity(city);
+    try {
+      await AsyncStorage.setItem('@user_selected_city', city);
+    } catch (error) {
+      console.log('Error saving city:', error);
+    }
+  };
+
   return (
     <LinearGradient
       colors={['#F1EBDD', '#897066']}
@@ -117,6 +145,33 @@ const NewScreen = ({ navigation }) => {
         imageStyle={styles.topPatternImage}
       />
       <View style={styles.contentContainer}>
+        
+        {/* City Segmented Control */}
+        <View style={styles.segmentedControlContainer}>
+            <View style={styles.segmentedControl}>
+            {cities.map((city) => (
+                <TouchableOpacity
+                key={city}
+                style={[
+                    styles.segmentButton,
+                    selectedCity === city && styles.segmentButtonActive,
+                ]}
+                onPress={() => handleCitySelect(city)}
+                activeOpacity={0.7}
+                >
+                <Text
+                    style={[
+                    styles.segmentText,
+                    selectedCity === city && styles.segmentTextActive,
+                    ]}
+                >
+                    {city}
+                </Text>
+                </TouchableOpacity>
+            ))}
+            </View>
+        </View>
+
         <View style={styles.logoContainer}>
           <Image
             source={require('../../assets/logo.png')}
@@ -135,16 +190,6 @@ const NewScreen = ({ navigation }) => {
               resizeMode="contain"
             />
           </TouchableOpacity>
-          {/* <TouchableOpacity
-            style={styles.imageButton}
-            onPress={() => navigation.navigate('Authenticated', { screen: 'Home' })}
-          >
-            <Image
-              source={require('../../assets/join.png')}
-              style={styles.buttonImage}
-              resizeMode="contain"
-            />
-          </TouchableOpacity> */}
         </View>
       </View>
     </LinearGradient>
@@ -875,5 +920,82 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     textAlign: 'center',
+  },
+  citySelectorContainer: {
+    position: 'absolute',
+    top: 60,
+    width: '100%',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  citySelectorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#5A4032',
+    marginBottom: 15,
+  },
+  cityButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  cityButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderWidth: 2,
+    borderColor: '#897066',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  cityButtonActive: {
+    backgroundColor: '#897066',
+    borderColor: '#5A4032',
+  },
+  cityButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#5A4032',
+  },
+  cityButtonTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  segmentedControlContainer: {
+    alignItems: 'center',
+    marginTop: 60, 
+    zIndex: 10,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 25,
+    padding: 4,
+    width: '90%',
+    maxWidth: 350,
+  },
+  segmentButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 22,
+  },
+  segmentButtonActive: {
+    backgroundColor: '#897066',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  segmentText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#5A4032',
+  },
+  segmentTextActive: {
+    color: '#FFFFFF',
   },
 });
