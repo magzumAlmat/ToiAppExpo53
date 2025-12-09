@@ -1059,7 +1059,16 @@ export default function Item3Screen() {
                   quantity: es.quantity || 1,
                 };
               } catch (err) {
-                console.error(`Failed to fetch details for ${es.serviceType}/${es.serviceId}`, err);
+                // Only log error if it's not a "not found" error (404)
+                const isNotFoundError = err.message && (
+                  err.message.includes('не найдено') || 
+                  err.message.includes('не найден') ||
+                  err.message.includes('not found') ||
+                  err.response?.status === 404
+                );
+                if (!isNotFoundError) {
+                  console.error(`Failed to fetch details for ${es.serviceType}/${es.serviceId}`, err);
+                }
                 return existingService || {
                   id: es.serviceId,
                   name: `Service ${es.serviceId}`,
@@ -3375,7 +3384,7 @@ const renderServiceDetailsModal = ({
               <Text style={styles.noItems}>Детали недоступны</Text>
             )}
               </ScrollView>
-              {files && files.length > 0 && (
+              {/* {files && files.length > 0 && (
                 <View style={styles.mediaSection}>
                   <Text style={styles.sectionTitle}>Фотографии</Text>
                   <FlatList
@@ -3389,7 +3398,7 @@ const renderServiceDetailsModal = ({
                     )}
                   />
                 </View>
-              )}
+              )} */}
 
           <TouchableOpacity
             style={[styles.createButton, { backgroundColor: COLORS.error }]}
@@ -3405,6 +3414,8 @@ const renderServiceDetailsModal = ({
             <Text style={styles.createButtonText}>Закрыть</Text>
           </TouchableOpacity>
         </View>
+
+        {/* === МОДАЛКА ЗАПИСИ ИЗОБРАЖЕНИЙ === */}
         <Modal
           visible={!!selectedImage}
           transparent
