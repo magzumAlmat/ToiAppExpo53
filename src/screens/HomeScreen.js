@@ -2478,6 +2478,7 @@ const openDetailsModal = (item) => {
         <Modal
           animationType="slide" transparent={true} visible={modalVisible}
           onRequestClose={() => { setModalVisible(false); /* reset some state if needed */ }}
+          onShow={() => { fetchAllBlockedDays(); }}
         >
           <SafeAreaView style={[styles.modalOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
             <Animatable.View style={styles.modalContent} animation="zoomIn" duration={300}>

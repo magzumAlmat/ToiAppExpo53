@@ -2317,7 +2317,11 @@ console.log('Полученные категории:', selectedCategories);
           setFiles(fetchedFiles);
           console.log(`Загружено ${fetchedFiles.length} файлов для ${item.type} #${item.id}`);
         } catch (err) {
-          console.error("Ошибка загрузки файлов:", err);
+          if (err.response && (err.response.status === 400 || err.response.status === 404)) {
+            console.log("Файлы не найдены (400/404) - это нормально для новых элементов");
+          } else {
+             console.error("Ошибка загрузки файлов:", err);
+          }
           setFiles([]);
         } finally {
           setLoadingFiles(false);
@@ -2706,7 +2710,7 @@ console.log('Полученные категории:', selectedCategories);
         />
 
         {/* Модальное окно для ввода данных мероприятия */}
-        <Modal visible={eventDetailsModalVisible} transparent animationType="slide" onRequestClose={() => setEventDetailsModalVisible(false)}>
+        <Modal visible={eventDetailsModalVisible} transparent animationType="slide" onRequestClose={() => setEventDetailsModalVisible(false)} onShow={() => fetchAllBlockedDays()}>
           <SafeAreaView style={[styles.modalOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
             <View style={styles.eventDetailsModalContainer}>
               <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>

@@ -1752,8 +1752,8 @@ const ConferencesEventScreen = ({ navigation, route }) => {
           const fetchedFiles = response.data || [];
           setFiles(fetchedFiles);
         } catch (err) {
-          if (err.response && err.response.status === 400) {
-            console.log("Файлы для данного элемента не найдены или запрос некорректен (400).");
+          if (err.response && (err.response.status === 400 || err.response.status === 404)) {
+            console.log("Файлы не найдены (400/404) - это нормально для новых элементов");
           } else {
             console.error("Ошибка загрузки файлов:", err);
           }
@@ -1961,7 +1961,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
         <AddItemModal visible={addItemModalVisible} onClose={() => setAddItemModalVisible(false)} filteredItems={combinedData} filteredData={filteredData} handleAddItem={handleAddItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} updateCategories={updateCategories} />
         <CategoryItemsModal visible={categoryModalVisible} onClose={() => setCategoryModalVisible(false)} categoryItems={selectedCategoryItems} categoryLabel={selectedCategoryLabel} categoryType={selectedCategoryType} filteredData={filteredData} handleAddItem={handleAddItem} handleRemoveItem={handleRemoveItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} setQuantities={setQuantities} budget={budget} setFilteredData={setFilteredData} setRemainingBudget={setRemainingBudget} updateCategories={updateCategories} guestCount={guestCount} setGuestCount={setGuestCount} />
         <DetailsModal visible={detailsModalVisible} onClose={() => setDetailsModalVisible(false)} item={selectedItem} />
-        <Modal visible={eventDetailsModalVisible} transparent animationType="slide" onRequestClose={() => setEventDetailsModalVisible(false)}>
+        <Modal visible={eventDetailsModalVisible} transparent animationType="slide" onRequestClose={() => setEventDetailsModalVisible(false)} onShow={() => fetchAllBlockedDays()}>
           <SafeAreaView style={[styles.modalOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
             <View style={styles.eventDetailsModalContainer}>
               <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>

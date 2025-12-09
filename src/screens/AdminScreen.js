@@ -533,6 +533,7 @@ const {  loading, error } = useSelector((state) => state.auth);
         transparent={true}
         visible={showCalendarModal}
         onRequestClose={() => setShowCalendarModal(false)}
+        onShow={() => fetchAllBlockedDays()}
       >
         <View style={styles.modalOverlay}>
           <Animatable.View style={styles.modalContent} animation="fadeInUp" duration={300}>
@@ -658,6 +659,7 @@ const {  loading, error } = useSelector((state) => state.auth);
   transparent={true}
   visible={showCalendarModal2}
   onRequestClose={() => setShowCalendarModal2(false)}
+  onShow={() => fetchAllBlockedDays()}
 >
   <View style={styles.modalOverlay}>
     <Animatable.View style={styles.modalContent} animation="fadeInUp" duration={300}>

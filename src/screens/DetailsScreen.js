@@ -169,6 +169,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Пол" value={item.gender} />
             <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
             <DetailField label="Адрес" value={item.address} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       case 'tamada':
@@ -290,6 +291,7 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Тип" value="Товары" />
             <DetailField label="Описание" value={item.description} />
             <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Город" value={item.city} />
           </>
         );
       default:
