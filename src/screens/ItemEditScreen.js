@@ -121,10 +121,21 @@ export default function ItemEditScreen() {
   };
 
   const cuisineOptions = ['Русская', 'Итальянская', 'Азиатская', 'Французская', 'Американская'];
-  const districtOptions = [
-    'Медеуский', 'Бостандыкский', 'Алмалинский', 'Ауэзовский', 'Наурызбайский',
-    'Алатауский', 'Жетысуйский', 'За пределами Алматы',
-  ];
+  const districtMap = {
+    'Алматы': [
+      'Медеуский', 'Бостандыкский', 'Алмалинский', 'Ауэзовский', 'Наурызбайский',
+      'Алатауский', 'Жетысуйский', 'За пределами Алматы',
+    ],
+    'Астана': [
+      'Алматинский район', 'Байконурский район', 'Есильский район', 'Нуринский район',
+      'Сарыаркинский район', 'Сарайшыкский район',
+    ],
+    'Шымкент': [
+      'Абайский район', 'Аль-Фарабийский район', 'Енбекшинский район',
+      'Каратауский район', 'Туранский район',
+    ],
+  };
+  const districtOptions = districtMap[form.city] || districtMap['Алматы'];
   const cityOptions = ['Алматы', 'Астана', 'Шымкент'];
   const genderOptions = ['мужской', 'женский'];
   const categoryOptions = [
@@ -532,6 +543,7 @@ export default function ItemEditScreen() {
                       selectedValue={form.city}
                       onValueChange={(value) => {
                         handleChange('city', value);
+                        handleChange('district', '');
                         setModalVisible({ ...modalVisible, city: false });
                       }}
                       style={styles.modalPicker}
@@ -861,6 +873,7 @@ export default function ItemEditScreen() {
                       selectedValue={form.city}
                       onValueChange={(value) => {
                         handleChange('city', value);
+                        handleChange('district', '');
                         setModalVisible({ ...modalVisible, city: false });
                       }}
                       style={styles.modalPicker}
@@ -945,6 +958,7 @@ export default function ItemEditScreen() {
                       selectedValue={form.city}
                       onValueChange={(value) => {
                         handleChange('city', value);
+                        handleChange('district', '');
                         setModalVisible({ ...modalVisible, city: false });
                       }}
                       style={styles.modalPicker}

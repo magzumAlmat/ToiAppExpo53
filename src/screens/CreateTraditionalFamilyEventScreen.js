@@ -194,6 +194,7 @@ const AddItemModal = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTypeFilter, setSelectedTypeFilter] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("all");
   const [selectedDistrict, setSelectedDistrict] = useState("all");
   const [costRange, setCostRange] = useState("all");
 
@@ -214,15 +215,29 @@ const AddItemModal = ({
     return types;
   }, [filteredItems]);
 
+  const itemsFilteredByCity = useMemo(() => {
+    if (selectedCity === "all") return filteredItems;
+    return filteredItems.filter((item) => item.city === selectedCity);
+  }, [filteredItems, selectedCity]);
+
   const districts = useMemo(
     () => [
       "all",
       ...new Set(
-        filteredItems.map((item) => String(item.district)).filter(Boolean)
+        itemsFilteredByCity.map((item) => String(item.district)).filter(Boolean)
       ),
     ],
-    [filteredItems]
+    [itemsFilteredByCity]
   );
+
+  const uniqueCities = useMemo(() => {
+    return [
+      "all",
+      ...new Set(
+        filteredItems.map((item) => item.city).filter(Boolean)
+      )
+    ];
+  }, [filteredItems]);
 
   const filteredDataMemo = useMemo(() => {
     let result = filteredItems;
@@ -257,6 +272,9 @@ const AddItemModal = ({
     }
     if (selectedTypeFilter !== "all") {
       result = result.filter((item) => item.type === selectedTypeFilter);
+    }
+    if (selectedCity !== "all") {
+      result = result.filter((item) => item.city === selectedCity);
     }
     if (selectedDistrict !== "all") {
       result = result.filter(
@@ -378,6 +396,7 @@ const AddItemModal = ({
   const closeModal = () => {
     setSearchQuery("");
     setSelectedTypeFilter("all");
+    setSelectedCity("all");
     setSelectedDistrict("all");
     setCostRange("all");
     onClose();
@@ -438,6 +457,41 @@ const AddItemModal = ({
             data={[{ key: "filters" }]}
             renderItem={() => (
               <View>
+                <Text style={styles.addModalFilterLabel}>Город</Text>
+                 <FlatList
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={uniqueCities}
+                  keyExtractor={(city) => city}
+                  renderItem={({ item: city }) => (
+                    <TouchableOpacity
+                      style={[
+                        styles.filterButtonBase,
+                        selectedCity === city
+                          ? styles.addModalDistrictButtonActive
+                          : styles.addModalDistrictButton,
+                      ]}
+                      onPress={() => {
+                        setSelectedCity(city);
+                        setSelectedDistrict("all"); // Reset district when city changes
+                      }}
+                      accessible
+                      accessibilityLabel={`Фильтр по городу ${city === "all" ? "Все" : city}`}
+                    >
+                      <Text
+                        style={[
+                          styles.filterButtonTextBase,
+                          selectedCity === city
+                            ? styles.addModalDistrictButtonTextActive
+                            : styles.addModalDistrictButtonText,
+                        ]}
+                      >
+                        {city === "all" ? "Все" : city}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+
                 <Text style={styles.addModalFilterLabel}>Тип</Text>
                 <FlatList
                   horizontal

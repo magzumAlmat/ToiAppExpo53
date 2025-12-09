@@ -184,6 +184,7 @@ const AddItemModal = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTypeFilter, setSelectedTypeFilter] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("all");
   const [selectedDistrict, setSelectedDistrict] = useState("all");
   const [costRange, setCostRange] = useState("all");
 
@@ -215,15 +216,29 @@ const AddItemModal = ({
     return types;
   }, [filteredItems]);
 
+  const itemsFilteredByCity = useMemo(() => {
+    if (selectedCity === "all") return filteredItems;
+    return filteredItems.filter((item) => item.city === selectedCity);
+  }, [filteredItems, selectedCity]);
+
   const districts = useMemo(
     () => [
       "all",
       ...new Set(
-        filteredItems.map((item) => String(item.district)).filter(Boolean)
+        itemsFilteredByCity.map((item) => String(item.district)).filter(Boolean)
       ),
     ],
-    [filteredItems]
+    [itemsFilteredByCity]
   );
+
+  const uniqueCities = useMemo(() => {
+    return [
+      "all",
+      ...new Set(
+        filteredItems.map((item) => item.city).filter(Boolean)
+      )
+    ];
+  }, [filteredItems]);
 
 
   const handleOpenDetails = (item) => {
@@ -423,6 +438,9 @@ const filteredDataMemo = useMemo(() => {
   if (selectedTypeFilter !== "all") {
     result = result.filter((item) => item.type === selectedTypeFilter);
   }
+  if (selectedCity !== "all") {
+    result = result.filter((item) => item.city === selectedCity);
+  }
   if (selectedDistrict !== "all") {
     result = result.filter(
       (item) => String(item.district) === selectedDistrict
@@ -441,7 +459,7 @@ const filteredDataMemo = useMemo(() => {
   return result.sort(
     (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
   );
-}, [filteredItems, searchQuery, selectedTypeFilter, selectedDistrict, costRange]);
+}, [filteredItems, searchQuery, selectedTypeFilter, selectedCity, selectedDistrict, costRange]);
 
 
 
@@ -537,6 +555,7 @@ const renderAddItem = useCallback(
   console.log("Closing AddItemModal");
   setSearchQuery("");
   setSelectedTypeFilter("all");
+  setSelectedCity("all");
   setSelectedDistrict("all");
   setCostRange("all");
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); // Добавляем haptic feedback
@@ -590,6 +609,37 @@ const renderAddItem = useCallback(
             showsVerticalScrollIndicator={false}
           >
             <View> {/* Removed addModalFilterContainer style */}
+              <View>
+                <Text style={styles.addModalFilterLabel}>Город</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {uniqueCities.map((city) => (
+                    <TouchableOpacity
+                      key={city}
+                      style={[
+                        styles.filterButtonBase,
+                        selectedCity === city
+                          ? styles.addModalDistrictButtonActive
+                          : styles.addModalDistrictButton,
+                      ]}
+                      onPress={() => {
+                        setSelectedCity(city);
+                        setSelectedDistrict("all");
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.filterButtonTextBase,
+                          selectedCity === city
+                            ? styles.addModalDistrictButtonTextActive
+                            : styles.addModalDistrictButtonText,
+                        ]}
+                      >
+                        {city === "all" ? "Все" : city}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
               <View> {/* Removed addModalTypeFilterContainer */}
                 <Text style={styles.addModalFilterLabel}>Тип</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
