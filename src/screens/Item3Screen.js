@@ -722,8 +722,8 @@ const fieldLabelsByCategory = {
   },
   car: {
     salonName: 'Название салона',
-    carName: 'Модель автомобиля',
-    brand: 'Бренд',
+    carName: 'Модель',
+    brand: 'Марка автомобиля',
     color: 'Цвет',
     cost: 'Стоимость',
     address: 'Адрес',
@@ -3276,12 +3276,12 @@ const renderServiceDetailsModal = ({
                 setServiceDetailsModalVisible(false);
                 setSelectedService(null);
                 setSelectedItem(null);
-                setFiles([]); // Clear files
-                setSelectedImage(null); // Clear selected image
-                setActiveSlide(0); // Reset active slide
+                setFiles([]);
+                setSelectedImage(null);
+                setActiveSlide(0);
               }}
             >
-              <Text style={styles.closeButtonText}>✕</Text>
+              <Icon name="close" size={24} color={COLORS.error} />
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.detailScrollContainer}>
@@ -3366,7 +3366,7 @@ const renderServiceDetailsModal = ({
                     key.startsWith('_') ||
                     value === null ||
                     value === undefined ||
-                    ['id', 'serviceId', 'item_id', 'originalServiceType', 'supplier_id', 'wedding_id', 'created_at', 'updated_at'].includes(
+                    ['id', 'serviceId', 'serviceid', 'item_id', 'serviceType', 'servicetype', 'cost', 'originalServiceType', 'originalservicetype', 'supplier_id', 'wedding_id', 'created_at', 'updated_at'].includes(
                       key.toLowerCase()
                     )
                   )
@@ -3383,36 +3383,7 @@ const renderServiceDetailsModal = ({
             ) : (
               <Text style={styles.noItems}>Детали недоступны</Text>
             )}
-              </ScrollView>
-              {/* {files && files.length > 0 && (
-                <View style={styles.mediaSection}>
-                  <Text style={styles.sectionTitle}>Фотографии</Text>
-                  <FlatList
-                    horizontal
-                    data={files}
-                    keyExtractor={(file) => file.id.toString()}
-                    renderItem={({ item: file, index }) => (
-                      <TouchableOpacity onPress={() => openPhotoModal(files, index)}>
-                        <Image source={{ uri: `${BASE_URL}/${file.path}` }} style={styles.thumbnail} />
-                      </TouchableOpacity>
-                    )}
-                  />
-                </View>
-              )} */}
-
-          <TouchableOpacity
-            style={[styles.createButton, { backgroundColor: COLORS.error }]}
-            onPress={() => {
-              setServiceDetailsModalVisible(false);
-              setSelectedService(null);
-              setSelectedItem(null);
-              setFiles([]);
-              setSelectedImage(null);
-              setActiveSlide(0);
-            }}
-          >
-            <Text style={styles.createButtonText}>Закрыть</Text>
-          </TouchableOpacity>
+          </ScrollView>
         </View>
 
         {/* === МОДАЛКА ЗАПИСИ ИЗОБРАЖЕНИЙ === */}
