@@ -171,6 +171,7 @@ const DetailsScreen = ({ route }) => {
           </>
         );
       case 'tamada':
+      case 'host':
         return (
           <>
             <DetailField label="Тип" value="Ведущий / Тамада" />
@@ -179,6 +180,7 @@ const DetailsScreen = ({ route }) => {
           </>
         );
       case 'flowers':
+      case 'flower':
         return (
           <>
             <DetailField label="Салон" value={item.salonName} />
@@ -187,6 +189,96 @@ const DetailsScreen = ({ route }) => {
             <DetailField label="Вид цветов" value={item.flowerType} />
             <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
             <DetailField label="Адрес" value={item.address} />
+            <DetailField label="Район" value={item.district} />
+            <DetailField label="Телефон" value={item.phone} />
+          </>
+        );
+      case 'cake':
+      case 'cakes':
+        return (
+          <>
+            <DetailField label="Название кондитерской" value={item.name} />
+            <DetailField label="Тип" value="Торт" />
+            <DetailField label="Тип торта" value={item.cakeType} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Адрес" value={item.address} />
+            <DetailField label="Район" value={item.district} />
+            <DetailField label="Телефон" value={item.phone} />
+          </>
+        );
+      case 'alcohol':
+        return (
+          <>
+            <DetailField label="Салон" value={item.salonName} />
+            <DetailField label="Тип" value="Алкоголь" />
+            <DetailField label="Название напитка" value={item.alcoholName} />
+            <DetailField label="Категория" value={item.category} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Адрес" value={item.address} />
+            <DetailField label="Район" value={item.district} />
+            <DetailField label="Телефон" value={item.phone} />
+          </>
+        );
+      case 'program':
+      case 'programs':
+      case 'theater':
+        return (
+          <>
+            <DetailField label="Название команды" value={item.teamName} />
+            <DetailField label="Тип" value="Программа" />
+            <DetailField label="Тип программы" value={item.type} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+          </>
+        );
+      case 'transport':
+      case 'car':
+        return (
+          <>
+            <DetailField label="Название салона" value={item.salonName} />
+            <DetailField label="Тип" value="Транспорт" />
+            <DetailField label="Модель" value={item.carName} />
+            <DetailField label="Марка автомобиля" value={item.brand} />
+            <DetailField label="Цвет" value={item.color} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Адрес" value={item.address} />
+            <DetailField label="Район" value={item.district} />
+            <DetailField label="Телефон" value={item.phone} />
+          </>
+        );
+      case 'jewelry':
+        return (
+          <>
+            <DetailField label="Название магазина" value={item.storeName} />
+            <DetailField label="Тип" value="Ювелирные изделия" />
+            <DetailField label="Материал" value={item.material} />
+            <DetailField label="Тип изделия" value={item.type} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Адрес" value={item.address} />
+            <DetailField label="Район" value={item.district} />
+            <DetailField label="Телефон" value={item.phone} />
+          </>
+        );
+      case 'traditionalGift':
+      case 'traditionalgift':
+        return (
+          <>
+            <DetailField label="Салон" value={item.salonName} />
+            <DetailField label="Тип" value="Традиционные подарки" />
+            <DetailField label="Тип подарка" value={item.type} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
+            <DetailField label="Адрес" value={item.address} />
+            <DetailField label="Район" value={item.district} />
+            <DetailField label="Телефон" value={item.phone} />
+          </>
+        );
+      case 'goods':
+      case 'good':
+        return (
+          <>
+            <DetailField label="Название" value={item.item_name} />
+            <DetailField label="Тип" value="Товары" />
+            <DetailField label="Описание" value={item.description} />
+            <DetailField label="Стоимость" value={item.cost ? `${item.cost} ₸` : null} />
           </>
         );
       default:

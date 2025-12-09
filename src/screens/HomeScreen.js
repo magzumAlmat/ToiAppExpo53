@@ -2311,75 +2311,61 @@ const openDetailsModal = (item) => {
               case "restaurant":
                 mainTitle = item.name || "Не указано";
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Кухня: ${item.cuisine || "Не указано"}`,
                   `Вместимость: ${item.capacity || "Не указано"}`,
                   `Средний чек: ${item.averageCost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
                   `Телефон: ${item.phone || "Не указано"}`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "clothing":
                 mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Наименование товара: ${item.itemName || "Не указано"}`,
                   `Пол: ${item.gender || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "flowers":
                 mainTitle = `${item.salonName || "Не указано"} - ${item.flowerName || "Не указано"}`;
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Тип: ${item.flowerType || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "cake":
                 mainTitle = item.name || "Не указано";
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Тип торта: ${item.cakeType || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "alcohol":
                 mainTitle = `${item.salonName || "Не указано"} - ${item.alcoholName || "Не указано"}`;
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Категория: ${item.category || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "program":
                 mainTitle = item.teamName || "Не указано";
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Название команды: ${item.teamName || "Не указано"}`,
                   `Тип программы: ${item.type || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "tamada":
                 mainTitle = item.name || "Не указано";
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   item.portfolio
                     ? `Портфолио: ${item.portfolio.substring(0, 50)}...`
                     : "Портфолио не указано",
                   `Стоимость: ${item.cost} ₸`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 if (
                   item.portfolio &&
@@ -2407,41 +2393,33 @@ const openDetailsModal = (item) => {
               case "traditionalGift":
                 mainTitle = `${item.salonName || "Не указано"} - ${item.itemName || "Не указано"}`;
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Тип: ${item.type || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "transport":
                 mainTitle = `${item.salonName || "Не указано"} - ${item.carName || "Не указано"}`;
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Марка: ${item.brand || "Не указано"}`,
                   `Цвет: ${item.color || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "jewelry":
                 mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   `Материал: ${item.material || "Не указано"}`,
                   `Стоимость: ${item.cost} ₸`,
                   `Адрес: ${item.address || "Не указано"}`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               case "goods":
                 mainTitle = item.item_name || "Не указано";
                 details = [
-                  `ID: ${item.id || "Не указано"}`,
                   item.description || "Описание не указано",
                   `Стоимость: ${item.cost} ₸`,
-                  `ID поставщика: ${item.supplier_id || "Не указано"}`,
                 ];
                 break;
               default:

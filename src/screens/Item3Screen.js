@@ -693,7 +693,7 @@ const determineCategory = (data) => {
 const fieldLabelsByCategory = {
   theater: {
     teamName: 'Название команды',
-    type: 'Тип постановки',
+    type: 'Тип',
     cost: 'Стоимость',
   },
   restaurant: {
@@ -1356,8 +1356,17 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
     console.log(`Service Details for ${data.serviceType}/${serviceId}:`, JSON.stringify(data, null, 2));
     return data;
   } catch (error) {
-    console.error(`Error fetching service details for ${serviceType}/${serviceId}:`, error);
-    Alert.alert('Ошибка', `Не удалось загрузить детали услуги: ${error.message}`);
+    const errorMessage = error.message || error.toString();
+    const isNotFoundError = 
+      error.response?.status === 404 ||
+      errorMessage.toLowerCase().includes('не найдено') ||
+      errorMessage.toLowerCase().includes('не найден') ||
+      errorMessage.toLowerCase().includes('not found');
+    
+    if (!isNotFoundError) {
+      console.error(`Error fetching service details for ${serviceType}/${serviceId}:`, error);
+      Alert.alert('Ошибка', `Не удалось загрузить детали услуги: ${error.message}`);
+    }
     return null;
   } finally {
     setLoadingServiceDetails(false);
@@ -3366,7 +3375,7 @@ const renderServiceDetailsModal = ({
                     key.startsWith('_') ||
                     value === null ||
                     value === undefined ||
-                    ['id', 'serviceId', 'serviceid', 'item_id', 'serviceType', 'servicetype', 'cost', 'originalServiceType', 'originalservicetype', 'supplier_id', 'wedding_id', 'created_at', 'updated_at'].includes(
+                    ['id', 'serviceId', 'serviceid', 'item_id', 'serviceType', 'servicetype', 'cost', 'originalServiceType', 'originalservicetype', 'supplier_id', 'wedding_id', 'created_at', 'updated_at', 'itemName', 'itemname'].includes(
                       key.toLowerCase()
                     )
                   )
