@@ -215,9 +215,9 @@ export default function LoginScreen({ navigation }) {
       const userResponse = await api.getUser();
       dispatch(loginSuccess({ user: { ...userResponse.data, city }, token: authToken }));
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      dispatch(setError(error.response?.data?.error || '\u041e\u0448\u0438\u0431\u043a\u0430 \u0432\u0445\u043e\u0434\u0430'));
-      Alert.alert('\u041e\u0448\u0438\u0431\u043a\u0430', error.response?.data?.error || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0432\u043e\u0439\u0442\u0438');
+      console.log('Login error:', error.response?.data || error.message);
+      dispatch(setError('')); // Clear global error or set friendly string if needed
+      Alert.alert('Ошибка входа', 'Возможно вы ввели неправильно логин или пароль');
     }
   };
 
@@ -247,6 +247,9 @@ export default function LoginScreen({ navigation }) {
         </LinearGradient>
       </TouchableOpacity>
       <View style={styles.linksContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate('RestorePassword')}>
+          <Text style={styles.linkText}>Забыли пароль?</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
           <Text style={styles.linkText}>Нет аккаунта? Зарегистрироваться</Text>
         </TouchableOpacity>

@@ -131,6 +131,9 @@ export default {
   getProfile: () =>
     api.get('/api/auth/getAuthentificatedUserInfo').catch((error) => handleError(error, 'получения профиля')),
 
+  forgotPassword: (data) =>
+    api.post('/api/forgot-password', data).catch((error) => handleError(error, 'восстановления пароля')),
+
   // Универсальные CRUD-методы
   ...createResourceMethods(),
 

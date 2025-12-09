@@ -11,6 +11,7 @@ import Item3Screen from '../screens/Item3Screen';
 import Item4Screen from '../screens/Item4Screen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import RestorePasswordScreen from '../screens/RestorePasswordScreen';
 import { View, Image, StyleSheet, TouchableOpacity, ImageBackground, FlatList, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DetailsScreen from '../screens/DetailsScreen';
@@ -771,6 +772,7 @@ export default function Navigation() {
         <Stack.Screen name="Authenticated" component={AuthenticatedTabs} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="RestorePassword" component={RestorePasswordScreen} options={{ title: 'Восстановление пароля' }} />
         <Stack.Screen name="ItemEdit" component={ItemEditScreen} />
         <Stack.Screen name="Wishlist" component={WeddingWishlistScreen} options={{ title: 'Wishlist', headerShown: false }} />
       </Stack.Navigator>
