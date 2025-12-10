@@ -694,25 +694,26 @@ const fieldLabelsByCategory = {
   theater: {
     teamName: 'Название команды',
     type: 'Тип',
+    description: 'Описание',
     cost: 'Стоимость',
     phone: 'Телефон',
     city: 'Город',
   },
   restaurant: {
-  
     name: 'Название ресторана',
     cuisine: 'Кухня',
     averageCost: 'Средний чек',
     capacity: 'Вместимость',
+    description: 'Описание',
     address: 'Адрес',
     district: 'Район',
     phone: 'Телефон',
     city: 'Город',
-
   },
   host: {
     name: 'Имя ведущего',
     portfolio: 'Портфолио',
+    description: 'Описание',
     cost: 'Стоимость',
     phone: 'Телефон',
     city: 'Город',
@@ -720,6 +721,7 @@ const fieldLabelsByCategory = {
   cake: {
     name: 'Название кондитерской',
     cakeType: 'Тип торта',
+    description: 'Описание',
     cost: 'Стоимость',
     address: 'Адрес',
     district: 'Район',
@@ -729,8 +731,9 @@ const fieldLabelsByCategory = {
   car: {
     salonName: 'Название салона',
     carName: 'Модель',
-    brand: 'Марка автомобиля',
+    brand: 'Марка',
     color: 'Цвет',
+    description: 'Описание',
     cost: 'Стоимость',
     address: 'Адрес',
     district: 'Район',
@@ -741,6 +744,7 @@ const fieldLabelsByCategory = {
     salonName: 'Название салона',
     flowerName: 'Название цветов',
     flowerType: 'Тип композиции',
+    description: 'Описание',
     cost: 'Стоимость',
     address: 'Адрес',
     district: 'Район',
@@ -752,6 +756,7 @@ const fieldLabelsByCategory = {
     itemName: 'Название изделия',
     material: 'Материал',
     type: 'Тип изделия',
+    description: 'Описание',
     cost: 'Стоимость',
     address: 'Адрес',
     district: 'Район',
@@ -759,17 +764,47 @@ const fieldLabelsByCategory = {
     city: 'Город',
   },
   alcohol: {
+    salonName: 'Название салона',
     alcoholName: 'Название напитка',
-    cost: 'Стоимость',
     category: 'Категория',
-     salonName: 'Название салона',
-      district: 'Район',
-    address:'Адрес',
-       phone: 'Телефон',
+    description: 'Описание',
+    cost: 'Стоимость',
+    address: 'Адрес',
+    district: 'Район',
+    phone: 'Телефон',
     city: 'Город',
-
   },
-
+  traditionalgift: {
+    salonName: 'Название салона',
+    itemName: 'Название подарка',
+    type: 'Тип',
+    description: 'Описание',
+    cost: 'Стоимость',
+    address: 'Адрес',
+    district: 'Район',
+    phone: 'Телефон',
+    city: 'Город',
+  },
+  technicalequipmentrental: {
+    companyName: 'Название компании',
+    description: 'Описание',
+    link: 'Ссылка',
+    phone: 'Телефон',
+  },
+  typography: {
+    companyName: 'Название типографии',
+    description: 'Описание',
+    link: 'Ссылка',
+    phone: 'Телефон',
+  },
+  program: {
+    teamName: 'Название программы/команды',
+    type: 'Тип',
+    description: 'Описание',
+    cost: 'Стоимость',
+    phone: 'Телефон',
+    city: 'Город',
+  },
 };
 
 export default function Item3Screen() {
@@ -2598,6 +2633,11 @@ const handleDetailsPress = () => {
                           <Text style={styles.subItemText}>
                              {service.name || group.name} - {formatCurrency(service.cost || 0)} x {service.quantity || 1} = {formatCurrency((parseFloat(service.cost) || 0) * (service.quantity || 1))} тг
                           </Text>
+                          {service.serviceType === 'restaurant' && service.capacity && (
+                             <Text style={[styles.subItemText, { fontSize: 12, color: COLORS.muted }]}>
+                                Вместимость: {service.capacity} чел.
+                             </Text>
+                          )}
                         </View>
                         <View style={styles.itemActions}>
                           <TouchableOpacity
@@ -3216,6 +3256,10 @@ const renderServiceDetailsModal = ({
     district: 'Район',
     phone: 'Телефон',
     type: 'Тип',
+    capacity: 'Вместимость',
+    cuisine: 'Кухня',
+    averageCost: 'Средний чек',
+    description: 'Описание',
   };
 
   const handleScroll = (event) => {

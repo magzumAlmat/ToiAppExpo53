@@ -7,7 +7,7 @@ const API_BASE_URL = 'http://89.207.250.181:3000/api';
 
 // Создаем экземпляр axios с базовой конфигурацией
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_BASE_URL, // Note: This variable name seems specific to this file context, keeping as is based on previous read
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

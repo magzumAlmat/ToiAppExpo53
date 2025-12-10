@@ -74,6 +74,24 @@ const resources = {
   weddings: { path: 'weddings', singular: 'wedding', createPath: 'createwedding' }, // Uses /createwedding
   eventCategories: { path: 'event-categories', singular: 'event-category' }, // Not in router
   wishlist: { path: 'wishlist', singular: 'wishlist' }, // Not in router
+  technicalEquipmentRental: {
+    path: 'technical-equipment-rentals',
+    singular: 'technical-equipment-rental',
+    getAllPath: 'technical-equipment-rentals',
+    getByIdPath: 'technical-equipment-rental',
+    createPath: 'technical-equipment-rental',
+    updatePath: 'technical-equipment-rental',
+    deletePath: 'technical-equipment-rental',
+  },
+  typography: {
+    path: 'typographies',
+    singular: 'typography',
+    getAllPath: 'typographies',
+    getByIdPath: 'typography',
+    createPath: 'typography',
+    updatePath: 'typography',
+    deletePath: 'typography',
+  },
 };
 
 // Универсальная функция для обработки ошибок
