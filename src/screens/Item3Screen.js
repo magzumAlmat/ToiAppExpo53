@@ -13,6 +13,7 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  Switch,
 } from "react-native";
 import Video from "react-native-video";
 import * as Linking from "expo-linking";
@@ -1088,10 +1089,7 @@ export default function Item3Screen() {
               console.log(`  - es.quantity:`, es.quantity);
               console.log(`  - existingService.quantity:`, existingService?.quantity);
               
-              // If existing service has cost, use it. Otherwise, fetch details.
-              if (existingService && (existingService.cost !== undefined && existingService.cost !== null)) {
-                return { ...existingService, quantity: es.quantity || existingService.quantity || 1 };
-              }
+
 
               try {
                 const details = await getServiceDetailsData(es.serviceId, es.serviceType);
@@ -1248,12 +1246,39 @@ export default function Item3Screen() {
         : response.data.data || [];
       setWeddings(weddingData);
       console.log('Processed weddingData for state:', JSON.stringify(weddingData, null, 2));
-      const itemsPromises = weddingData.map((wedding) =>
-        api.getWeddingItems(wedding.id, token).then((res) => ({
+      
+      // Fetch wedding items with details
+      const itemsPromises = weddingData.map(async (wedding) => {
+        const res = await api.getWeddingItems(wedding.id, token);
+        const items = res.data.data || [];
+        
+        // Fetch details for each item
+        const itemsWithDetails = await Promise.all(
+          items.map(async (item) => {
+            try {
+              const details = await getServiceDetailsData(item.item_id, item.item_type);
+              return {
+                ...item,
+                serviceName: details?.item_name || details?.itemName || details?.name || `Service ${item.item_id}`,
+                serviceCost: details?.cost || item.total_cost || 0,
+              };
+            } catch (err) {
+              console.error(`Failed to fetch details for wedding item ${item.item_type}/${item.item_id}`, err);
+              return {
+                ...item,
+                serviceName: `Service ${item.item_id}`,
+                serviceCost: item.total_cost || 0,
+              };
+            }
+          })
+        );
+
+        return {
           weddingId: wedding.id,
-          items: res.data.data || [],
-        }))
-      );
+          items: itemsWithDetails,
+        };
+      });
+      
       const itemsResults = await Promise.all(itemsPromises);
       const newCache = itemsResults.reduce((acc, { weddingId, items }) => {
         acc[weddingId] = items;
@@ -1367,6 +1392,15 @@ const getServiceDetailsData = async (serviceId, serviceType) => {
      normalizedCost = data.averageCost || data.cost || 0;
   }
 
+  console.log(`[getServiceDetailsData] RAW DATA for ${normalizedServiceType}/${serviceId}:`, JSON.stringify(data, null, 2));
+  console.log(`[getServiceDetailsData] Normalized name: "${normalizedName}" from fields:`, {
+    name: data.name,
+    itemName: data.itemName,
+    item_name: data.item_name,
+    alcoholName: data.alcoholName,
+    companyName: data.companyName
+  });
+
   const result = {
     serviceId,
     serviceType: normalizedServiceType,
@@ -1375,7 +1409,7 @@ const getServiceDetailsData = async (serviceId, serviceType) => {
     cost: normalizedCost,
   };
 
-  console.log(`[getServiceDetailsData] ${normalizedServiceType}/${serviceId} -> name: "${normalizedName}", cost: ${normalizedCost}`);
+  console.log(`[getServiceDetailsData] FINAL RESULT for ${normalizedServiceType}/${serviceId}:`, JSON.stringify(result, null, 2));
   return result;
 };
 
@@ -1937,6 +1971,33 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
       ]
     );
   };
+  
+  const handleToggleWishlistItem = async (item) => {
+    // If already selected/added in this session, ignore
+    if (selectedGoodIds.includes(item.id)) return;
+
+    try {
+      const payload = { good_id: item.id };
+      if (giftTargetType === 'wedding') {
+        payload.event_id = giftTargetId || selectedWedding.id;
+        payload.event_type = 'wedding';
+      } else if (giftTargetType === 'eventCategory') {
+        payload.event_id = giftTargetId;
+        payload.event_type = 'eventcategory';
+      }
+
+      await api.createWish(payload, token);
+      
+      setSelectedGoodIds(prev => [...prev, item.id]);
+      
+      // Update the wishlist in background
+      fetchWishlistItems(giftTargetType, giftTargetId || selectedWedding.id);
+
+    } catch (error) {
+       console.error("Error adding item:", error);
+       Alert.alert("Ошибка", "Не удалось добавить подарок");
+    }
+  };
 
   const handleAddWishlistItem = async () => {
     if (selectedGoodIds.length === 0) {
@@ -2032,6 +2093,8 @@ const fetchServiceDetails = async (serviceId, serviceType) => {
   };
 
   const fetchWishlistItems = async (type, id) => {
+    setGiftTargetType(type);
+    setGiftTargetId(id);
     console.log(`[fetchWishlistItems] type=${type}, id=${id}, token=${token ? 'present' : 'missing'}`);
     try {
       let response;
@@ -2630,8 +2693,8 @@ const handleDetailsPress = () => {
                         style={styles.weddingItem}
                       >
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.subItemText}>
-                             {service.name || group.name} - {formatCurrency(service.cost || 0)} x {service.quantity || 1} = {formatCurrency((parseFloat(service.cost) || 0) * (service.quantity || 1))} тг
+                           <Text style={styles.subItemText}>
+                              {service.item_name || service.itemName || service.name || group.name} - {formatCurrency(service.cost || 0)} x {service.quantity || 1} = {formatCurrency((parseFloat(service.cost) || 0) * (service.quantity || 1))} тг
                           </Text>
                           {service.serviceType === 'restaurant' && service.capacity && (
                              <Text style={[styles.subItemText, { fontSize: 12, color: COLORS.muted }]}>
@@ -2985,13 +3048,7 @@ const handleDetailsPress = () => {
           isSelected && styles.muiCardSelected
         ]}
         activeOpacity={0.7}
-        onPress={() => {
-          setSelectedGoodIds((prev) =>
-            prev.includes(item.id)
-              ? prev.filter((id) => id !== item.id)
-              : [...prev, item.id]
-          );
-        }}
+        onPress={() => handleToggleWishlistItem(item)}
       >
         <View style={styles.muiCardHeader}>
           <View style={styles.muiAvatar}>
@@ -3007,7 +3064,7 @@ const handleDetailsPress = () => {
              {isSelected ? (
                <Icon name="check-circle" size={24} color={COLORS.primary} />
              ) : (
-               <Icon name="radio-button-unchecked" size={24} color={COLORS.muted} />
+               <Icon name="add-circle-outline" size={24} color={COLORS.muted} />
              )}
           </View>
         </View>
@@ -3072,6 +3129,7 @@ const handleDetailsPress = () => {
               <Text style={styles.linkText}>Открыть ссылку</Text>
             </TouchableOpacity>
           )}
+
           {!item.is_reserved && (
             <Button
               title="Зарезервировать"
@@ -3079,6 +3137,7 @@ const handleDetailsPress = () => {
               color={COLORS.primary}
             />
           )}
+
         </View>
       </View>
     );
@@ -3491,18 +3550,31 @@ return (
       {/* === УНИВЕРСАЛЬНАЯ МОДАЛКА ПОДАРКОВ === */}
       <Modal visible={wishlistModalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
-          <Text style={styles.subtitle}>
-            Добавить подарки — {giftTargetType === "wedding" ? "Свадьба" : "Мероприятие"}
-          </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <View style={{ width: 44 }} /> 
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.subtitle, { marginVertical: 0 }]}>
+                Добавить подарки — {giftTargetType === "wedding" ? "Свадьба" : "Мероприятие"}
+              </Text>
+            </View>
+            {isCustomGift ? <View style={{ width: 44 }} /> : (
+              <TouchableOpacity
+                style={[styles.iconButton, styles.iconButtonPrimary]}
+                onPress={() => handleShareEventLink(giftTargetId, giftTargetType)}
+              >
+                <Icon name="share" size={24} color={COLORS.white} />
+              </TouchableOpacity>
+            )}
+          </View>
 
           <View style={styles.switchContainer}>
             <Text>Свой подарок</Text>
-            <TouchableOpacity
-              style={[styles.switch, isCustomGift && styles.switchActive]}
-              onPress={() => setIsCustomGift(!isCustomGift)}
-            >
-              <Text style={styles.switchText}>{isCustomGift ? "Вкл" : "Выкл"}</Text>
-            </TouchableOpacity>
+            <Switch
+              value={isCustomGift}
+              onValueChange={setIsCustomGift}
+              trackColor={{ false: "#767577", true: COLORS.primary }}
+              thumbColor={isCustomGift ? COLORS.white : "#f4f3f4"}
+            />
           </View>
 
           {isCustomGift ? (
@@ -3560,15 +3632,9 @@ return (
           )}
 
           <View style={styles.buttonRowModal}>
-            {!isCustomGift && (
-              <Button
-                title="Добавить выбранные"
-                onPress={handleAddWishlistItem}
-                disabled={selectedGoodIds.length === 0}
-                color={COLORS.primary}
-              />
-            )}
-            <Button title="Отмена" onPress={closeGiftModal} color={COLORS.error} />
+            <View style={{ flex: 1 }}>
+               <Button title="Отмена" onPress={closeGiftModal} color={COLORS.error} />
+            </View>
           </View>
         </SafeAreaView>
       </Modal>
@@ -3685,7 +3751,18 @@ return (
       onRequestClose={() => setWishlistViewModalVisible(false)}
     >
       <SafeAreaView style={styles.modalContainer}>
-        <Text style={styles.subtitle}>Список подарков</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <View style={{ width: 44 }} /> 
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.subtitle, { marginVertical: 0 }]}>Список подарков</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.iconButton, styles.iconButtonPrimary]}
+            onPress={() => handleShareEventLink(giftTargetId, giftTargetType)}
+          >
+            <Icon name="share" size={24} color={COLORS.white} />
+          </TouchableOpacity>
+        </View>
         <FlatList
           data={wishlistItems}
           renderItem={renderWishlistItem}
@@ -3695,11 +3772,16 @@ return (
             <Text style={styles.noItems}>Список желаний пуст</Text>
           }
         />
-        <Button
-          title="Закрыть"
-          onPress={() => setWishlistViewModalVisible(false)}
-          color={COLORS.error}
-        />
+        <View style={styles.buttonRowModal}>
+
+          <View style={{ flex: 1, marginLeft: 5 }}>
+            <Button
+              title="Закрыть"
+              onPress={() => setWishlistViewModalVisible(false)}
+              color={COLORS.error}
+            />
+          </View>
+        </View>
       </SafeAreaView>
     </Modal>
 
