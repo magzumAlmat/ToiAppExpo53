@@ -793,7 +793,6 @@ const SelectedItem = React.memo(({
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setSelectedItem(item);
               setDetailsModalVisible(true);
-              if (onClose) onClose();
             }}
             accessible
             accessibilityLabel={`Посмотреть детали ${title}`}
@@ -1001,7 +1000,6 @@ const renderAvailableItem = useCallback(
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setSelectedItem(item);
-              onClose();
             setDetailsModalVisible(true);
           }}
           accessible

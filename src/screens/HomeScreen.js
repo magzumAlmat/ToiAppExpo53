@@ -11,6 +11,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Text,
   Dimensions,
   FlatList,
@@ -526,7 +527,7 @@ const renderAddItem = useCallback(
             if (category) {
               updateCategories(category);
             }
-            onClose();
+            // Don't close modal - allow adding multiple items
           }}
         >
           <Text style={styles.addModalItemText}>{title}</Text>
@@ -986,7 +987,7 @@ const SelectedItem = ({
             onPress={() => {
               setSelectedItem(item);
               setDetailsModalVisible(true);
-              if (onClose) onClose();
+              // Don't close parent modal
             }}
           >
             <Icon2 name="magnify" size={24} color={MODAL_COLORS.icon} />
@@ -1308,12 +1309,22 @@ const CategoryItemsModal = ({
 
 
 
+  if (!visible) return null;
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+    <View
+      style={[
+        styles.modalOverlay,
+        {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 3000,
+          backgroundColor: MODAL_COLORS.overlayBackground,
+        }
+      ]}
     >
       <SafeAreaView style={styles.modalOverlay}>
         <View style={styles.addModalContainer}>
@@ -1377,23 +1388,23 @@ const CategoryItemsModal = ({
           </ScrollView>
         </View>
       </SafeAreaView>
-    </Modal>
+    </View>
   );
 };
 
 
 const CreateEventScreen = ({ navigation, route }) => {
 
-  useEffect(() => {
-  const unsubscribeBlur = navigation.addListener('blur', () => {
-    setDetailsModalVisible(false); // Автоматически закрывать DetailsModal при потере фокуса
-    setAddItemModalVisible(false);
-    setCategoryModalVisible(false);
-    console.log('Screen blurred, closing all modals');
-  });
+//   useEffect(() => {
+//   const unsubscribeBlur = navigation.addListener('blur', () => {
+//     setDetailsModalVisible(false); // Автоматически закрывать DetailsModal при потере фокуса
+//     setAddItemModalVisible(false);
+//     setCategoryModalVisible(false);
+//     console.log('Screen blurred, closing all modals');
+//   });
 
-  return unsubscribeBlur;
-}, [navigation]);
+//   return unsubscribeBlur;
+// }, [navigation]);
 
 
 
@@ -1440,24 +1451,7 @@ const CreateEventScreen = ({ navigation, route }) => {
     });
   }, []);
 
-  // const combinedData = useMemo(() => { // All available items from API
-  //   const dataArray = [
-  //     ...(data.restaurants || []).map((item) => ({ ...item, type: "restaurant" })),
-  //     ...(data.clothing || []).map((item) => ({ ...item, type: "clothing" })),
-  //     ...(data.tamada || []).map((item) => ({ ...item, type: "tamada" })),
-  //     ...(data.programs || []).map((item) => ({ ...item, type: "program" })),
-  //     ...(data.traditionalGifts || []).map((item) => ({ ...item, type: "traditionalGift" })),
-  //     ...(data.flowers || []).map((item) => ({ ...item, type: "flowers" })),
-  //     ...(data.cakes || []).map((item) => ({ ...item, type: "cake" })),
-  //     ...(data.alcohol || []).map((item) => ({ ...item, type: "alcohol" })),
-  //     ...(data.transport || []).map((item) => ({ ...item, type: "transport" })),
-  //     ...(data.goods || []).map((item) => ({ ...item, type: "goods" })),
-  //     ...(data.jewelry || []).map((item) => ({ ...item, type: "jewelry" })),
-  //   ].filter((item) => item.type !== "goods" || item.category !== "Прочее");
-  //   return dataArray.sort(
-  //     (a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11)
-  //   );
-  // }, [data]);
+
 
 
 
@@ -1899,7 +1893,7 @@ useEffect(() => {
         setRemainingBudget(parseFloat(budget) - totalSpent);
         return updatedSelectedItems.sort((a, b) => (typeOrder[a.type] || 11) - (typeOrder[b.type] || 11));
       });
-      if (categoryModalVisible) setCategoryModalVisible(false); // Close category modal after adding
+      // if (categoryModalVisible) setCategoryModalVisible(false); // Close category modal after adding
     },
     [quantities, budget, guestCount, categoryModalVisible] // Dependencies
   );
@@ -2191,14 +2185,16 @@ const handleDetailsPress = () => {
   }
 };
 
-const openDetailsModal = (item) => {
-  setAddItemModalVisible(false);
-  setCategoryModalVisible(false);
-  setSelectedItem(item);
-  console.log('selected item is - ',selectedItem)
-  setDetailsModalVisible(true);
-  console.log('Opening DetailsModal for item:', item);
-};
+  const openDetailsModal = useCallback((item) => {
+    // setAddItemModalVisible(false);
+    // setCategoryModalVisible(false);
+    setSelectedItem(item);
+    console.log('selected item is - ', item) 
+    setTimeout(() => {
+        setDetailsModalVisible(true);
+    }, 100);
+    console.log('Opening DetailsModal for item:', item);
+  }, []);
 
 
 
@@ -2316,212 +2312,215 @@ const openDetailsModal = (item) => {
 
 
 
-        {/* Details Modal (shows brief info, navigates to full details screen) */}
-      <Modal
-  visible={detailsModalVisible}
-  transparent
-  animationType="fade"
-  onRequestClose={() => {
-    console.log("DetailsModal closing via onRequestClose");
-    setDetailsModalVisible(false);
-  }}
-  onDismiss={() => console.log("DetailsModal dismissed")}
->
-  <SafeAreaView
-    style={[styles.modalOverlay, { justifyContent: "center", alignItems: "center" }]}
-  >
-    <Animatable.View
-      style={styles.detailsModalContainer}
-      animation="zoomIn"
-      duration={300}
-    >
-      <View style={styles.modalHeader}>
-        <Text style={styles.modalTitle}>Подробности</Text>
-        <TouchableOpacity
-          style={styles.modalCloseButton}
-          onPress={() => {
-            setDetailsModalVisible(false);
-            // Keep selectedItem for potential navigation
-          }}
-        >
-          <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-        </TouchableOpacity>
-      </View>
-
-      {selectedItem ? (
-        <View style={styles.detailsModalContent}>
-          {(() => {
-            let mainTitle = "Детали элемента";
-            let details = [];
-            const item = selectedItem.dataValues || selectedItem; // Handle dataValues
-
-            console.log('GEMINI LOG: selectedItem inside DetailsModal', item);
-
-            switch (item.type) {
-              case "restaurant":
-                mainTitle = item.name || "Не указано";
-                details = [
-                  `Кухня: ${item.cuisine || "Не указано"}`,
-                  `Вместимость: ${item.capacity || "Не указано"}`,
-                  `Средний чек: ${item.averageCost} ₸`,
-                  `Адрес: ${item.address || "Не указано"}`,
-                  `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "clothing":
-                mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
-                details = [
-                  `Наименование товара: ${item.itemName || "Не указано"}`,
-                  `Пол: ${item.gender || "Не указано"}`,
-                  `Стоимость: ${item.cost} ₸`,
-                  `Адрес: ${item.address || "Не указано"}`,
-                  `Город: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "flowers":
-                mainTitle = `${item.salonName || "Не указано"} - ${item.flowerName || "Не указано"}`;
-                details = [
-                  `Тип: ${item.flowerType || "Не указано"}`,
-                  `Стоимость: ${item.cost} ₸`,
-                  `Адрес: ${item.address || "Не указано"}`,
-                  `Город: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "cake":
-                mainTitle = item.name || "Не указано";
-                details = [
-                  `Тип торта: ${item.cakeType || "Не указано"}`,
-                  `Стоимость: ${item.cost} ₸`,
-                  `Адрес: ${item.address || "Не указано"}`,
-                  `Город: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "alcohol":
-                mainTitle = `${item.salonName || "Не указано"} - ${item.alcoholName || "Не указано"}`;
-                details = [
-                  `Категория: ${item.category || "Не указано"}`,
-                  `Стоимость: ${item.cost} ₸`,
-                  `Адрес: ${item.address || "Не указано"}`,
-                  `Город: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "program":
-                mainTitle = item.teamName || "Не указано";
-                details = [
-                  `Название команды: ${item.teamName || "Не указано"}`,
-                  `Тип программы: ${item.type || "Не указано"}`,
-                  `Стоимость: ${item.cost} ₸`,
-                  `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "tamada":
-                mainTitle = item.name || "Не указано";
-                details = [
-                  item.portfolio
-                    ? `Портфолио: ${item.portfolio.substring(0, 50)}...`
-                    : "Портфолио не указано",
-                  `Стоимость: ${item.cost} ₸`,
-                  `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
-                ];
-                if (
-                  item.portfolio &&
-                  (item.portfolio.startsWith("http://") ||
-                    item.portfolio.startsWith("https://"))
-                ) {
-                  details.push(
-                    <TouchableOpacity
-                      key="link"
-                      onPress={() => Linking.openURL(item.portfolio)}
-                    >
-                      <Text
-                        style={{
-                          color: COLORS.secondary,
-                          textDecorationLine: "underline",
-                          marginTop: 5,
-                        }}
-                      >
-                        Открыть портфолио
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                }
-                break;
-              case "traditionalGift":
-                mainTitle = `${item.salonName || "Не указано"} - ${item.itemName || "Не указано"}`;
-                details = [
-                  `Тип: ${item.type || "Не указано"}`,
-                  `Стоимость: ${item.cost} ₸`,
-                  `Адрес: ${item.address || "Не указано"}`,
-                  `Город: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "transport":
-                mainTitle = `${item.salonName || "Не указано"} - ${item.carName || "Не указано"}`;
-                details = [
-                  `Марка: ${item.brand || "Не указано"}`,
-                  `Цвет: ${item.color || "Не указано"}`,
-                  `Стоимость: ${item.cost} ₸`,
-                  `Адрес: ${item.address || "Не указано"}`,
-                  `Город: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "jewelry":
-                mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
-                details = [
-                  `Материал: ${item.material || "Не указано"}`,
-                  `Стоимость: ${item.cost} ₸`,
-                  `Адрес: ${item.address || "Не указано"}`,
-                  `Город: ${item.city || "Не указан"}`,
-                ];
-                break;
-              case "goods":
-                mainTitle = item.item_name || "Не указано";
-                details = [
-                  item.description || "Описание не указано",
-                  `Стоимость: ${item.cost} ₸`,
-                  `Город: ${item.city || "Не указан"}`,
-                ];
-                break;
-              default:
-                return <Text style={styles.detailsModalText}>Информация недоступна.</Text>;
+      {detailsModalVisible && (
+        <View
+          style={[
+            styles.modalOverlay,
+            {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 99999, // Ensure it's on top of everything in HomeScreen
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: MODAL_COLORS.overlayBackground, // Restore overlay background
             }
+          ]}
+        >
+        <Animatable.View
+            style={styles.detailsModalContainer}
+            animation="zoomIn"
+            duration={300}
+        >
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Подробности</Text>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => {
+                setDetailsModalVisible(false);
+              }}
+            >
+              <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
+            </TouchableOpacity>
+          </View>
 
-            return (
-              <>
-                <Text
-                  style={[
-                    styles.detailsModalText,
-                    { fontWeight: "bold", fontSize: 18, marginBottom: 15 },
-                  ]}
-                >
-                  {mainTitle}
-                </Text>
-                {details.map((detail, index) =>
-                  typeof detail === "string" ? (
-                    <Text key={index} style={styles.detailsModalText}>
-                      {detail}
+          {selectedItem ? (
+            <View style={styles.detailsModalContent}>
+              {(() => {
+                let mainTitle = "Детали элемента";
+                let details = [];
+                const item = selectedItem.dataValues || selectedItem;
+
+                console.log('GEMINI LOG: selectedItem inside DetailsModal', item);
+
+                switch (item.type) {
+                  case "restaurant":
+                    mainTitle = item.name || "Не указано";
+                    details = [
+                      `Кухня: ${item.cuisine || "Не указано"}`,
+                      `Вместимость: ${item.capacity || "Не указано"}`,
+                      `Средний чек: ${item.averageCost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "clothing":
+                    mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
+                    details = [
+                      `Наименование товара: ${item.itemName || "Не указано"}`,
+                      `Пол: ${item.gender || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "flowers":
+                    mainTitle = `${item.salonName || "Не указано"} - ${item.flowerName || "Не указано"}`;
+                    details = [
+                      `Тип: ${item.flowerType || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "cake":
+                    mainTitle = item.name || "Не указано";
+                    details = [
+                      `Тип торта: ${item.cakeType || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "alcohol":
+                    mainTitle = `${item.salonName || "Не указано"} - ${item.alcoholName || "Не указано"}`;
+                    details = [
+                      `Категория: ${item.category || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "program":
+                    mainTitle = item.teamName || "Не указано";
+                    details = [
+                      `Название команды: ${item.teamName || "Не указано"}`,
+                      `Тип программы: ${item.type || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "tamada":
+                    mainTitle = item.name || "Не указано";
+                    details = [
+                      item.portfolio
+                        ? `Портфолио: ${item.portfolio.substring(0, 50)}...`
+                        : "Портфолио не указано",
+                      `Стоимость: ${item.cost} ₸`,
+                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
+                    ];
+                    if (
+                      item.portfolio &&
+                      (item.portfolio.startsWith("http://") ||
+                        item.portfolio.startsWith("https://"))
+                    ) {
+                      details.push(
+                        <TouchableOpacity
+                          key="link"
+                          onPress={() => Linking.openURL(item.portfolio)}
+                        >
+                          <Text
+                            style={{
+                              color: COLORS.secondary,
+                              textDecorationLine: "underline",
+                              marginTop: 5,
+                            }}
+                          >
+                            Открыть портфолио
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    }
+                    break;
+                  case "traditionalGift":
+                    mainTitle = `${item.salonName || "Не указано"} - ${item.itemName || "Не указано"}`;
+                    details = [
+                      `Тип: ${item.type || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "transport":
+                    mainTitle = `${item.salonName || "Не указано"} - ${item.carName || "Не указано"}`;
+                    details = [
+                      `Марка: ${item.brand || "Не указано"}`,
+                      `Цвет: ${item.color || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "jewelry":
+                    mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
+                    details = [
+                      `Материал: ${item.material || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "goods":
+                    mainTitle = item.item_name || "Не указано";
+                    details = [
+                      item.description || "Описание не указано",
+                      `Стоимость: ${item.cost} ₸`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  default:
+                    return <Text style={styles.detailsModalText}>Информация недоступна.</Text>;
+                }
+
+                return (
+                  <>
+                    <Text
+                      style={[
+                        styles.detailsModalText,
+                        { fontWeight: "bold", fontSize: 18, marginBottom: 15 },
+                      ]}
+                    >
+                      {mainTitle}
                     </Text>
-                  ) : (
-                    detail
-                  )
-                )}
-              </>
-            );
-          })()}
-          <TouchableOpacity
-            style={[styles.modalButton2, styles.confirmButton, { marginTop: 20 }]}
-            onPress={handleDetailsPress}
-          >
-            <Icon name="search" size={20} color={COLORS.white} style={styles.buttonIcon} />
-            <Text style={styles.modalButtonText}>Подробнее</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <Text style={styles.detailsModalText}>Нет данных для отображения</Text>
+                    {details.map((detail, index) =>
+                      typeof detail === "string" ? (
+                        <Text key={index} style={styles.detailsModalText}>
+                          {detail}
+                        </Text>
+                      ) : (
+                        detail
+                      )
+                    )}
+                  </>
+                );
+              })()}
+              <TouchableOpacity
+                style={[styles.modalButton2, styles.confirmButton, { marginTop: 20 }]}
+                onPress={handleDetailsPress}
+              >
+                <Icon name="search" size={20} color={COLORS.white} style={styles.buttonIcon} />
+                <Text style={styles.modalButtonText}>Подробнее</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Text style={styles.detailsModalText}>Нет данных для отображения</Text>
+          )}
+
+        </Animatable.View>
+      </View>
       )}
-    </Animatable.View>
-  </SafeAreaView>
-</Modal>
         {/* Create Wedding Event Modal (final save step) */}
 
         
@@ -2707,6 +2706,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: MODAL_COLORS.overlayBackground,
   },
+  detailsModalContainer: {
+    width: "85%",
+    backgroundColor: MODAL_COLORS.background,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: MODAL_COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 50,
+    zIndex: 20001,
+  },
   loaderContainer: {
     backgroundColor: MODAL_COLORS.cardBackground,
     borderRadius: 15,
@@ -2875,6 +2886,8 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: MODAL_COLORS.overlayBackground,
+    justifyContent: "flex-end",
+    zIndex: 9999,
   },
   addModalContainer: {
     backgroundColor: MODAL_COLORS.background,
