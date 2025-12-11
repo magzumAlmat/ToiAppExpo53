@@ -1070,12 +1070,22 @@ const CategoryItemsModal = ({
     ]
   );
 
+  if (!visible) return null;
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+    <View
+      style={[
+        styles.modalOverlay,
+        {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 3000,
+          backgroundColor: MODAL_COLORS.overlayBackground,
+        }
+      ]}
     >
       <SafeAreaView style={styles.modalOverlay}>
         <View style={styles.addModalContainer}>
@@ -1150,7 +1160,8 @@ const CategoryItemsModal = ({
           />
         </View>
       </SafeAreaView>
-    </Modal>
+        </View>
+
   );
 };
 
@@ -1684,7 +1695,7 @@ console.log('Полученные категории:', selectedCategories);
         );
       });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      if (categoryModalVisible) setCategoryModalVisible(false);
+      // if (categoryModalVisible) setCategoryModalVisible(false);
     },
     [budget, guestCount, quantities, categoryModalVisible]
   );
@@ -2328,6 +2339,7 @@ console.log('Полученные категории:', selectedCategories);
   );
 
             const DetailsModal = ({ visible, onClose, item }) => {
+              if (!item) return null;
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [files, setFiles] = useState([]);
     const [loadingFiles, setLoadingFiles] = useState(true);
@@ -2425,11 +2437,21 @@ console.log('Полученные категории:', selectedCategories);
       setCurrentPhotoIndex(currentIndex);
     };
 
+    if (!item || !visible) return null;
+
     return (
-      <Modal
-        visible={visible}
-        animationType="slide"
-        onRequestClose={onClose}
+      <View
+        style={[
+          styles.modalOverlay,
+          {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 99999,
+          }
+        ]}
       >
         <View style={styles.fullscreenModalContainer}>
           {/* Header with back button */}
@@ -2547,7 +2569,7 @@ console.log('Полученные категории:', selectedCategories);
             </View>
           </ScrollView>
         </View>
-      </Modal>
+    </View>
     );
   };
 
@@ -3749,8 +3771,8 @@ const styles = StyleSheet.create({
     marginTop: -24,
     paddingHorizontal: 24,
     paddingTop: 32,
-    paddingBottom: 40,
-    minHeight: 400,
+    paddingBottom: 400,
+    minHeight: 700,
   },
   fullscreenTitle: {
     fontSize: 28,

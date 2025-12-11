@@ -1019,12 +1019,22 @@ const renderAvailableItem = useCallback(
   ]
 );
 
+  if (!visible) return null;
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+    <View
+      style={[
+        styles.modalOverlay,
+        {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 3000,
+          backgroundColor: MODAL_COLORS.overlayBackground,
+        }
+      ]}
     >
       <SafeAreaView style={styles.modalOverlay}>
         <View style={styles.addModalContainer}>
@@ -1099,7 +1109,7 @@ const renderAvailableItem = useCallback(
           />
         </View>
       </SafeAreaView>
-    </Modal>
+    </View>
   );
 };
 
@@ -1510,7 +1520,7 @@ const CorporateEventScreen = ({ navigation, route }) => {
         );
       });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      if (categoryModalVisible) setCategoryModalVisible(false);
+      // if (categoryModalVisible) setCategoryModalVisible(false);
     },
     [budget, guestCount, quantities, categoryModalVisible]
   );
@@ -1730,11 +1740,12 @@ const CorporateEventScreen = ({ navigation, route }) => {
   };
   
   const DetailsModal = ({ visible, onClose, item }) => {
+    if (!item) return null;
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [files, setFiles] = useState([]);
     const [loadingFiles, setLoadingFiles] = useState(true);
     
-    if (!item) return null;
+    // if (!item) return null;
 
     const BASE_URL = process.env.EXPO_PUBLIC_API_baseURL;
 
@@ -1820,8 +1831,22 @@ const CorporateEventScreen = ({ navigation, route }) => {
       setCurrentPhotoIndex(currentIndex);
     };
 
+    if (!item || !visible) return null;
+
     return (
-      <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+      <View
+        style={[
+          styles.modalOverlay,
+          {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 99999,
+          }
+        ]}
+      >
         <View style={styles.fullscreenModalContainer}>
           <View style={styles.fullscreenModalHeader}>
             <TouchableOpacity style={styles.fullscreenBackButton} onPress={onClose} accessible accessibilityLabel="Назад">
@@ -1888,7 +1913,7 @@ const CorporateEventScreen = ({ navigation, route }) => {
             </View>
           </ScrollView>
         </View>
-      </Modal>
+    </View>
     );
   };
   

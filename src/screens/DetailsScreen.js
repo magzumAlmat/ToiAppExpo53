@@ -381,6 +381,7 @@ const DetailsScreen = ({ route }) => {
           />
         </View>
       </Modal>
+      
     </LinearGradient>
   );
 };
@@ -406,7 +407,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SIZES.padding,
     paddingTop: SIZES.padding,
-    paddingBottom: SIZES.padding * 2,
+    paddingBottom: 500,
   },
   mediaSection: {
     marginBottom: SIZES.padding * 1.5,
@@ -474,6 +475,7 @@ const styles = StyleSheet.create({
     marginTop: SIZES.padding / 2,
   },
   detailsCard: {
+    paddingVertical: SIZES.padding,
     backgroundColor: COLORS.cardBackground,
     borderRadius: SIZES.radius,
     padding: SIZES.padding,
@@ -483,6 +485,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
+    // paddingBottom:400,
   },
   cardTitle: {
     ...FONTS.title,
@@ -494,6 +497,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.cardBorderColor,
     marginVertical: SIZES.padding * 0.75,
     opacity: 0.7,
+    // paddingBottom:400,
   },
   detailLabel: {
     ...FONTS.detailLabel,
