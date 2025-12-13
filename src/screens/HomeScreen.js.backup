@@ -606,7 +606,7 @@ const renderAddItem = useCallback(
             style={styles.addModalFilterScroll}
             showsVerticalScrollIndicator={false}
           >
-            <View>
+            <View> {/* Removed addModalFilterContainer style */}
               <View>
                 <Text style={styles.addModalFilterLabel}>Город</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -638,7 +638,7 @@ const renderAddItem = useCallback(
                   ))}
                 </ScrollView>
               </View>
-              <View>
+              <View> {/* Removed addModalTypeFilterContainer */}
                 <Text style={styles.addModalFilterLabel}>Тип</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {uniqueTypes.map((typeObj) => (
@@ -664,7 +664,7 @@ const renderAddItem = useCallback(
                   ))}
                 </ScrollView>
               </View>
-              <View>
+              <View> {/* Removed addModalDistrictFilterContainer */}
                 <Text style={styles.addModalFilterLabel}>Район</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {districts.map((district) => (
@@ -690,7 +690,7 @@ const renderAddItem = useCallback(
                   ))}
                 </ScrollView>
               </View>
-              <View>
+              <View> {/* Removed addModalPriceFilterContainer */}
                 <Text style={styles.addModalFilterLabel}>Цена</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {[
@@ -2186,8 +2186,8 @@ const handleDetailsPress = () => {
 };
 
   const openDetailsModal = useCallback((item) => {
-    setAddItemModalVisible(false);
-    setCategoryModalVisible(false);
+    // setAddItemModalVisible(false);
+    // setCategoryModalVisible(false);
     setSelectedItem(item);
     console.log('selected item is - ', item) 
     setTimeout(() => {
@@ -2318,10 +2318,219 @@ const handleDetailsPress = () => {
 />
 
 
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={detailsModalVisible}
+        onRequestClose={() => setDetailsModalVisible(false)}
+      >
+        <View
+          style={[
+            styles.modalOverlay,
+            {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: MODAL_COLORS.overlayBackground,
+            }
+          ]}
+        >
+        <Animatable.View
+            style={styles.detailsModalContainer}
+            animation="zoomIn"
+            duration={300}
+        >
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Подробности</Text>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => {
+                setDetailsModalVisible(false);
+              }}
+            >
+              <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
+            </TouchableOpacity>
+          </View>
 
+          {selectedItem ? (
+            <View style={styles.detailsModalContent}>
+              {(() => {
+                let mainTitle = "Детали элемента";
+                let details = [];
+                const item = selectedItem.dataValues || selectedItem;
 
+                console.log('GEMINI LOG: selectedItem inside DetailsModal', item);
 
+                switch (item.type) {
+                  case "restaurant":
+                    mainTitle = item.name || "Не указано";
+                    details = [
+                      `Кухня: ${item.cuisine || "Не указано"}`,
+                      `Вместимость: ${item.capacity || "Не указано"}`,
+                      `Средний чек: ${item.averageCost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "clothing":
+                    mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
+                    details = [
+                      `Наименование товара: ${item.itemName || "Не указано"}`,
+                      `Пол: ${item.gender || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "flowers":
+                    mainTitle = `${item.salonName || "Не указано"} - ${item.flowerName || "Не указано"}`;
+                    details = [
+                      `Тип: ${item.flowerType || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "cake":
+                    mainTitle = item.name || "Не указано";
+                    details = [
+                      `Тип торта: ${item.cakeType || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "alcohol":
+                    mainTitle = `${item.salonName || "Не указано"} - ${item.alcoholName || "Не указано"}`;
+                    details = [
+                      `Категория: ${item.category || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "program":
+                    mainTitle = item.teamName || "Не указано";
+                    details = [
+                      `Название команды: ${item.teamName || "Не указано"}`,
+                      `Тип программы: ${item.type || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "tamada":
+                    mainTitle = item.name || "Не указано";
+                    details = [
+                      item.portfolio
+                        ? `Портфолио: ${item.portfolio.substring(0, 50)}...`
+                        : "Портфолио не указано",
+                      `Стоимость: ${item.cost} ₸`,
+                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
+                    ];
+                    if (
+                      item.portfolio &&
+                      (item.portfolio.startsWith("http://") ||
+                        item.portfolio.startsWith("https://"))
+                    ) {
+                      details.push(
+                        <TouchableOpacity
+                          key="link"
+                          onPress={() => Linking.openURL(item.portfolio)}
+                        >
+                          <Text
+                            style={{
+                              color: COLORS.secondary,
+                              textDecorationLine: "underline",
+                              marginTop: 5,
+                            }}
+                          >
+                            Открыть портфолио
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    }
+                    break;
+                  case "traditionalGift":
+                    mainTitle = `${item.salonName || "Не указано"} - ${item.itemName || "Не указано"}`;
+                    details = [
+                      `Тип: ${item.type || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "transport":
+                    mainTitle = `${item.salonName || "Не указано"} - ${item.carName || "Не указано"}`;
+                    details = [
+                      `Марка: ${item.brand || "Не указано"}`,
+                      `Цвет: ${item.color || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "jewelry":
+                    mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
+                    details = [
+                      `Материал: ${item.material || "Не указано"}`,
+                      `Стоимость: ${item.cost} ₸`,
+                      `Адрес: ${item.address || "Не указано"}`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  case "goods":
+                    mainTitle = item.item_name || "Не указано";
+                    details = [
+                      item.description || "Описание не указано",
+                      `Стоимость: ${item.cost} ₸`,
+                      `Город: ${item.city || "Не указан"}`,
+                    ];
+                    break;
+                  default:
+                    return <Text style={styles.detailsModalText}>Информация недоступна.</Text>;
+                }
 
+                return (
+                  <>
+                    <Text
+                      style={[
+                        styles.detailsModalText,
+                        { fontWeight: "bold", fontSize: 18, marginBottom: 15 },
+                      ]}
+                    >
+                      {mainTitle}
+                    </Text>
+                    {details.map((detail, index) =>
+                      typeof detail === "string" ? (
+                        <Text key={index} style={styles.detailsModalText}>
+                          {detail}
+                        </Text>
+                      ) : (
+                        detail
+                      )
+                    )}
+                  </>
+                );
+              })()}
+              <TouchableOpacity
+                style={[styles.modalButton2, styles.confirmButton, { marginTop: 20 }]}
+                onPress={handleDetailsPress}
+              >
+                <Icon2 name="dots-horizontal" size={20} color={COLORS.white} style={styles.buttonIcon} />
+                <Text style={styles.modalButtonText}>Подробнее</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Text style={styles.detailsModalText}>Нет данных для отображения</Text>
+          )}
+
+        </Animatable.View>
+      </View>
+      </Modal>
         {/* Create Wedding Event Modal (final save step) */}
 
         
@@ -2495,221 +2704,6 @@ const handleDetailsPress = () => {
           </SafeAreaView>
         </Modal>
       </LinearGradient>
-
-      {/* Details Modal - Rendered last to ensure it appears on top */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={detailsModalVisible}
-        onRequestClose={() => setDetailsModalVisible(false)}
-      >
-        <View
-          style={[
-            styles.modalOverlay,
-            {
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: MODAL_COLORS.overlayBackground,
-            }
-          ]}
-        >
-        <Animatable.View
-            style={styles.detailsModalContainer}
-            animation="zoomIn"
-            duration={300}
-        >
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Подробности</Text>
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => {
-                setDetailsModalVisible(false);
-              }}
-            >
-              <Icon name="close" size={24} color={MODAL_COLORS.closeButtonColor} />
-            </TouchableOpacity>
-          </View>
-
-          {selectedItem ? (
-            <View style={styles.detailsModalContent}>
-              {(() => {
-                let mainTitle = "Детали элемента";
-                let details = [];
-                const item = selectedItem.dataValues || selectedItem;
-
-                console.log('GEMINI LOG: selectedItem inside DetailsModal', item);
-
-                switch (item.type) {
-                  case "restaurant":
-                    mainTitle = item.name || "Не указано";
-                    details = [
-                      `Кухня: ${item.cuisine || "Не указано"}`,
-                      `Вместимость: ${item.capacity || "Не указано"}`,
-                      `Средний чек: ${item.averageCost} ₸`,
-                      `Адрес: ${item.address || "Не указано"}`,
-                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "clothing":
-                    mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
-                    details = [
-                      `Наименование товара: ${item.itemName || "Не указано"}`,
-                      `Пол: ${item.gender || "Не указано"}`,
-                      `Стоимость: ${item.cost} ₸`,
-                      `Адрес: ${item.address || "Не указано"}`,
-                      `Город: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "flowers":
-                    mainTitle = `${item.salonName || "Не указано"} - ${item.flowerName || "Не указано"}`;
-                    details = [
-                      `Тип: ${item.flowerType || "Не указано"}`,
-                      `Стоимость: ${item.cost} ₸`,
-                      `Адрес: ${item.address || "Не указано"}`,
-                      `Город: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "cake":
-                    mainTitle = item.name || "Не указано";
-                    details = [
-                      `Тип торта: ${item.cakeType || "Не указано"}`,
-                      `Стоимость: ${item.cost} ₸`,
-                      `Адрес: ${item.address ||"Не указано"}`,
-                      `Город: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "alcohol":
-                    mainTitle = `${item.salonName || "Не указано"} - ${item.alcoholName || "Не указано"}`;
-                    details = [
-                      `Категория: ${item.category || "Не указано"}`,
-                      `Стоимость: ${item.cost} ₸`,
-                      `Адрес: ${item.address || "Не указано"}`,
-                      `Город: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "program":
-                    mainTitle = item.teamName || "Не указано";
-                    details = [
-                      `Название команды: ${item.teamName || "Не указано"}`,
-                      `Тип программы: ${item.type || "Не указано"}`,
-                      `Стоимость: ${item.cost} ₸`,
-                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "tamada":
-                    mainTitle = item.name || "Не указано";
-                    details = [
-                      item.portfolio
-                        ? `Портфолио: ${item.portfolio.substring(0, 50)}...`
-                        : "Портфолио не указано",
-                      `Стоимость: ${item.cost} ₸`,
-                      `Телефон: ${item.phone || "Не указано"}\nГород: ${item.city || "Не указан"}`,
-                    ];
-                    if (
-                      item.portfolio &&
-                      (item.portfolio.startsWith("http://") ||
-                        item.portfolio.startsWith("https://"))
-                    ) {
-                      details.push(
-                        <TouchableOpacity
-                          key="link"
-                          onPress={() => Linking.openURL(item.portfolio)}
-                        >
-                          <Text
-                            style={{
-                              color: COLORS.secondary,
-                              textDecorationLine: "underline",
-                              marginTop: 5,
-                            }}
-                          >
-                            Открыть портфолио
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    }
-                    break;
-                  case "traditionalGift":
-                    mainTitle = `${item.salonName || "Не указано"} - ${item.itemName || "Не указано"}`;
-                    details = [
-                      `Тип: ${item.type || "Не указано"}`,
-                      `Стоимость: ${item.cost} ₸`,
-                      `Адрес: ${item.address || "Не указано"}`,
-                      `Город: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "transport":
-                    mainTitle = `${item.salonName || "Не указано"} - ${item.carName || "Не указано"}`;
-                    details = [
-                      `Марка: ${item.brand || "Не указано"}`,
-                      `Цвет: ${item.color || "Не указано"}`,
-                      `Стоимость: ${item.cost} ₸`,
-                      `Адрес: ${item.address || "Не указано"}`,
-                      `Город: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "jewelry":
-                    mainTitle = `${item.storeName || "Не указано"} - ${item.itemName || "Не указано"}`;
-                    details = [
-                      `Материал: ${item.material || "Не указано"}`,
-                      `Стоимость: ${item.cost} ₸`,
-                      `Адрес: ${item.address || "Не указано"}`,
-                      `Город: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  case "goods":
-                    mainTitle = item.item_name || "Не указано";
-                    details = [
-                      item.description || "Описание не указано",
-                      `Стоимость: ${item.cost} ₸`,
-                      `Город: ${item.city || "Не указан"}`,
-                    ];
-                    break;
-                  default:
-                    return <Text style={styles.detailsModalText}>Информация недоступна.</Text>;
-                }
-
-                return (
-                  <>
-                    <Text
-                      style={[
-                        styles.detailsModalText,
-                        { fontWeight: "bold", fontSize: 18, marginBottom: 15 },
-                      ]}
-                    >
-                      {mainTitle}
-                    </Text>
-                    {details.map((detail, index) =>
-                      typeof detail === "string" ? (
-                        <Text key={index} style={styles.detailsModalText}>
-                          {detail}
-                        </Text>
-                      ) : (
-                        detail
-                      )
-                    )}
-                  </>
-                );
-              })()}
-              <TouchableOpacity
-                style={[styles.modalButton2, styles.confirmButton, { marginTop: 20 }]}
-                onPress={handleDetailsPress}
-              >
-                <Icon2 name="dots-horizontal" size={20} color={COLORS.white} style={styles.buttonIcon} />
-                <Text style={styles.modalButtonText}>Подробнее</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <Text style={styles.detailsModalText}>Нет данных для отображения</Text>
-          )}
-
-        </Animatable.View>
-      </View>
-      </Modal>
     </>
   );
 };
