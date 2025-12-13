@@ -948,10 +948,7 @@ const categoryImages = {
     inactive: require('../../assets/tortyTurnOff.png'),
     active: require('../../assets/torty.png'),
   },
-  Алкоголь: {
-    inactive: require('../../assets/alcoholOff.png'),
-    active: require('../../assets/alcoholOn.png'),
-  },
+
   Цветы: {
     inactive: require('../../assets/cvetyOff.png'),
     active: require('../../assets/cvetyOn.png'),
@@ -970,7 +967,7 @@ const BeforeTraditionalFamilyEventScreen = ({ navigation, route }) => {
     'Традиционные подарки',
     'Ювелирные изделия',
     'Торты',
-    'Алкоголь',
+
     'Цветы',
   ];
 

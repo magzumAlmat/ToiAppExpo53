@@ -1378,10 +1378,7 @@ const categoryImages = {
     inactive: require('../../assets/tortyTurnOff.png'),
     active: require('../../assets/torty.png'),
   },
-  Алкоголь: {
-    inactive: require('../../assets/alcoholOff.png'),
-    active: require('../../assets/alcoholOn.png'),
-  },
+
   Цветы: {
     inactive: require('../../assets/cvetyOff.png'),
     active: require('../../assets/cvetyOn.png'),
@@ -1396,7 +1393,7 @@ const BeforeCorporateEventScreen = ({ navigation, route }) => {
   const defaultCategories = [
     'Прокат авто',
     'Ресторан',
-    'Алкоголь',
+
     'Торты',
     'Ведущий',
     'Шоу программа',

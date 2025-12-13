@@ -82,7 +82,7 @@ const typeOrder = {
   flowers: 6,
   transport: 7,
   cake: 8,
-  alcohol: 9,
+
   goods: 10,
   jewelry: 11,
 };
@@ -99,7 +99,7 @@ const typesMapping = [
   },
   { key: "flowers", costField: "cost", type: "flowers", label: "Цветы" },
   { key: "cakes", costField: "cost", type: "cake", label: "Торты" },
-  { key: "alcohol", costField: "cost", type: "alcohol", label: "Алкоголь" },
+
   {
     key: "transport",
     costField: "cost",
@@ -123,7 +123,7 @@ const typesMapping = [
 const categoryToTypeMap = {
   "Ведущий": "tamada",
   "Ресторан": "restaurant",
-  "Алкоголь": "alcohol",
+
   "Шоу программа": "program",
   "Ювелирные изделия": "jewelry",
   "Традиционные подарки": "traditionalGift",
@@ -413,7 +413,7 @@ const filteredDataMemo = useMemo(() => {
         item.name,
         item.itemName,
         item.flowerName,
-        item.alcoholName,
+
         item.carName,
         item.teamName,
         item.salonName,
@@ -492,9 +492,6 @@ const renderAddItem = useCallback(
         break;
       case "cake":
         title = `Торты: ${item.name || "Не указано"} (${cost} ₸)`;
-        break;
-      case "alcohol":
-        title = `Алкоголь: ${item.salonName || "Не указано"} - ${item.alcoholName || "Не указано"} (${cost} ₸)`;
         break;
       case "program":
         title = `Программа: ${item.teamName || "Не указано"} (${cost} ₸)`;
@@ -944,9 +941,6 @@ const SelectedItem = ({
     case "cake":
       title = `${item.name} (${cost} ₸)`;
       break;
-    case "alcohol":
-      title = `${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
-      break;
     case "program":
       title = `${item.teamName} (${cost} ₸)`;
       break;
@@ -963,7 +957,7 @@ const SelectedItem = ({
       title = `${item.item_name} (${cost} ₸)`;
       break;
     case "jewelry":
-      title = `${item.storeName} - ${item.itemName} (${cost} ₸)`;
+      title = `${item.storeName || "Магазин"} - ${item.itemName || "Изделие"} (${cost} ₸)`;
       break;
     default:
       title = "Неизвестный элемент";
@@ -1228,9 +1222,6 @@ const CategoryItemsModal = ({
       case "cake":
         title = `${item.name} (${cost} ₸)`;
         break;
-      case "alcohol":
-        title = `${item.salonName} - ${item.alcoholName} (${cost} ₸)`;
-        break;
       case "program":
         title = `${item.teamName} (${cost} ₸)`;
         break;
@@ -1247,7 +1238,7 @@ const CategoryItemsModal = ({
         title = `${item.item_name} (${cost} ₸)`;
         break;
       case "jewelry":
-        title = `${item.storeName} - ${item.itemName} (${cost} ₸)`;
+        title = `${item.storeName || "Магазин"} - ${item.itemName || "Изделие"} (${cost} ₸)`;
         break;
       default:
         title = "Неизвестный элемент";
@@ -1417,7 +1408,7 @@ const CreateEventScreen = ({ navigation, route }) => {
   const [disabledCategories, setDisabledCategories] = useState([]);
   const [data, setData] = useState({
     restaurants: [], clothing: [], tamada: [], programs: [], traditionalGifts: [],
-    flowers: [], cakes: [], alcohol: [], transport: [], goods: [], jewelry: [],
+    flowers: [], cakes: [], transport: [], goods: [], jewelry: [],
   });
   const [filteredData, setFilteredData] = useState([]); // Holds selected items
   const [quantities, setQuantities] = useState({});
@@ -1667,16 +1658,16 @@ useEffect(() => {
     try {
       const responses = await Promise.all([
         api.getRestaurants(), api.getClothing(), api.getTamada(), api.getPrograms(),
-        api.getTraditionalGifts(), api.getFlowers(), api.getCakes(), api.getAlcohol(),
+        api.getTraditionalGifts(), api.getFlowers(), api.getCakes(),
         api.getTransport(), api.getGoods(token), api.getJewelry(),
       ]);
       const [
         restaurants, clothing, tamada, programs, traditionalGifts,
-        flowers, cakes, alcohol, transport, goods, jewelry,
+        flowers, cakes, transport, goods, jewelry,
       ] = responses.map(res => res.data);
       setData({
         restaurants, clothing, tamada, programs, traditionalGifts,
-        flowers, cakes, alcohol, transport, goods, jewelry,
+        flowers, cakes, transport, goods, jewelry,
       });
     } catch (error) {
       console.error("Ошибка загрузки данных:", error);
@@ -2658,20 +2649,20 @@ const handleDetailsPress = () => {
       
                                 case "alcohol":itemTitle = `${item.alcoholName} (${item.salonName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
                                  
-                                case "transport":itemTitle = `${item.carName} (${item.brand}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                                case "transport":itemTitle = `${item.carName || item.name || "Авто"} (${item.brand || "Не указано"}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
                                  
                                 
                                  
-                                case "jewelry":itemTitle = `${item.itemName} (${item.storeName}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                                case "jewelry":itemTitle = `${item.itemName || "Изделие"} (${item.storeName || "Не указано"}) - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
                                 
                                 
                                 
 
 
 
-                                case "flowers": itemTitle = `${item.flowerName} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
-                                case "cake": itemTitle = `${item.name} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
-                                default: itemTitle = `${item.name || item.itemName || item.teamName} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`;
+                                case "flowers": itemTitle = `${item.flowerName || "Цветы"} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                                case "cake": itemTitle = `${item.name || "Торт"} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`; break;
+                                default: itemTitle = `${item.name || item.itemName || item.teamName || "Элемент"} - ${cost} x ${effectiveQuantity} = ${totalItemCost} тг`;
                             }
                           return (
                             <View key={`${item.type}-${item.id}`} style={styles.itemContainer}>
