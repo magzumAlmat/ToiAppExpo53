@@ -366,7 +366,7 @@ const AddItemModal = ({
             accessible
             accessibilityLabel="Посмотреть детали"
           >
-            <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+           <Icon2 name="dots-horizontal"  size={20} color={MODAL_COLORS.icon} />
           </TouchableOpacity>
         </View>
       );

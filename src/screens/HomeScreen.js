@@ -539,7 +539,7 @@ const renderAddItem = useCallback(
             openDetailsModal(item);
           }}
         >
-          <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+          <Icon2 name="dots-horizontal" size={20} color={MODAL_COLORS.icon} />
         </TouchableOpacity>
       </View>
     );
@@ -1022,8 +1022,17 @@ const SelectedItem = ({
                 {totalCost.toLocaleString()} ₸
               </Text>
             </View>
+          ) : item.type === "tamada" || item.type === "program" ? (
+            // For tamada and program items - fixed quantity at 1, no controls
+            <View style={styles.controlRow}>
+                <Text style={styles.label}>Количество</Text>
+                <Text style={styles.fixedQuantityText}>1</Text>
+                <Text style={styles.totalCost}>
+                    {totalCost.toLocaleString()} ₸
+                </Text>
+            </View>
           ) : (
-            // For non-restaurant items
+            // For non-restaurant, non-tamada items
             <View style={styles.controlRow}>
                 <Text style={styles.label}>Количество</Text>
                 <View style={styles.quantityContainer}>
@@ -1285,7 +1294,7 @@ const CategoryItemsModal = ({
             openDetailsModal(item); // Use openDetailsModal
           }}
         >
-          <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+         <Icon2 name="dots-horizontal" size={20} color={MODAL_COLORS.icon} />
         </TouchableOpacity>
       </View>
     );
@@ -2511,7 +2520,7 @@ const handleDetailsPress = () => {
                 style={[styles.modalButton2, styles.confirmButton, { marginTop: 20 }]}
                 onPress={handleDetailsPress}
               >
-                <Icon name="search" size={20} color={COLORS.white} style={styles.buttonIcon} />
+                <Icon2 name="dots-horizontal" size={20} color={COLORS.white} style={styles.buttonIcon} />
                 <Text style={styles.modalButtonText}>Подробнее</Text>
               </TouchableOpacity>
             </View>
@@ -3170,6 +3179,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: MODAL_COLORS.activeFilter,
     marginLeft: "auto",
+  },
+  fixedQuantityText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: MODAL_COLORS.textPrimary,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: MODAL_COLORS.cardBackground,
+    borderRadius: 6,
   },
   selectedItemContainer: {
     // No specific style, relies on item margins

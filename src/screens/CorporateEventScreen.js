@@ -337,7 +337,7 @@ const renderAddItem = useCallback(
           accessible
           accessibilityLabel="Посмотреть детали"
         >
-          <Icon name="search" size={20} color={MODAL_COLORS.icon} />
+          <Icon2 name="dots-horizontal" size={20} color={MODAL_COLORS.icon} />
         </TouchableOpacity>
       </View>
     );
@@ -840,6 +840,15 @@ const SelectedItem = React.memo(({
               <Text style={styles.totalCost}>
                 {totalCost.toLocaleString()} ₸
               </Text>
+            </View>
+          ) : item.type === "tamada" || item.type === "program" ? (
+            // For tamada and program items - fixed quantity at 1, no controls
+            <View style={styles.controlRow}>
+                <Text style={styles.label}>Количество</Text>
+                <Text style={styles.fixedQuantityText}>1</Text>
+                <Text style={styles.totalCost}>
+                    {totalCost.toLocaleString()} ₸ 
+                </Text>
             </View>
           ) : (
             <View style={styles.controlRow}>
@@ -2999,6 +3008,21 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: MODAL_COLORS.activeFilterText,
     marginLeft: 8,
+  },
+  totalCost: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: MODAL_COLORS.activeFilter,
+    marginLeft: 'auto',
+  },
+  fixedQuantityText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: MODAL_COLORS.textPrimary,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: MODAL_COLORS.cardBackground,
+    borderRadius: 6,
   },
   calendar: {
     marginBottom: 15,
