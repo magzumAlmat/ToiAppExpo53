@@ -2603,11 +2603,7 @@ console.log('Полученные категории:', selectedCategories);
           />
         </View>
 
-        {/* Footer паттерн */}
-        <Image 
-          source={require("../../assets/footer.png")} 
-          style={styles.topPatternContainer} 
-        />
+
 
         {/* Поля ввода */}
         <View style={styles.headerContainer}>
@@ -2685,7 +2681,7 @@ console.log('Полученные категории:', selectedCategories);
             <ScrollView 
               style={styles.scrollView} 
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 20 }}
+              contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
             >
               <View style={styles.categoryGrid}>
                 {[...categories, 'Добавить'].map((item, index) => (
@@ -2695,12 +2691,15 @@ console.log('Полученные категории:', selectedCategories);
                 ))}
               </View>
 
+              {/* Flexible Spacer */}
+              <View style={{ flex: 1 }} />
+
               {/* Custom Footer moved inside ScrollView for common scrolling */}
               <View style={styles.customFooterContainer}>
-                <View style={styles.footerBackground} />
+                <Image source={require("../../assets/footer.png")} style={styles.footerBackground} resizeMode="cover" />
                 
-                <View style={styles.footerContent}>
-                  {/* <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Home")}>
+                {/* <View style={styles.footerContent}>
+                  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Home")}>
                     <Icon name="home" size={24} color="#5A4032" />
                     <Text style={styles.navText}>Главная</Text>
                   </TouchableOpacity>
@@ -2713,8 +2712,8 @@ console.log('Полученные категории:', selectedCategories);
                   <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Profile")}>
                     <Icon name="person" size={24} color="#5A4032" />
                     <Text style={styles.navText}>Профиль</Text>
-                  </TouchableOpacity> */}
-                </View>
+                  </TouchableOpacity>
+                </View> */}
 
                 <View style={styles.floatingButtonContainer}>
                   <TouchableOpacity 

@@ -2209,7 +2209,7 @@ const handleDetailsPress = () => {
         <View style={styles.logoContainer}>
           <Image source={require("../../assets/kazanRevert.png")} style={styles.potIcon} resizeMode="contain" />
         </View>
-        <Image source={require("../../assets/footer.png")} style={styles.topPatternContainer} />
+
 
         <View style={styles.headerContainer}>
           <View style={styles.budgetContainer}>
@@ -2247,7 +2247,7 @@ const handleDetailsPress = () => {
 
         <View style={styles.listContainer}>
           {loading ? ( <ActivityIndicator size="large" color={COLORS.primary} /> ) : (
-            <ScrollView ref={scrollViewRef} style={styles.scrollView} showsVerticalScrollIndicator={false}>
+            <ScrollView ref={scrollViewRef} style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}>
               <View style={styles.categoryGrid}>
                 {sortedCategories.map((item, index) => (
                   <View key={index} style={styles.categoryItem}>
@@ -2255,15 +2255,25 @@ const handleDetailsPress = () => {
                   </View>
                 ))}
               </View>
-              <View style={styles.bottomPadding} />
+              <View style={{ height: 20 }} />
+              {/* Flexible Spacer */}
+              <View style={{ flex: 1 }} />
+
+              {/* Custom Footer moved inside ScrollView */}
+              <View style={styles.customFooterContainer}>
+                <Image source={require("../../assets/footer.png")} style={styles.footerBackground} resizeMode="cover" />
+                
+                {/* Navigation items hidden to match Reference */}
+                {/* <View style={styles.footerContent}> ... </View> */}
+
+                <View style={styles.floatingButtonContainer}>
+                  <TouchableOpacity style={styles.nextButton} onPress={() => setModalVisible(true)} disabled={filteredData.length === 0 && !budget && !guestCount}>
+                    <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </ScrollView>
           )}
-        </View>
-
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity style={styles.nextButton} onPress={() => setModalVisible(true)} disabled={filteredData.length === 0 && !budget && !guestCount}>
-            <Image source={require("../../assets/next.png")} style={styles.potIcon3} resizeMode="contain" />
-          </TouchableOpacity>
         </View>
 
    
@@ -2869,12 +2879,28 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   bottomPadding: { height: 20 },
-  bottomContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    backgroundColor: "transparent",
-    zIndex: 5,
-    marginBottom: "10%", // Reduced from 20% to 10% to minimize overlap
+  customFooterContainer: {
+    marginTop: 20,
+    width: '100%',
+    height: 170,
+    justifyContent: 'flex-end',
+  },
+  footerBackground: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+    // backgroundColor: '#d3c5b722',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 105,
   },
   nextButton: {
     borderRadius: 25,

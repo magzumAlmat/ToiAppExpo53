@@ -1999,7 +1999,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
           {loading ? (
             <ActivityIndicator size="large" color={COLORS.primary} />
           ) : (
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 200 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}>
               <View style={styles.categoryGrid}>
                 {[...categories, 'Добавить'].map((item, index) => (
                   <View key={index} style={styles.categoryItem}>
@@ -2007,15 +2007,15 @@ const ConferencesEventScreen = ({ navigation, route }) => {
                   </View>
                 ))}
               </View>
-            </ScrollView>
-          )}
-        </View>
 
-        {/* Custom Footer - Fixed at bottom */}
+              {/* Flexible Spacer */}
+              <View style={{ flex: 1 }} />
+
+        {/* Custom Footer - Moved inside ScrollView */}
         <View style={styles.customFooterContainer}>
           <Image source={require("../../assets/footer.png")} style={styles.footerBackground} resizeMode="cover" />
           
-          <View style={styles.footerContent}>
+          {/* <View style={styles.footerContent}>
             <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Home")}>
               <Icon name="home" size={24} color="#5A4032" />
               <Text style={styles.navText}>Главная</Text>
@@ -2030,7 +2030,7 @@ const ConferencesEventScreen = ({ navigation, route }) => {
               <Icon name="person" size={24} color="#5A4032" />
               <Text style={styles.navText}>Профиль</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           <View style={styles.floatingButtonContainer}>
             <TouchableOpacity style={styles.nextButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setEventDetailsModalVisible(true); }} disabled={loading} accessible accessibilityLabel="Далее">
@@ -2038,6 +2038,11 @@ const ConferencesEventScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           </View>
         </View>
+            </ScrollView>
+          )}
+        </View>
+
+
         <AddItemModal visible={addItemModalVisible} onClose={() => setAddItemModalVisible(false)} filteredItems={combinedData} filteredData={filteredData} handleAddItem={handleAddItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} updateCategories={updateCategories} />
         <CategoryItemsModal visible={categoryModalVisible} onClose={() => setCategoryModalVisible(false)} categoryItems={selectedCategoryItems} categoryLabel={selectedCategoryLabel} categoryType={selectedCategoryType} filteredData={filteredData} handleAddItem={handleAddItem} handleRemoveItem={handleRemoveItem} setDetailsModalVisible={setDetailsModalVisible} setSelectedItem={setSelectedItem} quantities={quantities} setQuantities={setQuantities} budget={budget} setFilteredData={setFilteredData} setRemainingBudget={setRemainingBudget} updateCategories={updateCategories} guestCount={guestCount} setGuestCount={setGuestCount} />
         <DetailsModal visible={detailsModalVisible} onClose={() => setDetailsModalVisible(false)} item={selectedItem} />
@@ -2810,10 +2815,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   customFooterContainer: {
-    position: 'absolute', 
-    bottom: 0,
-    left: 0,
-    right: 0,
+    // position: 'absolute', 
+    // bottom: 0,
+    // left: 0,
+    // right: 0,
+    marginTop: 20,
+    width: '100%',
     height: 170, 
     justifyContent: 'flex-end',
     zIndex: 100,

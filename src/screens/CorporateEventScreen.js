@@ -1940,10 +1940,6 @@ const CorporateEventScreen = ({ navigation, route }) => {
             resizeMode="contain" 
           />
         </View>
-        <Image 
-          source={require("../../assets/footer.png")} 
-          style={styles.topPatternContainer} 
-        />
         <View style={styles.headerContainer}>
           <View style={styles.budgetContainer}>
             <View style={styles.categoryItemAdd}>
@@ -2001,14 +1997,14 @@ const CorporateEventScreen = ({ navigation, route }) => {
             </View>
           </Modal>
         </View>
-        <View style={styles.listContainer}>
+        <View style={[styles.listContainer, { flex: 1 }]}>
           {loading ? (
             <ActivityIndicator size="large" color={COLORS.primary} />
           ) : (
             <ScrollView 
               style={styles.scrollView} 
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 20 }}
+              contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
             >
               <View style={styles.categoryGrid}>
                 {[...categories, 'Добавить'].map((item, index) => (
@@ -2018,12 +2014,15 @@ const CorporateEventScreen = ({ navigation, route }) => {
                 ))}
               </View>
               
+              {/* Flexible Spacer */}
+              <View style={{ flex: 1 }} />
+              
               {/* Custom Footer moved inside ScrollView for common scrolling */}
               <View style={styles.customFooterContainer}>
-                <View style={styles.footerBackground} />
+                <Image source={require("../../assets/footer.png")} style={styles.footerBackground} resizeMode="cover" />
                 
-                <View style={styles.footerContent}>
-                  {/* <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Home")}>
+                {/* <View style={styles.footerContent}>
+                  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Home")}>
                     <Icon name="home" size={24} color="#5A4032" />
                     <Text style={styles.navText}>Главная</Text>
                   </TouchableOpacity>
@@ -2036,8 +2035,8 @@ const CorporateEventScreen = ({ navigation, route }) => {
                   <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Profile")}>
                     <Icon name="person" size={24} color="#5A4032" />
                     <Text style={styles.navText}>Профиль</Text>
-                  </TouchableOpacity> */}
-                </View>
+                  </TouchableOpacity>
+                </View> */}
 
                 <View style={styles.floatingButtonContainer}>
                   <TouchableOpacity 
@@ -2055,7 +2054,7 @@ const CorporateEventScreen = ({ navigation, route }) => {
                 </View>
               </View>
 
-              <View style={styles.bottomPadding} />
+
             </ScrollView>
           )}
         </View>
@@ -2867,13 +2866,13 @@ const styles = StyleSheet.create({
     width: '100%', 
     height: 170, 
     justifyContent: 'flex-end',
-    // zIndex: 100, // Not strictly needed if in flow, but keeps stacking context
+    zIndex: 100,
   },
   footerBackground: {
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    backgroundColor: '#d3c5b722', 
+    // backgroundColor: '#d3c5b722', 
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
   },
